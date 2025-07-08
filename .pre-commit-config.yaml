@@ -1,0 +1,48 @@
+default_language_version:
+  python: python3
+
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: trailing-whitespace # Supprime les espaces en fin de ligne
+  - id: end-of-file-fixer # Ajoute une ligne vide à la fin des fichiers
+  - id: check-yaml # Vérifie la syntaxe des fichiers YAML
+
+- repo: https://github.com/psf/black
+  rev: 25.1.0
+  hooks:
+  - id: black
+    args: [ "--line-length=119" ]
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 7.2.0
+  hooks:
+  - id: flake8
+    args: [ "--max-line-length=119", "--ignore", "E203", "--ignore", "W503" ]
+
+# - repo: https://github.com/pre-commit/mirrors-mypy
+#   rev: v1.15.0
+#   hooks:
+#   - id: mypy
+#     exclude: my_robot_package/
+#     # exclude: "^(my_robot_package|external_packages)"
+#     # exclude: ^/home/flexweldv1/flexweld_ros/external_packages/eds_pie/.*
+#     # args: ["--check-untyped-defs", "--exclude=my_robot_package/"]
+#     # exclude: '^(my_robot_package|external_packages)(/.*)?$'
+#     args: [ "--check-untyped-defs", "--ignore-missing-imports" ]
+- repo: https://github.com/RobertCraigie/pyright-python
+  rev: v1.1.401
+  hooks:
+  - id: pyright
+    name: Pyright Type Checking
+    entry: pyright
+    language: python
+    types: [ python ]
+
+# - repo: local
+#   hooks:
+#   - id: update-readme
+#     name: Mise à jour de README.md avec src/generate_readme.py
+#     entry: bash scripts/install_repo/pre-commit
+#     language: system # Utilisation de bash

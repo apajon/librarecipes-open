@@ -1,0 +1,24 @@
+{
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "**/tests",
+        "**/data",
+        "**/build",
+        "**/install",
+        "**/log",
+        "**/__pycache__"
+    ],
+    "reportMissingImports": false,
+    "reportMissingTypeStubs": false,
+    "reportAttributeAccessIssue": false,
+    "reportGeneralTypeIssues": false,
+    "pythonVersion": "3.12",
+    "typeCheckingMode": "basic",
+    "reportCallIssue": false,
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.cacheFolderPath": ".vscode/.pylance-cache",
+    "venvPath": ".venv",
+    "extraPaths": []
+}
