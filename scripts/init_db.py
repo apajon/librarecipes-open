@@ -1,12 +1,5 @@
-import os
-import sys
-
 from sqlalchemy import create_engine
-
-# Pour pouvoir importer depuis le dossier parent (src/)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-from src.models import Base
+from src.model import Base
 
 DATABASE_URL = "sqlite:///data/recettes.db"
 
