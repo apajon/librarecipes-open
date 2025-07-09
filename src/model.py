@@ -54,6 +54,9 @@ class Recette(Base):
     categories = relationship("Categorie", cascade="all, delete-orphan")
     tags = relationship("Tag", cascade="all, delete-orphan")
 
+    # Source
+    source = relationship("Source", uselist=False, cascade="all, delete-orphan")
+
 
 class Ingredient(Base):
     __tablename__ = "ingredients"
@@ -133,3 +136,20 @@ class FeedbackExecution(Base):
     execution_id = Column(String, ForeignKey("executions.id"))
     convive_id = Column(String, ForeignKey("convives.id"))
     statut = Column(String)  # "aimé", "partiellement", "rien mangé"
+
+
+class Source(Base):
+    __tablename__ = "sources"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    recette_id = Column(String, ForeignKey("recettes.id"), unique=True)
+
+    type = Column(String)  # 'homemade', 'url', 'book'
+
+    # champs facultatifs selon le type
+    url = Column(String, nullable=True)
+    book_title = Column(String, nullable=True)
+    book_authors = Column(String, nullable=True)
+    book_page = Column(String, nullable=True)
+
+    recette = relationship("Recette", back_populates="source")
