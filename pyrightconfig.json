@@ -20,5 +20,8 @@
     "python.analysis.diagnosticMode": "openFilesOnly",
     "python.analysis.cacheFolderPath": ".vscode/.pylance-cache",
     "venvPath": ".venv",
-    "extraPaths": []
+    "extraPaths": [
+        "src",
+        "src/crud"
+    ]
 }

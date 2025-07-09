@@ -1,0 +1,30 @@
+{
+    "python.autoComplete.extraPaths": [
+        ".venv/lib/python3.12/site-packages",
+        "src",
+        "src/crud",
+    ],
+    "python.analysis.extraPaths": [
+        ".venv/lib/python3.12/site-packages",
+        "src",
+        "src/crud",
+    ],
+    "cmake.ignoreCMakeListsMissing": true,
+    "cSpell.words": [
+        "categorie",
+        "Categorie",
+        "etapes",
+        "librarecipes",
+        "librarecipesopen",
+        "librarecipespro",
+        "quantite"
+    ],
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "files.associations": {
+        "*.py": "python",
+        "*.ipp": "cpp"
+    },
+    "terminal.integrated.env.linux": {
+        "PYTHONPATH": "src"
+    },
+}
