@@ -1,3 +1,3 @@
-import importlib.metadata
+from scripts import get_version
 
-__version__ = importlib.metadata.version("librarecipes")
+__version__ = get_version.__version__
