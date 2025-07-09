@@ -3,7 +3,7 @@ name = "librarecipes"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Adrien PAJON",email = "adrien.pajon@gmail.comcom"}
+    {name = "Adrien PAJON",email = "adrien.pajon@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
