@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 import streamlit as st
 from PIL import Image
@@ -50,8 +51,14 @@ def main():
             )
 
             st.subheader(f"{len(recettes)} recette(s) trouvée(s)")
-            for r in recettes:
-                st.markdown(f"- **{r.nom}**")
+
+            for recette in recettes:
+                st.markdown(f"### {recette.nom}")
+                st.markdown(f"[➡️ Voir la recette détaillée](./card_recette?recette_id={quote(str(recette.id))})")
+
+                recette_id = str(recette.id)
+                url = f"?recette_id={recette_id}"
+                st.markdown(f"[Voir la recette détaillée](./card_recette{url})")
 
 
 if __name__ == "__main__":
