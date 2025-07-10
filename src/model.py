@@ -86,6 +86,7 @@ class Photo(Base):
     recette_id = Column(String, ForeignKey("recettes.id"))
     chemin = Column(String, nullable=False)  # chemin local
     categorie = Column(String)  # final, cuisson, ingrédient...
+    ordre = Column(Integer, default=0)
 
 
 class Categorie(Base):
