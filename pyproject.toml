@@ -9,7 +9,8 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "streamlit (>=1.46.1,<2.0.0)",
-    "sqlalchemy (>=2.0.41,<3.0.0)"
+    "sqlalchemy (>=2.0.41,<3.0.0)",
+    "streamlit-tags (>=1.2.8,<2.0.0)"
 ]
 
 
