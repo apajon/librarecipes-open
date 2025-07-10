@@ -22,6 +22,8 @@
     "venvPath": ".venv",
     "extraPaths": [
         "src",
-        "src/crud"
+        "src/crud",
+        "app",
+        "app/pages"
     ]
 }

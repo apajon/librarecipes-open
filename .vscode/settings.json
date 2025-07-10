@@ -3,17 +3,22 @@
         ".venv/lib/python3.12/site-packages",
         "src",
         "src/crud",
+        "app",
+        "app/pages"
     ],
     "python.analysis.extraPaths": [
         ".venv/lib/python3.12/site-packages",
         "src",
         "src/crud",
+        "app",
+        "app/pages"
     ],
     "cmake.ignoreCMakeListsMissing": true,
     "cSpell.words": [
         "categorie",
         "Categorie",
         "etapes",
+        "joinedload",
         "librarecipes",
         "librarecipesopen",
         "librarecipespro",
