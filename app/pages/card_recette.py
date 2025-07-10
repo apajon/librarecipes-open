@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import streamlit as st
 
 from app.pages.photos_recette import photo_viewer
@@ -55,8 +57,10 @@ def main():
     elif recette.source.type == "book":
         st.write(f"{recette.source.book_title} — {recette.source.book_authors}")
 
-    # (Facultatif) Ajoute ici les photos et l’historique
-    # TODO
+    # Lien vers la page de gestion des photos
+    st.markdown("### 🖼️ Voir les photos associées")
+    url_photos = f"./photos_recette?recette_id={quote(str(recette.id))}"
+    st.markdown(f"[📷 Gérer les photos]({url_photos})")
 
 
 if __name__ == "__main__":
