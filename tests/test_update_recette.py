@@ -1,5 +1,5 @@
 from src.crud.recettes import update_recette
-from src.db import SessionLocal
+from src.db import get_db_session
 
 updated_data = {
     "nom": "Pâtes pesto revisitées",
@@ -11,5 +11,5 @@ updated_data = {
     "source": {"type": "homemade"},
 }
 
-with SessionLocal() as session:
+with get_db_session as session:
     update_recette(session, recette_id="id-de-ta-recette", data=updated_data)
