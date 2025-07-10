@@ -1,5 +1,6 @@
 import streamlit as st
 
+from app.pages.photos_recette import photo_viewer
 from src.crud.recettes import get_recette_by_id
 from src.db import get_db_session
 
@@ -21,6 +22,10 @@ def main():
         return
 
     st.title(recette.nom)
+
+    # 📸 Affichage des photos
+    st.subheader("📷 Photos")
+    photo_viewer(recette)
 
     # Tags
     st.markdown("### 🏷️ Catégories")
