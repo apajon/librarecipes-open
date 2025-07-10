@@ -2,6 +2,7 @@ from datetime import datetime
 from urllib.parse import quote
 
 import streamlit as st
+from streamlit_tags import st_tags
 
 from app.pages.photos_recette import photo_viewer
 from src.crud.recettes import get_recette_by_id
@@ -90,6 +91,26 @@ def main():
             convives = session.query(Convive).order_by(Convive.nom).all()
             selections = {}
 
+            # Nouveau champ pour ajouter un convive
+            # new_convive_name = st.text_input("Ajouter un·e convive (laissez vide si aucun·e à ajouter)")
+            new_convive_name = st_tags(
+                label="# Ajouter un·e convive (laissez vide si aucun·e à ajouter)",
+                text="Press enter to add more",
+                suggestions=[c.nom for c in convives],
+                maxtags=-1,
+                key="new_convive_name",
+            )
+
+            # new_convive_group = st.text_input("Groupe du convive (optionnel)")
+            new_convive_group = st_tags(
+                label="# Groupe du convive (optionnel)",
+                text="Press enter to add more",
+                value=[c.groupe if c.nom in new_convive_name else "Aucun" for c in convives],
+                suggestions=[c.groupe for c in convives],
+                maxtags=1,
+                key="new_convive_group",
+            )
+
             for c in convives:
                 statut = st.radio(
                     f"{c.nom} ({c.groupe or 'autre'})",
@@ -102,6 +123,13 @@ def main():
             submitted = st.form_submit_button("Enregistrer")
 
             if submitted:
+                # Ajouter le nouveau convive s’il y en a un
+                if new_convive_name.strip():
+                    nouveau = Convive(nom=new_convive_name.strip(), groupe=new_convive_group.strip() or None)
+                    session.add(nouveau)
+                    session.commit()
+                    st.experimental_rerun()  # Recharge la page pour l’afficher dans les convives
+
                 # Enregistrer l'exécution
                 exec = Execution(recette_id=recette.id, date_execution=date)
                 for cid, statut in selections.items():
