@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.model import Categorie, Etape, Ingredient, Photo, Recette, Source, Tag
 
@@ -64,7 +64,21 @@ def create_recette(session: Session, data: dict) -> Recette:
 
 
 def get_recette_by_id(session: Session, recette_id: str) -> Recette | None:
-    return session.query(Recette).filter(Recette.id == recette_id).first()
+    # return session.query(Recette).filter(Recette.id == recette_id).first()
+    return (
+        session.query(Recette)
+        .options(
+            joinedload(Recette.categories),
+            joinedload(Recette.tags),
+            joinedload(Recette.ingredients),
+            joinedload(Recette.etapes),
+            joinedload(Recette.source),
+            joinedload(Recette.executions),
+            joinedload(Recette.photos),
+        )
+        .filter(Recette.id == recette_id)
+        .first()
+    )
 
 
 def list_recettes(session: Session) -> list[Recette]:
