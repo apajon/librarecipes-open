@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+
 from src.model import Base
 
 DATABASE_URL = "sqlite:///data/recettes.db"

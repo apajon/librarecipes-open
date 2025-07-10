@@ -11,5 +11,5 @@ updated_data = {
     "source": {"type": "homemade"},
 }
 
-with get_db_session as session:
+with get_db_session() as session:
     update_recette(session, recette_id="id-de-ta-recette", data=updated_data)

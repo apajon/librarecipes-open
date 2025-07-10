@@ -56,10 +56,6 @@ def main():
                 st.markdown(f"### {recette.nom}")
                 st.markdown(f"[➡️ Voir la recette détaillée](./card_recette?recette_id={quote(str(recette.id))})")
 
-                recette_id = str(recette.id)
-                url = f"?recette_id={recette_id}"
-                st.markdown(f"[Voir la recette détaillée](./card_recette{url})")
-
 
 if __name__ == "__main__":
     main()
