@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session, joinedload
 
-from src.model import Categorie, Etape, Ingredient, Photo, Recette, Source, Tag
+from src.model import Categorie, Etape, Execution, FeedbackExecution, Ingredient, Photo, Recette, Source, Tag
 
 
 def create_recette(session: Session, data: dict) -> Recette:
@@ -73,7 +73,7 @@ def get_recette_by_id(session: Session, recette_id: str) -> Recette | None:
             joinedload(Recette.ingredients),
             joinedload(Recette.etapes),
             joinedload(Recette.source),
-            joinedload(Recette.executions),
+            joinedload(Recette.executions).joinedload(Execution.feedbacks).joinedload(FeedbackExecution.convive),
             joinedload(Recette.photos),
         )
         .filter(Recette.id == recette_id)
