@@ -281,31 +281,7 @@ def main():
         # Bouton de soumission du formulaire
         submitted = st.form_submit_button("💾 Enregistrer la recette", type="primary")
 
-    # Gestion des ingrédients (en dehors du formulaire pour permettre les interactions)
-    gestion_ingredients()
-
-    # Gestion des étapes (en dehors du formulaire pour permettre les interactions)
-    gestion_etapes()
-
-    # Gestion des photos (en dehors du formulaire pour permettre les interactions)
-    gestion_photos()
-
-    # Résumé avant soumission
-    if st.session_state.ingredients_list and st.session_state.etapes_list:
-        with st.expander("📋 Résumé de la recette à créer", expanded=False):
-            st.markdown(f"**Ingrédients :** {len(st.session_state.ingredients_list)} ingrédient(s)")
-            for ing in st.session_state.ingredients_list:
-                quantite_text = f" - {ing['quantite']} {ing['unite'] or ''}" if ing["quantite"] else ""
-                st.markdown(f"  • {ing['nom']}{quantite_text}")
-
-            st.markdown(f"**Étapes :** {len(st.session_state.etapes_list)} étape(s)")
-            for i, etape in enumerate(st.session_state.etapes_list):
-                st.markdown(f"  {i+1}. {etape[:80]}{'...' if len(etape) > 80 else ''}")  # noqa E226
-
-            if st.session_state.photos_list:
-                st.markdown(f"**Photos :** {len(st.session_state.photos_list)} photo(s) prêtes")
-
-    # Traitement de la soumission
+    # Traitement de la soumission - Messages d'erreur/succès juste après le formulaire
     if submitted:
         if not nom.strip():
             st.error("Le nom de la recette est obligatoire !")
@@ -362,6 +338,30 @@ def main():
             except Exception as e:
                 st.error(f"Erreur lors de la création de la recette : {str(e)}")
                 st.exception(e)
+
+    # Gestion des ingrédients (en dehors du formulaire pour permettre les interactions)
+    gestion_ingredients()
+
+    # Gestion des étapes (en dehors du formulaire pour permettre les interactions)
+    gestion_etapes()
+
+    # Gestion des photos (en dehors du formulaire pour permettre les interactions)
+    gestion_photos()
+
+    # Résumé avant soumission
+    if st.session_state.ingredients_list and st.session_state.etapes_list:
+        with st.expander("📋 Résumé de la recette à créer", expanded=False):
+            st.markdown(f"**Ingrédients :** {len(st.session_state.ingredients_list)} ingrédient(s)")
+            for ing in st.session_state.ingredients_list:
+                quantite_text = f" - {ing['quantite']} {ing['unite'] or ''}" if ing["quantite"] else ""
+                st.markdown(f"  • {ing['nom']}{quantite_text}")
+
+            st.markdown(f"**Étapes :** {len(st.session_state.etapes_list)} étape(s)")
+            for i, etape in enumerate(st.session_state.etapes_list):
+                st.markdown(f"  {i+1}. {etape[:80]}{'...' if len(etape) > 80 else ''}")  # noqa E226
+
+            if st.session_state.photos_list:
+                st.markdown(f"**Photos :** {len(st.session_state.photos_list)} photo(s) prêtes")
 
 
 if __name__ == "__main__":
