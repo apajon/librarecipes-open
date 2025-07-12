@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime
 from urllib.parse import quote
 
 import streamlit as st
+from sqlalchemy import func
 from streamlit_tags import st_tags
 
 from app.pages.photos_recette import photo_viewer
@@ -78,67 +79,137 @@ def main():
             st.markdown(f"**📅 {exec.date_execution.strftime('%d/%m/%Y')}**")
             for fb in exec.feedbacks:
                 emoji = {"aimé": "✅", "partiellement": "🟡", "rien mangé": "🔴"}.get(fb.statut, "❓")
-                st.markdown(f"- {emoji} {fb.convive.nom}")
-            st.markdown("---")
+                if fb.convive.groupe:
+                    st.markdown(f"- {emoji} {fb.convive.nom} ({fb.convive.groupe}) → {fb.statut}")
+                else:
+                    st.markdown(f"- {emoji} {fb.convive.nom} → {fb.statut}")
+        st.markdown("---")
 
     if st.button("🍽️ Je l’ai cuisinée !"):
         st.session_state["ajout_execution"] = True
 
     if st.session_state.get("ajout_execution"):
-        with st.form("form_execution"):
 
-            date = st.date_input("Date", value=datetime.today())
-            convives = session.query(Convive).order_by(Convive.nom).all()
-            selections = {}
+        date_selected = st.date_input("Date", value=datetime.today())
+        convives = session.query(Convive).order_by(Convive.nom).all()
+        selections = {}
 
-            # Nouveau champ pour ajouter un convive
-            # new_convive_name = st.text_input("Ajouter un·e convive (laissez vide si aucun·e à ajouter)")
-            new_convive_name = st_tags(
-                label="# Ajouter un·e convive (laissez vide si aucun·e à ajouter)",
-                text="Press enter to add more",
-                suggestions=[c.nom for c in convives],
-                maxtags=-1,
-                key="new_convive_name",
-            )
+        # Nouveau champ pour ajouter un convive
+        # new_convive_name = st.text_input("Ajouter un·e convive (laissez vide si aucun·e à ajouter)")
+        new_convive_name = st_tags(
+            label="Créer/modifier un·e convive (laissez vide si aucun·e à créer/modifier)",
+            text="Press enter to add (only one)",
+            suggestions=[c.nom for c in convives],
+            maxtags=1,
+            key="new_convive_name",
+        )
 
-            # new_convive_group = st.text_input("Groupe du convive (optionnel)")
+        # new_convive_group = st.text_input("Groupe du convive (optionnel)")
+        if new_convive_name:
+            st.info(f"Convive à ajouter/modifier : {new_convive_name[0]}")
+            st.info([c.nom for c in convives])
+            st.info([c.groupe for c in convives if c.nom in new_convive_name])
             new_convive_group = st_tags(
-                label="# Groupe du convive (optionnel)",
-                text="Press enter to add more",
-                value=[c.groupe if c.nom in new_convive_name else "Aucun" for c in convives],
-                suggestions=[c.groupe for c in convives],
+                label="Groupe du convive (optionnel)",
+                text="Press enter to add (only one)",
+                value=[c.groupe for c in convives if c.nom in new_convive_name],
+                suggestions=[c.groupe for c in convives if c.groupe],
                 maxtags=1,
                 key="new_convive_group",
             )
 
-            for c in convives:
+            if st.button("Enregistrer le convive"):
+                from sqlalchemy.orm import Session
+
+                def get_or_create_convive(session: Session, nom: str, groupe: str | None = None) -> Convive:
+                    convive = session.query(Convive).filter_by(nom=nom).first()
+                    if convive is None:
+                        if groupe is None or groupe.strip() == "" or groupe.strip() == "Aucun":
+                            groupe = None
+                        convive = Convive(nom=nom, groupe=groupe)
+                        session.add(convive)
+                        session.commit()
+                    else:
+                        if groupe is not None and groupe.strip() != "":
+                            convive.groupe = groupe.strip()
+                            session.commit()
+                    return convive
+
+                with get_db_session() as session:
+                    # Ajouter le nouveau convive s’il y en a un
+                    if new_convive_name[0] and new_convive_name[0].strip():
+                        nouveau = get_or_create_convive(
+                            session, nom=new_convive_name[0].strip(), groupe=new_convive_group[0].strip() or None
+                        )
+                        session.add(nouveau)
+                        session.commit()
+
+                st.rerun()
+
+        recette_execution_convive_names = st.multiselect(
+            "Sélectionner un·e convive",
+            options=[f"{c.nom} ({c.groupe})" if c.groupe else f"{c.nom}" for c in convives],
+            key="recette_execution_convive_names",
+        )
+
+        for c in convives:
+            if f"{c.nom} ({c.groupe})" in recette_execution_convive_names or c.nom in recette_execution_convive_names:
                 statut = st.radio(
-                    f"{c.nom} ({c.groupe or 'autre'})",
+                    f"{c.nom} ({c.groupe or ''})" if c.groupe else str(c.nom),
                     ["aimé", "partiellement", "rien mangé"],
                     key=f"convive_{c.id}",
                     horizontal=True,
                 )
                 selections[c.id] = statut
 
-            submitted = st.form_submit_button("Enregistrer")
+        if st.button("Enregistrer l’exécution"):
+            st.session_state["save_execution"] = True
 
-            if submitted:
-                # Ajouter le nouveau convive s’il y en a un
-                if new_convive_name.strip():
-                    nouveau = Convive(nom=new_convive_name.strip(), groupe=new_convive_group.strip() or None)
-                    session.add(nouveau)
-                    session.commit()
-                    st.experimental_rerun()  # Recharge la page pour l’afficher dans les convives
+        if st.session_state.get("save_execution"):
+            from sqlalchemy.orm import Session
 
-                # Enregistrer l'exécution
-                exec = Execution(recette_id=recette.id, date_execution=date)
-                for cid, statut in selections.items():
-                    exec.feedbacks.append(FeedbackExecution(convive_id=cid, statut=statut))
-                session.add(exec)
+            def get_or_create_execution_with_feedbacks(
+                session: Session,
+                recette_id: str,
+                date_selected: date,
+                feedbacks: dict[int, str],
+            ) -> Execution:
+                # exécution
+                execution = (
+                    session.query(Execution)
+                    .filter(
+                        Execution.recette_id == recette_id,
+                        func.date(Execution.date_execution) == date_selected,
+                    )
+                    .first()
+                )
+                if execution is None:
+                    print("Création d'une nouvelle exécution")
+                    # Création de l’exécution
+                    execution = Execution(recette_id=recette_id, date_execution=date_selected)
+                    session.add(execution)
+                    # session.commit()
+                else:
+                    print("Exécution existante trouvée, mise à jour des feedbacks")
+                    # Si elle existe, on vide ses feedbacks
+                    execution.feedbacks.clear()
+
+                # Ajouter les feedbacks
+                for convive_id, statut in feedbacks.items():
+                    execution.feedbacks.append(FeedbackExecution(convive_id=convive_id, statut=statut))
+
+                return execution
+
+            with get_db_session() as session:
+                exec = get_or_create_execution_with_feedbacks(
+                    session, recette_id=str(recette.id), date_selected=date_selected, feedbacks=selections
+                )
+
                 session.commit()
 
-                st.success("Exécution enregistrée !")
-                st.session_state["ajout_execution"] = False
+                st.session_state["save_execution"] = False
+
+                st.rerun()  # Recharge la page pour l’afficher dans les convives
 
 
 if __name__ == "__main__":
