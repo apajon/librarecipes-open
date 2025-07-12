@@ -19,6 +19,21 @@ def initialize_session_state():
         st.session_state.etapes_list = []
     if "photos_list" not in st.session_state:
         st.session_state.photos_list = []
+    # Nouvelles variables pour stocker les données du formulaire principal
+    if "recette_nom" not in st.session_state:
+        st.session_state.recette_nom = ""
+    if "recette_preparation" not in st.session_state:
+        st.session_state.recette_preparation = 15
+    if "recette_cuisson" not in st.session_state:
+        st.session_state.recette_cuisson = 0
+    if "recette_portions" not in st.session_state:
+        st.session_state.recette_portions = 4
+    if "recette_categories" not in st.session_state:
+        st.session_state.recette_categories = []
+    if "recette_tags" not in st.session_state:
+        st.session_state.recette_tags = []
+    if "recette_source" not in st.session_state:
+        st.session_state.recette_source = {"type": "homemade"}
 
 
 def gestion_ingredients():
@@ -170,6 +185,63 @@ def sauvegarder_photos(recette_id: str) -> list[dict]:
     return photos_data
 
 
+def traiter_soumission_recette():
+    """Traite la soumission de la recette en utilisant les données du session state"""
+    try:
+        # Préparation des données depuis le session state
+        recette_data = {
+            "nom": st.session_state.recette_nom.strip(),
+            "preparation": st.session_state.recette_preparation if st.session_state.recette_preparation > 0 else None,
+            "cuisson": st.session_state.recette_cuisson if st.session_state.recette_cuisson > 0 else None,
+            "portions": st.session_state.recette_portions,
+            "ingredients": st.session_state.ingredients_list,
+            "etapes": st.session_state.etapes_list,
+            "categories": st.session_state.recette_categories,
+            "tags": st.session_state.recette_tags,
+            "source": st.session_state.recette_source,
+        }
+
+        # Création de la recette en base
+        with get_db_session() as session:
+            nouvelle_recette = create_recette(session, recette_data)
+
+            # Sauvegarde des photos si il y en a
+            if st.session_state.photos_list:
+                photos_data = sauvegarder_photos(str(nouvelle_recette.id))
+                # Mise à jour de la recette avec les photos
+                if photos_data:
+                    from src.crud.recettes import update_recette
+
+                    update_recette(session, str(nouvelle_recette.id), {"photos": photos_data})
+
+        st.success(f"✅ Recette '{st.session_state.recette_nom}' créée avec succès !")
+
+        # Lien vers la recette créée
+        from urllib.parse import quote
+
+        url_recette = f"./card_recette?recette_id={quote(str(nouvelle_recette.id))}"
+        st.markdown(f"[🔍 Voir la recette créée]({url_recette})")
+
+        # Réinitialiser les variables de session
+        st.session_state.ingredients_list = []
+        st.session_state.etapes_list = []
+        st.session_state.photos_list = []
+        st.session_state.recette_nom = ""
+        st.session_state.recette_preparation = 15
+        st.session_state.recette_cuisson = 0
+        st.session_state.recette_portions = 4
+        st.session_state.recette_categories = []
+        st.session_state.recette_tags = []
+        st.session_state.recette_source = {"type": "homemade"}
+
+        return True
+
+    except Exception as e:
+        st.error(f"Erreur lors de la création de la recette : {str(e)}")
+        st.exception(e)
+        return False
+
+
 def main():
     st.set_page_config(page_title="Ajout de recette", page_icon="🍽️", layout="wide", initial_sidebar_state="expanded")
 
@@ -221,15 +293,38 @@ def main():
 
         col1, col2 = st.columns([2, 1])
         with col1:
-            nom = st.text_input("Nom de la recette *", placeholder="Ex: Pâtes à la carbonara")
+            nom = st.text_input(
+                "Nom de la recette *",
+                placeholder="Ex: Pâtes à la carbonara",
+                value=st.session_state.recette_nom,
+                key="form_nom",
+            )
+            # Mettre à jour le session state
+            if nom != st.session_state.recette_nom:
+                st.session_state.recette_nom = nom
         with col2:
-            portions = st.number_input("Nombre de portions", min_value=1, value=4)
+            portions = st.number_input(
+                "Nombre de portions", min_value=1, value=st.session_state.recette_portions, key="form_portions"
+            )
+            if portions != st.session_state.recette_portions:
+                st.session_state.recette_portions = portions
 
         col3, col4 = st.columns([1, 1])
         with col3:
-            preparation = st.number_input("Temps de préparation (minutes)", min_value=0, value=15)
+            preparation = st.number_input(
+                "Temps de préparation (minutes)",
+                min_value=0,
+                value=st.session_state.recette_preparation,
+                key="form_preparation",
+            )
+            if preparation != st.session_state.recette_preparation:
+                st.session_state.recette_preparation = preparation
         with col4:
-            cuisson = st.number_input("Temps de cuisson (minutes)", min_value=0, value=0)
+            cuisson = st.number_input(
+                "Temps de cuisson (minutes)", min_value=0, value=st.session_state.recette_cuisson, key="form_cuisson"
+            )
+            if cuisson != st.session_state.recette_cuisson:
+                st.session_state.recette_cuisson = cuisson
 
         # Catégories et tags
         st.subheader("🏷️ Classification")
@@ -242,7 +337,9 @@ def main():
                 suggestions=existing_categories,
                 maxtags=10,
                 key="categories_input",
+                value=st.session_state.recette_categories,
             )
+            st.session_state.recette_categories = categories
         with col6:
             tags = st_tags(
                 label="Tags",
@@ -250,7 +347,9 @@ def main():
                 suggestions=existing_tags,
                 maxtags=15,
                 key="tags_input",
+                value=st.session_state.recette_tags,
             )
+            st.session_state.recette_tags = tags
 
         # Source
         st.subheader("📚 Source")
@@ -278,66 +377,21 @@ def main():
             if book_page:
                 source_data["book_page"] = book_page
 
+        st.session_state.recette_source = source_data
+
         # Bouton de soumission du formulaire
         submitted = st.form_submit_button("💾 Enregistrer la recette", type="primary")
 
     # Traitement de la soumission - Messages d'erreur/succès juste après le formulaire
     if submitted:
-        if not nom.strip():
+        if not (st.session_state.recette_nom and st.session_state.recette_nom.strip()):
             st.error("Le nom de la recette est obligatoire !")
         elif not st.session_state.ingredients_list:
             st.error("Au moins un ingrédient est requis !")
         elif not st.session_state.etapes_list:
             st.error("Au moins une étape de préparation est requise !")
         else:
-            try:
-                # Préparation des données
-                recette_data = {
-                    "nom": nom.strip(),
-                    "preparation": preparation if preparation > 0 else None,
-                    "cuisson": cuisson if cuisson > 0 else None,
-                    "portions": portions,
-                    "ingredients": st.session_state.ingredients_list,
-                    "etapes": st.session_state.etapes_list,
-                    "categories": categories,
-                    "tags": tags,
-                    "source": source_data,
-                }
-
-                # Création de la recette en base
-                with get_db_session() as session:
-                    nouvelle_recette = create_recette(session, recette_data)
-
-                    # Sauvegarde des photos si il y en a
-                    if st.session_state.photos_list:
-                        photos_data = sauvegarder_photos(str(nouvelle_recette.id))
-                        # Mise à jour de la recette avec les photos
-                        if photos_data:
-                            recette_data["photos"] = photos_data
-                            from src.crud.recettes import update_recette
-
-                            update_recette(session, str(nouvelle_recette.id), {"photos": photos_data})
-
-                st.success(f"✅ Recette '{nom}' créée avec succès !")
-
-                # Lien vers la recette créée
-                from urllib.parse import quote
-
-                url_recette = f"./card_recette?recette_id={quote(str(nouvelle_recette.id))}"
-                st.markdown(f"[🔍 Voir la recette créée]({url_recette})")
-
-                # Réinitialiser les variables de session
-                st.session_state.ingredients_list = []
-                st.session_state.etapes_list = []
-                st.session_state.photos_list = []
-
-                # Proposer de créer une nouvelle recette
-                if st.button("➕ Créer une nouvelle recette"):
-                    st.rerun()
-
-            except Exception as e:
-                st.error(f"Erreur lors de la création de la recette : {str(e)}")
-                st.exception(e)
+            traiter_soumission_recette()
 
     # Gestion des ingrédients (en dehors du formulaire pour permettre les interactions)
     gestion_ingredients()
@@ -362,6 +416,42 @@ def main():
 
             if st.session_state.photos_list:
                 st.markdown(f"**Photos :** {len(st.session_state.photos_list)} photo(s) prêtes")
+
+    # Bouton de soumission final en bas de page
+    st.markdown("---")
+    st.subheader("💾 Finaliser la recette")
+
+    st.info("💡 Vous pouvez enregistrer votre recette ici après avoir rempli le formulaire principal en haut de page.")
+
+    # Affichage d'un résumé rapide des données saisies
+    col1, col2, col3 = st.columns([1, 1, 1])
+    with col1:
+        st.metric("Ingrédients", len(st.session_state.ingredients_list))
+    with col2:
+        st.metric("Étapes", len(st.session_state.etapes_list))
+    with col3:
+        st.metric("Photos", len(st.session_state.photos_list))
+
+    # Récupérer les données du formulaire depuis les variables de session (si elles existent)
+    with st.form("recette_form_final", clear_on_submit=False):
+
+        # Bouton de soumission final
+        submitted_final = st.form_submit_button(
+            "🚀 Finaliser et enregistrer la recette", type="primary", use_container_width=True
+        )
+
+    # Traitement de la soumission finale
+    if submitted_final:
+        # Vérifier que les éléments essentiels sont présents
+        if not (st.session_state.recette_nom and st.session_state.recette_nom.strip()):
+            st.error("❌ Le nom de la recette est obligatoire ! Remplissez le formulaire principal en haut de page.")
+        elif not st.session_state.ingredients_list:
+            st.error("❌ Au moins un ingrédient est requis !")
+        elif not st.session_state.etapes_list:
+            st.error("❌ Au moins une étape de préparation est requise !")
+        else:
+            # Utiliser la même fonction de traitement
+            traiter_soumission_recette()
 
 
 if __name__ == "__main__":
