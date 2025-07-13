@@ -15,6 +15,7 @@ LibraRecipes est une application de gestion de recettes de cuisine développée 
   - Upload et catégorisation de photos
   - Classification par catégories et tags
   - Sources (maison, URL, livre)
+- **Modification de recettes** : Interface complète pour modifier tous les éléments d'une recette existante
 - **Affichage détaillé des recettes** : Visualisation complète avec photos et historique
 - **Gestion des photos** : Upload, catégorisation et organisation
 - **Gestion des convives** : Suivi des retours lors des réalisations
@@ -27,10 +28,11 @@ LibraRecipes est une application de gestion de recettes de cuisine développée 
 │   ├── Home.py            # Page d'accueil
 │   ├── assets/            # Images et ressources
 │   └── pages/             # Pages de l'application
-│       ├── add_recette.py     # ✨ Ajout de recettes (NOUVELLE)
-│       ├── card_recette.py    # Détail d'une recette
-│       ├── photos_recette.py  # Gestion des photos
-│       └── recherche_recette.py # Recherche
+│       ├── add_recette.py         # ✨ Ajout de recettes
+│       ├── modify_recette.py      # ✨ Modification de recettes (NOUVELLE)
+│       ├── card_recette.py        # Détail d'une recette
+│       ├── photos_recette.py      # Gestion des photos
+│       └── recherche_recette.py   # Recherche
 ├── src/                   # Logique métier
 │   ├── model.py          # Modèles SQLAlchemy
 │   ├── db.py             # Configuration base de données
@@ -97,6 +99,31 @@ PYTHONPATH=. streamlit run app/Home.py
    - Catégorisez chaque photo (final, cuisson, ingrédient, etc.)
 
 6. **Enregistrez** : La recette est créée en base avec toutes ses données
+
+### Modifier une recette existante
+
+1. **Accédez à la page de modification** : Depuis la page de détail d'une recette, cliquez sur "✏️ Modifier cette recette"
+
+2. **Modifiez les informations** :
+   - Tous les champs sont pré-remplis avec les données actuelles
+   - Ajustez le nom, temps, portions selon vos besoins
+   - Modifiez les catégories et tags
+
+3. **Gérez les ingrédients** :
+   - Les ingrédients existants sont affichés
+   - Ajoutez de nouveaux ingrédients
+   - Supprimez ceux que vous ne voulez plus
+
+4. **Modifiez les étapes** :
+   - Les étapes actuelles sont listées
+   - Ajoutez, supprimez ou réorganisez les étapes
+   - L'ordre est automatiquement mis à jour
+
+5. **Ajoutez de nouvelles photos** (optionnel) :
+   - Les photos existantes restent accessibles via "Gérer les photos existantes"
+   - Vous pouvez ajouter de nouvelles photos qui s'ajouteront aux existantes
+
+6. **Enregistrez** : Les modifications sont appliquées immédiatement
 
 ### Fonctionnalités avancées
 

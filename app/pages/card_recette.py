@@ -66,6 +66,11 @@ def main():
     url_photos = f"./photos_recette?recette_id={quote(str(recette.id))}"
     st.markdown(f"[📷 Gérer les photos]({url_photos})")
 
+    # Lien vers la page de modification de la recette
+    st.markdown("### ✏️ Modifier la recette")
+    url_modify = f"./modify_recette?recette_id={quote(str(recette.id))}"
+    st.markdown(f"[✏️ Modifier cette recette]({url_modify})")
+
     # 🕓 Historique des réalisations
     st.subheader("🕓 Réalisations passées")
 
