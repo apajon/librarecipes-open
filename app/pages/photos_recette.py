@@ -133,7 +133,7 @@ def main():
         for i, photo in enumerate(photos):
             col1, col2 = st.columns([1, 3])
             with col1:
-                st.image(photo.chemin, width=150)
+                st.image(str(photo.chemin), width=150)
             with col2:
                 st.markdown(f"**Catégorie :** {photo.categorie}")
                 st.markdown(f"**Position :** {i+1}/{len(photos)}")  # noqa E226
@@ -141,7 +141,7 @@ def main():
                 new_cat = st.selectbox(
                     "Modifier la catégorie",
                     ["final", "cuisson", "ingrédient", "préparation", "autre"],
-                    index=["final", "cuisson", "ingrédient", "préparation", "autre"].index(photo.categorie),
+                    index=["final", "cuisson", "ingrédient", "préparation", "autre"].index(str(photo.categorie)),
                     key=f"cat_{photo.id}",
                 )
                 if new_cat != photo.categorie:
