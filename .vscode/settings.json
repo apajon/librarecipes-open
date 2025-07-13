@@ -22,7 +22,8 @@
         "librarecipes",
         "librarecipesopen",
         "librarecipespro",
-        "quantite"
+        "quantite",
+        "reorganiser"
     ],
     "terminal.integrated.defaultProfile.linux": "bash",
     "files.associations": {
