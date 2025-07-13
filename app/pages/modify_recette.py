@@ -326,6 +326,14 @@ def main():
 
     st.title(f"✏️ Modification de la recette : {recette.nom}")
 
+    # Navigation - lien de retour vers la recette
+    st.markdown("### 🔙 Navigation")
+    from urllib.parse import quote
+
+    url_card = f"./card_recette?recette_id={quote(str(recette.id))}"
+    st.markdown(f"[📖 Retour à la recette]({url_card})")
+    st.markdown("---")
+
     # Initialiser les variables de session avec les données de la recette SEULEMENT si c'est une nouvelle recette
     # ou si les données n'existent pas encore
     if "modify_recette_id" not in st.session_state or st.session_state.modify_recette_id != recette.id:
@@ -560,6 +568,14 @@ def main():
         else:
             # Utiliser la même fonction de traitement
             traiter_modification_recette()
+
+    # Navigation en bas de page
+    st.markdown("---")
+    st.markdown("### 🔙 Navigation")
+    from urllib.parse import quote
+
+    url_card_bottom = f"./card_recette?recette_id={quote(str(recette.id))}"
+    st.markdown(f"[📖 Retour à la recette]({url_card_bottom})")
 
 
 if __name__ == "__main__":

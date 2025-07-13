@@ -1,7 +1,7 @@
 import os
 import uuid
 from pathlib import Path
-from urllib.parse import unquote
+from urllib.parse import quote, unquote
 
 import streamlit as st
 
@@ -75,6 +75,20 @@ def main():
             return
 
         st.title(f"📸 Photos : {recette.nom}")
+
+        # Navigation - liens de retour
+        st.markdown("### 🔙 Navigation")
+        col_nav1, col_nav2, col_nav3 = st.columns([1, 1, 2])
+
+        with col_nav1:
+            url_card = f"./card_recette?recette_id={quote(str(recette.id))}"
+            st.markdown(f"[📖 Voir la recette]({url_card})")
+
+        with col_nav2:
+            url_modify = f"./modify_recette?recette_id={quote(str(recette.id))}"
+            st.markdown(f"[✏️ Modifier la recette]({url_modify})")
+
+        st.markdown("---")
 
         # --- 📤 Upload ---
         st.subheader("Ajouter une photo")
@@ -187,6 +201,19 @@ def main():
                         reorganiser_ordres_photos(session, recette.id)
                         st.success("Photo supprimée")
                         st.rerun()
+
+        # Navigation en bas de page
+        st.markdown("---")
+        st.markdown("### 🔙 Navigation")
+        col_nav_bottom1, col_nav_bottom2, col_nav_bottom3 = st.columns([1, 1, 2])
+
+        with col_nav_bottom1:
+            url_card = f"./card_recette?recette_id={quote(str(recette.id))}"
+            st.markdown(f"[📖 Voir la recette]({url_card})")
+
+        with col_nav_bottom2:
+            url_modify = f"./modify_recette?recette_id={quote(str(recette.id))}"
+            st.markdown(f"[✏️ Modifier la recette]({url_modify})")
 
 
 if __name__ == "__main__":
