@@ -13,14 +13,6 @@ from src.model import Photo, Recette
 
 
 def photo_viewer(recette):
-
-    # photos = recette.photos
-    # if not photos:
-    #     st.info("Aucune photo enregistrée pour cette recette.")
-    # else:
-    #     for photo in photos:
-    #         st.image(photo.chemin, caption=f"Catégorie : {photo.categorie}", use_container_width=True)
-
     photos = recette.photos
     if not photos:
         st.info("Aucune photo enregistrée pour cette recette.")
@@ -54,6 +46,14 @@ def photo_viewer(recette):
             st.image(paths[i], caption=categories[i], use_container_width=True)
 
 
+def reorganiser_ordres_photos(session, recette_id):
+    """Réorganise les ordres des photos pour qu'ils soient séquentiels (0, 1, 2, ...)"""
+    photos = session.query(Photo).filter(Photo.recette_id == recette_id).order_by(Photo.ordre).all()
+    for i, photo in enumerate(photos):
+        photo.ordre = i
+    session.commit()
+
+
 def main():
     st.set_page_config(page_title="Photos de recette", page_icon="📷")
     recette_id = st.query_params.get("recette_id")
@@ -78,10 +78,15 @@ def main():
 
         # --- 📤 Upload ---
         st.subheader("Ajouter une photo")
-        uploaded = st.file_uploader("Photo", type=["png", "jpg", "jpeg"])
+
+        # Utiliser une clé unique pour éviter les uploads multiples
+        upload_key = f"photo_upload_{recette.id}"
+        uploaded = st.file_uploader("Photo", type=["png", "jpg", "jpeg"], key=upload_key)
         categorie = st.selectbox("Catégorie", ["final", "cuisson", "ingrédient", "préparation", "autre"])
 
-        if uploaded:
+        # Vérifier si un fichier a été uploadé et qu'il n'a pas déjà été traité
+        upload_session_key = f"uploaded_file_{recette.id}"
+        if uploaded and uploaded.name not in st.session_state.get(upload_session_key, set()):
             path_dir = Path("data") / "photos" / str(recette.id)
             path_dir.mkdir(parents=True, exist_ok=True)
 
@@ -91,21 +96,39 @@ def main():
             with open(filepath, "wb") as f:
                 f.write(uploaded.read())
 
+            # Calculer le prochain ordre disponible
+            max_ordre = session.query(Photo).filter(Photo.recette_id == recette.id).count()
+
             photo = Photo(
                 id=str(uuid.uuid4()),
                 recette_id=recette.id,
                 chemin=str(filepath),
                 categorie=categorie,
-                ordre=len(recette.photos),
+                ordre=max_ordre,  # Utiliser le nombre de photos existantes comme nouvel ordre
             )
             session.add(photo)
             session.commit()
+
+            # Marquer ce fichier comme traité
+            if upload_session_key not in st.session_state:
+                st.session_state[upload_session_key] = set()
+            st.session_state[upload_session_key].add(uploaded.name)
+
             st.success("📷 Photo enregistrée")
             st.rerun()
 
         # --- 🖼️ Liste des photos ---
         st.subheader("Photos existantes")
-        photos = sorted(recette.photos, key=lambda p: p.ordre)
+
+        # Réorganiser les ordres au cas où il y aurait des incohérences
+        reorganiser_ordres_photos(session, recette.id)
+
+        # Récupérer les photos triées par ordre
+        photos = session.query(Photo).filter(Photo.recette_id == recette.id).order_by(Photo.ordre).all()
+
+        if not photos:
+            st.info("Aucune photo pour cette recette.")
+            return
 
         for i, photo in enumerate(photos):
             col1, col2 = st.columns([1, 3])
@@ -113,6 +136,8 @@ def main():
                 st.image(photo.chemin, width=150)
             with col2:
                 st.markdown(f"**Catégorie :** {photo.categorie}")
+                st.markdown(f"**Position :** {i+1}/{len(photos)}")  # noqa E226
+
                 new_cat = st.selectbox(
                     "Modifier la catégorie",
                     ["final", "cuisson", "ingrédient", "préparation", "autre"],
@@ -120,29 +145,46 @@ def main():
                     key=f"cat_{photo.id}",
                 )
                 if new_cat != photo.categorie:
-                    photo.categorie = new_cat
-                    session.commit()
-                    st.success("Catégorie mise à jour")
+                    if st.button("💾 Sauvegarder la catégorie", key=f"save_cat_{photo.id}"):
+                        photo.categorie = new_cat
+                        session.commit()
+                        st.success("Catégorie mise à jour")
+                        st.rerun()
 
                 col_up, col_down, col_del = st.columns(3)
+
                 with col_up:
-                    if st.button("⬆️", key=f"up_{photo.id}") and i > 0:
-                        photos[i].ordre, photos[i - 1].ordre = photos[i - 1].ordre, photos[i].ordre
-                        session.commit()
-                        st.rerun()
+                    # Monter la photo (diminuer l'ordre)
+                    if st.button("⬆️", key=f"up_{photo.id}", disabled=(i == 0)):
+                        if i > 0:
+                            # Échanger avec la photo précédente
+                            photo_precedente = photos[i - 1]
+                            photo.ordre, photo_precedente.ordre = photo_precedente.ordre, photo.ordre
+                            session.commit()
+                            st.success("Photo montée !")
+                            st.rerun()
+
                 with col_down:
-                    if st.button("⬇️", key=f"down_{photo.id}") and i < len(photos) - 1:
-                        photos[i].ordre, photos[i + 1].ordre = photos[i + 1].ordre, photos[i].ordre
-                        session.commit()
-                        st.rerun()
+                    # Descendre la photo (augmenter l'ordre)
+                    if st.button("⬇️", key=f"down_{photo.id}", disabled=(i == len(photos) - 1)):
+                        if i < len(photos) - 1:
+                            # Échanger avec la photo suivante
+                            photo_suivante = photos[i + 1]
+                            photo.ordre, photo_suivante.ordre = photo_suivante.ordre, photo.ordre
+                            session.commit()
+                            st.success("Photo descendue !")
+                            st.rerun()
+
                 with col_del:
                     if st.button("🗑️ Supprimer", key=f"del_{photo.id}"):
                         try:
-                            os.remove(photo.chemin)
+                            os.remove(str(photo.chemin))
                         except Exception:
                             pass
                         session.delete(photo)
                         session.commit()
+                        # Réorganiser les ordres après suppression
+                        reorganiser_ordres_photos(session, recette.id)
                         st.success("Photo supprimée")
                         st.rerun()
 
