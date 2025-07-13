@@ -42,7 +42,7 @@ def que_cuisiner_page():
 
         # Bouton de suggestion
         if st.button("🎲 Suggérer une recette", type="primary", use_container_width=True):
-            # Filtrer les recettes selon les critères
+            # Filtrer les recettes selon les critères et stocker dans session_state
             recettes_filtrees = []
 
             for recette in toutes_recettes:
@@ -60,8 +60,16 @@ def que_cuisiner_page():
                 recettes_filtrees.append(recette)
 
             if recettes_filtrees:
-                # Choisir une recette au hasard
+                # Choisir une recette au hasard et la stocker
                 recette_suggeree = random.choice(recettes_filtrees)
+                st.session_state.suggested_recipe = recette_suggeree
+            else:
+                st.session_state.suggested_recipe = None
+
+        # Afficher la suggestion stockée (en dehors du bloc conditionnel)
+        if "suggested_recipe" in st.session_state:
+            if st.session_state.suggested_recipe:
+                recette_suggeree = st.session_state.suggested_recipe
 
                 st.success("🎉 Voici notre suggestion !")
 
@@ -94,17 +102,15 @@ def que_cuisiner_page():
                     col1, col2 = st.columns(2)
                     with col1:
                         if st.button("👀 Voir la recette complète", use_container_width=True):
-                            # Stocker l'ID de la recette dans session_state ET query_params
+                            # Code identique aux autres pages qui fonctionnent
                             st.session_state.selected_recette_id = str(recette_suggeree.id)
                             st.query_params.recette_id = str(recette_suggeree.id)
-                            # Navigation automatique vers la page de détail
                             if "card_recette_page_obj" in st.session_state:
                                 st.switch_page(st.session_state.card_recette_page_obj)
 
                     with col2:
                         if st.button("🎲 Autre suggestion", use_container_width=True):
                             st.rerun()
-
             else:
                 st.warning("Aucune recette ne correspond à vos critères. Essayez avec des filtres moins stricts !")
 
@@ -112,12 +118,20 @@ def que_cuisiner_page():
         st.markdown("---")
         st.subheader("⭐ Recettes populaires")
 
-        # Afficher quelques recettes au hasard
-        if len(toutes_recettes) >= 3:
-            recettes_populaires = random.sample(toutes_recettes, min(3, len(toutes_recettes)))
+        # Générer les recettes populaires une seule fois et les stocker
+        if "popular_recipes" not in st.session_state and len(toutes_recettes) >= 3:
+            st.session_state.popular_recipes = random.sample(toutes_recettes, min(3, len(toutes_recettes)))
 
+        # Bouton pour renouveler les recettes populaires
+        if st.button("🔄 Nouvelles recettes populaires"):
+            if len(toutes_recettes) >= 3:
+                st.session_state.popular_recipes = random.sample(toutes_recettes, min(3, len(toutes_recettes)))
+            st.rerun()
+
+        # Afficher les recettes populaires stockées
+        if "popular_recipes" in st.session_state:
             cols = st.columns(3)
-            for i, recette in enumerate(recettes_populaires):
+            for i, recette in enumerate(st.session_state.popular_recipes):
                 with cols[i]:
                     with st.container():
                         st.markdown(f"**{recette.nom}**")
@@ -129,10 +143,9 @@ def que_cuisiner_page():
                             st.caption(f"🏷️ {categories_str}")
 
                         if st.button("👀", key=f"populaire_{recette.id}"):
-                            # Stocker l'ID de la recette dans session_state ET query_params
+                            # Code identique aux autres pages qui fonctionnent
                             st.session_state.selected_recette_id = str(recette.id)
                             st.query_params.recette_id = str(recette.id)
-                            # Navigation automatique vers la page de détail
                             if "card_recette_page_obj" in st.session_state:
                                 st.switch_page(st.session_state.card_recette_page_obj)
 
