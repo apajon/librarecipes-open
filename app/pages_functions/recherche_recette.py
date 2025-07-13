@@ -6,7 +6,7 @@ from PIL.ImageFile import ImageFile
 
 from src.crud.metadata import get_all_categories, get_all_ingredients, get_all_tags
 from src.crud.recherche import IngredientsMode, rechercher_recettes
-from src.db import SessionLocal
+from src.db import get_db_session
 
 
 def recherche_recette_page():
@@ -17,7 +17,7 @@ def recherche_recette_page():
 
     st.title("Recherche de recettes")
 
-    with SessionLocal() as session:
+    with get_db_session() as session:
         nom = st.text_input("Nom de la recette")
 
         all_ingredients = get_all_ingredients(session)
@@ -36,6 +36,7 @@ def recherche_recette_page():
         categories = st.multiselect("Catégories", all_categories)
 
         if st.button("Rechercher"):
+            # Effectuer la recherche et stocker les résultats
             recettes = rechercher_recettes(
                 session,
                 nom=nom,
@@ -44,7 +45,11 @@ def recherche_recette_page():
                 tags=tags,
                 categories=categories,
             )
+            st.session_state.search_results = recettes
 
+        # Afficher les résultats stockés (en dehors du if button)
+        if "search_results" in st.session_state:
+            recettes = st.session_state.search_results
             st.subheader(f"{len(recettes)} recette(s) trouvée(s)")
 
             for recette in recettes:
@@ -52,25 +57,24 @@ def recherche_recette_page():
                     st.markdown(f"### {recette.nom}")
 
                     # Informations rapides
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        temps_total = (recette.preparation or 0) + (recette.cuisson or 0)
-                        st.caption(f"⏱️ {temps_total}min | 👥 {recette.portions or 0} portions")
+                    temps_total = (recette.preparation or 0) + (recette.cuisson or 0)
+                    st.caption(f"⏱️ {temps_total}min | 👥 {recette.portions or 0} portions")
 
-                        if recette.categories:
-                            categories_str = ", ".join([c.nom for c in recette.categories[:3]])
-                            st.caption(f"🏷️ {categories_str}")
+                    if recette.categories:
+                        categories_str = ", ".join([c.nom for c in recette.categories[:3]])
+                        st.caption(f"🏷️ {categories_str}")
 
-                    with col2:
-                        if st.button("👀 Voir", key=f"recherche_{recette.id}"):
-                            # Stocker l'ID de la recette dans session_state ET query_params
-                            st.session_state.selected_recette_id = str(recette.id)
-                            st.query_params.recette_id = str(recette.id)
-                            # Navigation automatique vers la page de détail
-                            if "card_recette_page_obj" in st.session_state:
-                                st.switch_page(st.session_state.card_recette_page_obj)
-                            else:
-                                st.session_state.navigate_to = "detail"
-                                st.rerun()
+                    # Bouton vers la recette (même structure que index_recettes.py)
+                    if st.button("👀 Voir", key=f"recherche_{recette.id}"):
+                        # Code identique à index_recettes.py et index_ingredients.py
+                        st.session_state.selected_recette_id = str(recette.id)
+                        st.query_params.recette_id = str(recette.id)
+                        # Debug temporaire
+                        st.write(f"Debug: clés session_state: {list(st.session_state.keys())}")
+                        if "card_recette_page_obj" in st.session_state:
+                            st.write("Debug: Objet trouvé, tentative de navigation...")
+                            st.switch_page(st.session_state.card_recette_page_obj)
+                        else:
+                            st.write("Debug: Objet page non trouvé!")
 
                 st.divider()
