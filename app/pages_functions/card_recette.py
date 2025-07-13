@@ -96,4 +96,11 @@ def card_recette_page():
 
     # Actions
     st.divider()
+
+    # Bouton pour modifier la recette
+    if st.button("✏️ Modifier cette recette", type="primary", use_container_width=True):
+        # Stocker l'ID de la recette dans session_state pour la page de modification
+        st.session_state.selected_recette_id = recette_id
+        st.switch_page(st.session_state.get("modify_recette_page_obj"))
+
     st.info("Utilisez le menu de navigation pour accéder aux autres fonctionnalités.")
