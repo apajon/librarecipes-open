@@ -29,10 +29,13 @@ LibraRecipes est une application de gestion de recettes de cuisine développée 
 │   ├── assets/            # Images et ressources
 │   └── pages/             # Pages de l'application
 │       ├── add_recette.py         # ✨ Ajout de recettes
-│       ├── modify_recette.py      # ✨ Modification de recettes (NOUVELLE)
+│       ├── modify_recette.py      # ✨ Modification de recettes
 │       ├── card_recette.py        # Détail d'une recette
 │       ├── photos_recette.py      # Gestion des photos
-│       └── recherche_recette.py   # Recherche
+│       ├── recherche_recette.py   # Recherche
+│       ├── index_ingredient.py    # Index des ingrédients
+│       ├── index_categorie.py     # Index des catégories
+│       └── que_choisir.py         # Que choisir ?
 ├── src/                   # Logique métier
 │   ├── model.py          # Modèles SQLAlchemy
 │   ├── db.py             # Configuration base de données
