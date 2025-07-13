@@ -69,12 +69,7 @@ def recherche_recette_page():
                         # Code identique à index_recettes.py et index_ingredients.py
                         st.session_state.selected_recette_id = str(recette.id)
                         st.query_params.recette_id = str(recette.id)
-                        # Debug temporaire
-                        st.write(f"Debug: clés session_state: {list(st.session_state.keys())}")
                         if "card_recette_page_obj" in st.session_state:
-                            st.write("Debug: Objet trouvé, tentative de navigation...")
                             st.switch_page(st.session_state.card_recette_page_obj)
-                        else:
-                            st.write("Debug: Objet page non trouvé!")
 
                 st.divider()
