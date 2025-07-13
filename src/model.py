@@ -1,8 +1,10 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm.relationships import _RelationshipDeclared
 
 Base = declarative_base()
 
@@ -117,7 +119,9 @@ class Convive(Base):
     nom = Column(String, unique=True, nullable=False)
     groupe = Column(String)  # famille, amis...
 
-    feedbacks = relationship("FeedbackExecution", cascade="all, delete-orphan")
+    feedbacks: _RelationshipDeclared[Any] = relationship(
+        "FeedbackExecution", back_populates="convive", cascade="all, delete-orphan"
+    )
 
 
 class Execution(Base):
@@ -129,6 +133,8 @@ class Execution(Base):
 
     feedbacks = relationship("FeedbackExecution", cascade="all, delete-orphan")
 
+    __table_args__ = (UniqueConstraint("recette_id", "date_execution", name="uix_recette_date"),)
+
 
 class FeedbackExecution(Base):
     __tablename__ = "feedback_execution"
@@ -137,6 +143,8 @@ class FeedbackExecution(Base):
     execution_id = Column(String, ForeignKey("executions.id"))
     convive_id = Column(String, ForeignKey("convives.id"))
     statut = Column(String)  # "aimé", "partiellement", "rien mangé"
+
+    convive = relationship("Convive", back_populates="feedbacks")
 
 
 class Source(Base):
