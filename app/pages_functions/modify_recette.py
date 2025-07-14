@@ -546,4 +546,12 @@ def modify_recette_page():
             st.error("❌ Au moins une étape de préparation est requise !")
         else:
             # Utiliser la même fonction de traitement
-            traiter_modification_recette()
+            success = traiter_modification_recette()
+            if success:
+                st.rerun()  # Recharger la page pour afficher les boutons de navigation
+
+    # Bouton de retour aux détails en bas de page
+    st.markdown("---")
+    if st.button("⬅️ Retour aux détails de la recette", type="secondary", use_container_width=True):
+        if "card_recette_page_obj" in st.session_state:
+            st.switch_page(st.session_state.card_recette_page_obj)
