@@ -17,6 +17,7 @@ st.set_page_config(page_title="LibraRecipes", page_icon="🍲", layout="wide", i
 # Définition des pages avec st.Page
 card_recette_page_obj = st.Page(card_recette_page, title="Détail", icon="📄")
 modify_recette_page_obj = st.Page(modify_recette_page, title="Modifier", icon="✏️")
+photos_recette_page_obj = st.Page(photos_recette_page, title="Photos", icon="📷")
 
 pages = {
     "🏠 Accueil": [
@@ -32,7 +33,7 @@ pages = {
         st.Page(add_recette_page, title="Ajouter", icon="➕"),
         card_recette_page_obj,
         modify_recette_page_obj,
-        st.Page(photos_recette_page, title="Photos", icon="📷"),
+        photos_recette_page_obj,
     ],
 }
 
@@ -45,6 +46,9 @@ if "card_recette_page_obj" not in st.session_state:
 
 if "modify_recette_page_obj" not in st.session_state:
     st.session_state.modify_recette_page_obj = modify_recette_page_obj
+
+if "photos_recette_page_obj" not in st.session_state:
+    st.session_state.photos_recette_page_obj = photos_recette_page_obj
 
 # Exécution de la page sélectionnée
 pg.run()
