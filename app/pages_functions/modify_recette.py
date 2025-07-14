@@ -264,20 +264,19 @@ def traiter_modification_recette():
         if recette_modifiee:
             st.success(f"✅ Recette '{st.session_state.modify_recette_nom}' modifiée avec succès !")
 
-            # Bouton pour revenir à la recette modifiée
-            if st.button("🔍 Voir la recette modifiée", type="primary"):
-                st.session_state.selected_recette_id = str(recette_modifiee.id)
-                st.switch_page(st.session_state.get("card_recette_page_obj"))
+            # Marquer la recette comme modifiée avec succès et stocker l'ID
+            st.session_state.modification_reussie = True
+            st.session_state.recette_modifiee_id = str(recette_modifiee.id)
+
+            # Réinitialiser les variables de session de modification
+            keys_to_clear = [k for k in st.session_state.keys() if k.startswith("modify_")]
+            for key in keys_to_clear:
+                del st.session_state[key]
+
+            return True
         else:
             st.error("Erreur lors de la modification de la recette")
             return False
-
-        # Réinitialiser les variables de session de modification
-        keys_to_clear = [k for k in st.session_state.keys() if k.startswith("modify_")]
-        for key in keys_to_clear:
-            del st.session_state[key]
-
-        return True
 
     except Exception as e:
         st.error(f"Erreur lors de la modification de la recette : {str(e)}")
@@ -311,13 +310,61 @@ def modify_recette_page():
 
     st.title(f"✏️ Modifier : {recette.nom}")
 
+    # Vérifier si une modification vient d'être réussie
+    if st.session_state.get("modification_reussie", False):
+        st.success("✅ Recette modifiée avec succès !")
+
+        st.info("💡 **Que souhaitez-vous faire maintenant ?**")
+
+        # Boutons de navigation après modification réussie
+        col1, col2, col3 = st.columns([1, 1, 1])
+        with col1:
+            if st.button("🔍 Voir la recette modifiée", type="primary", use_container_width=True):
+                st.session_state.selected_recette_id = st.session_state.recette_modifiee_id
+                # Nettoyer les flags de modification
+                del st.session_state.modification_reussie
+                del st.session_state.recette_modifiee_id
+                if "card_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.card_recette_page_obj)
+        with col2:
+            if st.button("⬅️ Retour aux détails", type="secondary", use_container_width=True):
+                st.session_state.selected_recette_id = st.session_state.recette_modifiee_id
+                # Nettoyer les flags de modification
+                del st.session_state.modification_reussie
+                del st.session_state.recette_modifiee_id
+                if "card_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.card_recette_page_obj)
+        with col3:
+            if st.button("✏️ Continuer la modification", type="secondary", use_container_width=True):
+                # Nettoyer juste le flag de succès mais garder l'ID pour recharger les données
+                del st.session_state.modification_reussie
+                # Garder recette_modifiee_id pour recharger les données fraîches
+                st.rerun()
+
+        st.markdown("---")
+        return  # Arrêter ici pour éviter d'afficher le formulaire de modification
+
     # Bouton pour revenir aux détails
     if st.button("⬅️ Retour aux détails", type="secondary"):
-        st.switch_page(st.session_state.get("card_recette_page_obj"))
+        if "card_recette_page_obj" in st.session_state:
+            st.switch_page(st.session_state.card_recette_page_obj)
 
     # Initialiser les variables de session avec les données de la recette SEULEMENT si c'est une nouvelle recette
-    # ou si les données n'existent pas encore
-    if "modify_recette_id" not in st.session_state or st.session_state.modify_recette_id != recette.id:
+    # ou si les données n'existent pas encore, ou si on continue après une modification réussie
+    if (
+        "modify_recette_id" not in st.session_state
+        or st.session_state.modify_recette_id != recette.id
+        or st.session_state.get("recette_modifiee_id") == str(recette.id)
+    ):
+
+        # Si on continue après une modification, utiliser l'ID de la recette modifiée
+        if st.session_state.get("recette_modifiee_id") == str(recette.id):
+            # Recharger les données fraîches de la recette modifiée
+            with get_db_session() as session:
+                recette = get_recette_by_id(session, st.session_state.recette_modifiee_id)
+            # Nettoyer le flag
+            del st.session_state.recette_modifiee_id
+
         initialize_session_state_for_modification(recette)
 
     # Section d'aide
@@ -467,7 +514,9 @@ def modify_recette_page():
         elif not st.session_state.modify_etapes_list:
             st.error("Au moins une étape de préparation est requise !")
         else:
-            traiter_modification_recette()
+            success = traiter_modification_recette()
+            if success:
+                st.rerun()  # Recharger la page pour afficher les boutons de navigation
 
     # Gestion des ingrédients (en dehors du formulaire pour permettre les interactions)
     gestion_ingredients_modification()
@@ -482,7 +531,8 @@ def modify_recette_page():
     st.markdown("---")
     st.subheader("🖼️ Gestion des photos existantes")
     if st.button("📷 Gérer les photos existantes", type="secondary"):
-        st.switch_page(st.session_state.get("photos_recette_page_obj"))
+        if "photos_recette_page_obj" in st.session_state:
+            st.switch_page(st.session_state.photos_recette_page_obj)
 
     # Résumé avant modification
     if st.session_state.modify_ingredients_list and st.session_state.modify_etapes_list:
