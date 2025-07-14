@@ -317,9 +317,9 @@ def modify_recette_page():
         st.info("💡 **Que souhaitez-vous faire maintenant ?**")
 
         # Boutons de navigation après modification réussie
-        col1, col2, col3 = st.columns([1, 1, 1])
+        col1, col2 = st.columns([1, 1])
         with col1:
-            if st.button("🔍 Voir la recette modifiée", type="primary", use_container_width=True):
+            if st.button("⬅️ Retour aux détails", type="primary", use_container_width=True):
                 st.session_state.selected_recette_id = st.session_state.recette_modifiee_id
                 # Nettoyer les flags de modification
                 del st.session_state.modification_reussie
@@ -327,14 +327,6 @@ def modify_recette_page():
                 if "card_recette_page_obj" in st.session_state:
                     st.switch_page(st.session_state.card_recette_page_obj)
         with col2:
-            if st.button("⬅️ Retour aux détails", type="secondary", use_container_width=True):
-                st.session_state.selected_recette_id = st.session_state.recette_modifiee_id
-                # Nettoyer les flags de modification
-                del st.session_state.modification_reussie
-                del st.session_state.recette_modifiee_id
-                if "card_recette_page_obj" in st.session_state:
-                    st.switch_page(st.session_state.card_recette_page_obj)
-        with col3:
             if st.button("✏️ Continuer la modification", type="secondary", use_container_width=True):
                 # Nettoyer juste le flag de succès mais garder l'ID pour recharger les données
                 del st.session_state.modification_reussie
