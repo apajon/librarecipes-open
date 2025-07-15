@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app.pages.photos_recette import photo_viewer
+from app.pages_functions.photos_recette import photo_viewer
 from src.crud.recettes import get_recette_by_id
 from src.db import get_db_session
 
@@ -97,10 +97,23 @@ def card_recette_page():
     # Actions
     st.divider()
 
-    # Bouton pour modifier la recette
-    if st.button("✏️ Modifier cette recette", type="primary", use_container_width=True):
-        # Stocker l'ID de la recette dans session_state pour la page de modification
-        st.session_state.selected_recette_id = recette_id
-        st.switch_page(st.session_state.get("modify_recette_page_obj"))
+    # Boutons d'action
+    col_action1, col_action2 = st.columns([1, 1])
+
+    with col_action1:
+        # Bouton pour modifier la recette
+        if st.button("✏️ Modifier cette recette", type="primary", use_container_width=True):
+            # Stocker l'ID de la recette dans session_state pour la page de modification
+            st.session_state.selected_recette_id = recette_id
+            st.switch_page(st.session_state.get("modify_recette_page_obj"))
+
+    with col_action2:
+        # Bouton pour gérer les photos
+        if st.button("📸 Gérer les photos", type="secondary", use_container_width=True):
+            # Stocker l'ID de la recette dans session_state ET query params
+            st.session_state.selected_recette_id = recette_id
+            st.query_params.recette_id = str(recette_id)
+            if "photos_recette_page_obj" in st.session_state:
+                st.switch_page(st.session_state.photos_recette_page_obj)
 
     st.info("Utilisez le menu de navigation pour accéder aux autres fonctionnalités.")

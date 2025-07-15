@@ -523,6 +523,9 @@ def modify_recette_page():
     st.markdown("---")
     st.subheader("🖼️ Gestion des photos existantes")
     if st.button("📷 Gérer les photos existantes", type="secondary"):
+        # Stocker l'ID de la recette dans session_state ET query params
+        st.session_state.selected_recette_id = recette_id
+        st.query_params.recette_id = str(recette_id)
         if "photos_recette_page_obj" in st.session_state:
             st.switch_page(st.session_state.photos_recette_page_obj)
 
