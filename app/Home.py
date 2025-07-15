@@ -27,10 +27,14 @@ pages = {
         st.Page(recherche_recette_page, title="Rechercher", icon="🔍"),
         st.Page(index_recettes_page, title="Index A-Z", icon="📖"),
         st.Page(index_ingredients_page, title="Ingrédients", icon="🥕"),
+    ],
+    "🎲 Que cuisiner ?": [
         st.Page(que_cuisiner_page, title="Que cuisiner ?", icon="🎲"),
     ],
-    "➕ Gestion des recettes": [
-        st.Page(add_recette_page, title="Ajouter", icon="➕"),
+    "➕ Ajouter recette": [
+        st.Page(add_recette_page, title="Ajouter recette", icon="➕"),
+    ],
+    "🔧 Gestion des recettes": [
         card_recette_page_obj,
         modify_recette_page_obj,
         photos_recette_page_obj,
@@ -38,7 +42,7 @@ pages = {
 }
 
 # Configuration de la navigation
-pg = st.navigation(pages)
+pg = st.navigation(pages, position="top")
 
 # Rendre l'objet page accessible globalement pour st.switch_page
 if "card_recette_page_obj" not in st.session_state:
@@ -51,4 +55,5 @@ if "photos_recette_page_obj" not in st.session_state:
     st.session_state.photos_recette_page_obj = photos_recette_page_obj
 
 # Exécution de la page sélectionnée
-pg.run()
+if pg:
+    pg.run()
