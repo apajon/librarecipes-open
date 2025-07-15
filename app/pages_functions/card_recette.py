@@ -1,7 +1,7 @@
 import streamlit as st
 
 from app.pages_functions.photos_recette import photo_viewer
-from src.crud.recettes import get_recette_by_id
+from src.crud.recettes import delete_recette, get_recette_by_id
 from src.db import get_db_session
 
 
@@ -98,7 +98,7 @@ def card_recette_page():
     st.divider()
 
     # Boutons d'action
-    col_action1, col_action2 = st.columns([1, 1])
+    col_action1, col_action2, col_action3 = st.columns([1, 1, 1])
 
     with col_action1:
         # Bouton pour modifier la recette
@@ -115,5 +115,58 @@ def card_recette_page():
             st.query_params.recette_id = str(recette_id)
             if "photos_recette_page_obj" in st.session_state:
                 st.switch_page(st.session_state.photos_recette_page_obj)
+
+    with col_action3:
+        # Bouton pour supprimer la recette
+        if st.button("🗑️ Supprimer cette recette", type="secondary", use_container_width=True):
+            # Marquer que l'utilisateur veut supprimer
+            st.session_state.confirm_delete_recette = recette_id
+
+    # Afficher la confirmation de suppression si demandée
+    if st.session_state.get("confirm_delete_recette") == recette_id:
+        st.markdown("---")
+        st.error("⚠️ **Confirmation de suppression**")
+
+        st.write(f"Êtes-vous sûr(e) de vouloir supprimer la recette **'{recette.nom}'** ?")
+        st.write("Cette action supprimera définitivement :")
+        st.markdown(
+            """
+        - La recette et toutes ses informations
+        - Tous les ingrédients associés
+        - Toutes les étapes de préparation
+        - Toutes les photos associées
+        - Les catégories et tags liés
+        """
+        )
+
+        col_confirm1, col_confirm2 = st.columns([1, 1])
+        with col_confirm1:
+            if st.button("❌ Annuler", type="secondary", use_container_width=True):
+                # Supprimer la demande de confirmation
+                if "confirm_delete_recette" in st.session_state:
+                    del st.session_state.confirm_delete_recette
+                st.rerun()
+
+        with col_confirm2:
+            if st.button("🗑️ Confirmer la suppression", type="primary", use_container_width=True):
+                # Supprimer la recette
+                with get_db_session() as session:
+                    success = delete_recette(session, recette_id)
+
+                if success:
+                    st.success(f"✅ La recette '{recette.nom}' a été supprimée avec succès.")
+                    st.info("💡 Redirection vers la page d'accueil...")
+                    # Nettoyer le session state
+                    if "selected_recette_id" in st.session_state:
+                        del st.session_state.selected_recette_id
+                    if "confirm_delete_recette" in st.session_state:
+                        del st.session_state.confirm_delete_recette
+                    # Rediriger vers la page d'accueil
+                    if "home_page_obj" in st.session_state:
+                        st.switch_page(st.session_state.home_page_obj)
+                else:
+                    st.error("❌ Erreur lors de la suppression de la recette.")
+                    if "confirm_delete_recette" in st.session_state:
+                        del st.session_state.confirm_delete_recette
 
     st.info("Utilisez le menu de navigation pour accéder aux autres fonctionnalités.")
