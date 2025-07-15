@@ -32,11 +32,11 @@ repos:
 #     # exclude: '^(my_robot_package|external_packages)(/.*)?$'
 #     args: [ "--check-untyped-defs", "--ignore-missing-imports" ]
 - repo: https://github.com/RobertCraigie/pyright-python
-  rev: v1.1.401
+  rev: v1.1.403
   hooks:
   - id: pyright
     name: Pyright Type Checking
-    entry: pyright
+    entry: poetry run pyright
     language: python
     types: [ python ]
 

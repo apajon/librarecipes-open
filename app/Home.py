@@ -1,41 +1,54 @@
-import os
-
 import streamlit as st
-from PIL import Image
-from PIL.ImageFile import ImageFile
+from pages_functions.add_recette import add_recette_page
+from pages_functions.card_recette import card_recette_page
 
+# Import des fonctions de pages
+from pages_functions.home import home_page
+from pages_functions.index_ingredients import index_ingredients_page
+from pages_functions.index_recettes import index_recettes_page
+from pages_functions.modify_recette import modify_recette_page
+from pages_functions.photos_recette import photos_recette_page
+from pages_functions.que_cuisiner import que_cuisiner_page
+from pages_functions.recherche_recette import recherche_recette_page
 
-def main():
-    st.set_page_config(page_title="LibraRecipes", page_icon="🍲", layout="wide")
+# Configuration de la page
+st.set_page_config(page_title="LibraRecipes", page_icon="🍲", layout="wide", initial_sidebar_state="expanded")
 
-    image_path = os.path.join(os.path.dirname(__file__), "assets", "banner_librarecipes.png")
-    img: ImageFile = Image.open(image_path)
-    st.image(img, use_container_width=True)
+# Définition des pages avec st.Page
+card_recette_page_obj = st.Page(card_recette_page, title="Détail", icon="📄")
+modify_recette_page_obj = st.Page(modify_recette_page, title="Modifier", icon="✏️")
+photos_recette_page_obj = st.Page(photos_recette_page, title="Photos", icon="📷")
 
-    st.title("LibraRecipes 🍽️")
+pages = {
+    "🏠 Accueil": [
+        st.Page(home_page, title="Accueil", icon="🏠", default=True),
+    ],
+    "🔍 Recherche & Exploration": [
+        st.Page(recherche_recette_page, title="Rechercher", icon="🔍"),
+        st.Page(index_recettes_page, title="Index A-Z", icon="📖"),
+        st.Page(index_ingredients_page, title="Ingrédients", icon="🥕"),
+        st.Page(que_cuisiner_page, title="Que cuisiner ?", icon="🎲"),
+    ],
+    "➕ Gestion des recettes": [
+        st.Page(add_recette_page, title="Ajouter", icon="➕"),
+        card_recette_page_obj,
+        modify_recette_page_obj,
+        photos_recette_page_obj,
+    ],
+}
 
-    st.markdown("Bienvenue dans votre bibliothèque de recettes personnelle.")
+# Configuration de la navigation
+pg = st.navigation(pages)
 
-    st.subheader("📂 Accès rapide")
+# Rendre l'objet page accessible globalement pour st.switch_page
+if "card_recette_page_obj" not in st.session_state:
+    st.session_state.card_recette_page_obj = card_recette_page_obj
 
-    st.info("Utilisez le menu latéral ou les liens ci-dessus pour naviguer.")
+if "modify_recette_page_obj" not in st.session_state:
+    st.session_state.modify_recette_page_obj = modify_recette_page_obj
 
-    st.page_link("pages/recherche_recette.py", label="🔍 Rechercher une recette")
-    st.page_link("pages/add_recette.py", label="➕ Ajouter une recette")
+if "photos_recette_page_obj" not in st.session_state:
+    st.session_state.photos_recette_page_obj = photos_recette_page_obj
 
-    # st.markdown(
-    #     """
-    #     ## 📖 À propos de LibraRecipes
-    #     LibraRecipes est une application pour gérer vos recettes de cuisine.
-    #     Vous pouvez rechercher des recettes, en ajouter de nouvelles et les organiser par catégories.
-
-    #     ### 🚀 Fonctionnalités à venir
-    #     - Ajout de recettes avec photos
-    #     - Gestion des ingrédients et des étapes
-    #     - Recherche avancée par tags et catégories
-    #     """
-    # )
-
-
-if __name__ == "__main__":
-    main()
+# Exécution de la page sélectionnée
+pg.run()

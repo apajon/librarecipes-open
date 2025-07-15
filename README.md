@@ -2,46 +2,50 @@
 
 LibraRecipes est une application de gestion de recettes de cuisine développée avec Streamlit et SQLAlchemy. Elle permet de créer, rechercher, et organiser vos recettes avec photos, ingrédients, étapes et métadonnées.
 
+**✨ Nouvelle version avec `st.Page` et `st.navigation` !**
+Cette application utilise maintenant la nouvelle API de navigation de Streamlit pour une expérience utilisateur améliorée.
+
 ## 🚀 Fonctionnalités
 
 ### ✅ Implémentées
 
-- **Page d'accueil** : Navigation principale de l'application
-- **Recherche de recettes** : Recherche avancée par nom, ingrédients, tags et catégories
-- **Ajout de recettes complètes** :
-  - Informations générales (nom, temps de préparation/cuisson, portions)
-  - Gestion des ingrédients avec quantités, unités et alternatives
-  - Étapes de préparation ordonnées et modifiables
-  - Upload et catégorisation de photos
+- **🏠 Page d'accueil** : Vue d'ensemble et navigation principale
+- **🔍 Recherche & Exploration** :
+  - Recherche avancée par nom, ingrédients, tags et catégories
+  - Index alphabétique des recettes
+  - Index des ingrédients
+  - Suggestions "Que cuisiner ?"
+- **➕ Gestion des recettes** :
+  - Ajout de recettes complètes avec ingrédients et étapes
+  - Affichage détaillé des recettes
+  - Modification et gestion des photos (en développement)
+- **📊 Organisation** :
   - Classification par catégories et tags
-  - Sources (maison, URL, livre)
-- **Modification de recettes** : Interface complète pour modifier tous les éléments d'une recette existante
-- **Affichage détaillé des recettes** : Visualisation complète avec photos et historique
-- **Gestion des photos** : Upload, catégorisation et organisation
-- **Gestion des convives** : Suivi des retours lors des réalisations
-- **Base de données SQLite** avec modèle relationnel complet
+  - Gestion des temps de préparation et cuisson
+  - Support des sources (maison, URL, livre)
 
-### 📋 Architecture
+### 📋 Architecture Moderne
 
 ```text
-├── app/                    # Interface Streamlit
-│   ├── Home.py            # Page d'accueil
-│   ├── assets/            # Images et ressources
-│   └── pages/             # Pages de l'application
-│       ├── add_recette.py         # ✨ Ajout de recettes
-│       ├── modify_recette.py      # ✨ Modification de recettes
-│       ├── card_recette.py        # Détail d'une recette
-│       ├── photos_recette.py      # Gestion des photos
-│       ├── recherche_recette.py   # Recherche
-│       ├── index_ingredient.py    # Index des ingrédients
-│       ├── index_categorie.py     # Index des catégories
-│       └── que_choisir.py         # Que choisir ?
-├── src/                   # Logique métier
-│   ├── model.py          # Modèles SQLAlchemy
-│   ├── db.py             # Configuration base de données
-│   └── crud/             # Opérations CRUD
-├── data/                 # Données et photos
-└── tests/                # Tests unitaires
+├── app/                           # Interface Streamlit
+│   ├── Home.py                   # Point d'entrée avec st.navigation 🆕
+│   ├── pages_functions/          # Fonctions des pages 🆕
+│   │   ├── home.py              # Page d'accueil
+│   │   ├── recherche_recette.py # Recherche avancée
+│   │   ├── add_recette.py       # Ajout de recettes
+│   │   ├── card_recette.py      # Détail d'une recette
+│   │   ├── index_recettes.py    # Index A-Z des recettes
+│   │   ├── index_ingredients.py # Index des ingrédients
+│   │   ├── que_cuisiner.py      # Suggestions de recettes
+│   │   ├── modify_recette.py    # Modification (placeholder)
+│   │   └── photos_recette.py    # Gestion photos (placeholder)
+│   └── assets/                   # Images et ressources
+├── src/                          # Logique métier
+│   ├── model.py                 # Modèles SQLAlchemy
+│   ├── db.py                    # Configuration base de données
+│   └── crud/                    # Opérations CRUD
+├── data/                        # Données et photos
+└── tests/                       # Tests unitaires
 ```
 
 ## 🛠️ Installation et Lancement
