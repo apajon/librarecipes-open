@@ -1,7 +1,6 @@
 import os
 import uuid
 from pathlib import Path
-from urllib.parse import quote
 
 import streamlit as st
 
@@ -86,12 +85,14 @@ def photos_recette_page():
         col_nav1, col_nav2, col_nav3 = st.columns([1, 1, 2])
 
         with col_nav1:
-            url_card = f"card_recette?recette_id={quote(str(recette.id))}"
-            st.markdown(f"[📖 Voir la recette]({url_card})")
+            if st.button("⬅️ Retour aux détails", type="secondary", key="top_back_to_details"):
+                if "card_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.card_recette_page_obj)
 
         with col_nav2:
-            url_modify = f"modify_recette?recette_id={quote(str(recette.id))}"
-            st.markdown(f"[✏️ Modifier la recette]({url_modify})")
+            if st.button("⬅️ Retour aux modifications", type="secondary", key="top_back_to_modifications"):
+                if "modify_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.modify_recette_page_obj)
 
         st.markdown("---")
 
@@ -213,9 +214,11 @@ def photos_recette_page():
         col_nav_bottom1, col_nav_bottom2, col_nav_bottom3 = st.columns([1, 1, 2])
 
         with col_nav_bottom1:
-            url_card = f"card_recette?recette_id={quote(str(recette.id))}"
-            st.markdown(f"[📖 Voir la recette]({url_card})")
+            if st.button("⬅️ Retour aux détails", type="secondary", key="bottom_back_to_details"):
+                if "card_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.card_recette_page_obj)
 
         with col_nav_bottom2:
-            url_modify = f"modify_recette?recette_id={quote(str(recette.id))}"
-            st.markdown(f"[✏️ Modifier la recette]({url_modify})")
+            if st.button("⬅️ Retour aux modifications", type="secondary", key="bottom_back_to_modifications"):
+                if "modify_recette_page_obj" in st.session_state:
+                    st.switch_page(st.session_state.modify_recette_page_obj)
