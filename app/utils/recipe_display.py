@@ -1,5 +1,7 @@
 """Utilitaires pour l'affichage des recettes"""
 
+from app.utils.constants import SOURCE_TYPES
+
 
 def format_recette_display_name(recette):
     """Formate le nom d'affichage de la recette pour éviter les doublons"""
@@ -7,8 +9,7 @@ def format_recette_display_name(recette):
 
     # Ajouter le type de source si disponible
     if recette.source and recette.source.type:
-        type_mapping = {"homemade": "Maison", "url": "Web", "book": "Livre"}
-        source_type = type_mapping.get(recette.source.type, recette.source.type)
+        source_type = SOURCE_TYPES.get(recette.source.type, recette.source.type)
         display_name += f" ({source_type})"
 
     # Ajouter la date d'ajout
