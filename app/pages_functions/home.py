@@ -1,15 +1,14 @@
-import os
-
 import streamlit as st
-from PIL import Image
-from PIL.ImageFile import ImageFile
+
+from app.utils.statistics import display_home_statistics
+
+# Import des utilitaires
+from app.utils.ui_helpers import show_banner
 
 
 def home_page():
     """Page d'accueil de LibraRecipes"""
-    image_path = os.path.join(os.path.dirname(__file__), "../assets", "banner_librarecipes.png")
-    img: ImageFile = Image.open(image_path)
-    st.image(img, use_container_width=True)
+    show_banner("banner_librarecipes.png")
 
     st.title("LibraRecipes 🍽️")
 
@@ -20,22 +19,18 @@ def home_page():
     st.info("Utilisez le menu de navigation pour explorer vos recettes.")
 
     # Statistiques rapides
-    col1, col2, col3 = st.columns(3)
-
-    with col1:
-        st.metric("Recettes totales", "0", help="Nombre total de recettes dans votre bibliothèque")
-
-    with col2:
-        st.metric("Catégories", "0", help="Nombre de catégories différentes")
-
-    with col3:
-        st.metric("Tags", "0", help="Nombre de tags utilisés")
+    display_home_statistics()
 
     st.subheader("🚀 Actions rapides")
 
     st.info("Utilisez le menu de navigation à gauche pour accéder aux différentes fonctionnalités de LibraRecipes.")
 
     # Section d'aide
+    _show_help_section()
+
+
+def _show_help_section():
+    """Affiche la section d'aide"""
     with st.expander("ℹ️ Comment utiliser LibraRecipes"):
         st.markdown(
             """

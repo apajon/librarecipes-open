@@ -41,6 +41,8 @@ pages = {
     ],
 }
 
+# TODO : selecteur de recettes avec st.selectbox + rappelle de la recette dans le sidebar
+
 # Configuration de la navigation
 pg = st.navigation(pages, position="top")
 
