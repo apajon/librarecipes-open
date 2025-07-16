@@ -1,6 +1,7 @@
 import streamlit as st
 
 from app.utils.navigation import navigate_to_recipe_detail
+from app.utils.recipe_display import format_recette_display_name
 
 # Import des utilitaires
 from app.utils.ui_helpers import show_banner
@@ -74,7 +75,9 @@ def _display_search_results(recettes):
 def _display_recipe_card(recette):
     """Affiche une carte de recette dans les résultats"""
     with st.container():
-        st.markdown(f"### {recette.nom}")
+        # Utiliser le nom formaté
+        formatted_name = format_recette_display_name(recette)
+        st.markdown(f"### {formatted_name}")
 
         # Informations rapides
         temps_total = (recette.preparation or 0) + (recette.cuisson or 0)
@@ -85,7 +88,7 @@ def _display_recipe_card(recette):
             st.caption(f"🏷️ {categories_str}")
 
         # Bouton vers la recette
-        if st.button("👀 Voir", key=f"recherche_{recette.id}"):
+        if st.button("👀 Voir", key=f"voir_recherche_{recette.id}"):
             navigate_to_recipe_detail(str(recette.id))
 
     st.divider()

@@ -1,7 +1,9 @@
 from collections import defaultdict
 
 import streamlit as st
+from sqlalchemy.orm import joinedload
 
+from app.utils.recipe_display import format_recette_display_name
 from src.db import get_db_session
 from src.model import Ingredient, Recette
 
@@ -33,7 +35,15 @@ def index_ingredients_page():
             initiale = nom_ingredient[0].upper()
             # Récupérer les recettes pour cet ingrédient
             recette_ids = list(set(ingredients_par_nom[nom_ingredient]))  # supprimer les doublons
-            recettes = session.query(Recette).filter(Recette.id.in_(recette_ids)).all()
+            recettes = (
+                session.query(Recette)
+                .filter(Recette.id.in_(recette_ids))
+                .options(
+                    joinedload(Recette.source),
+                    joinedload(Recette.executions),
+                )
+                .all()
+            )
             par_initiale[initiale].append({"nom": nom_ingredient, "recettes": recettes})
 
         # Trier par initiale
@@ -76,7 +86,9 @@ def index_ingredients_page():
                 for i, recette in enumerate(recettes):
                     with cols[i % 3]:
                         with st.container():
-                            st.markdown(f"• {recette.nom}")
+                            # Utiliser le nom formaté
+                            formatted_name = format_recette_display_name(recette)
+                            st.markdown(f"• {formatted_name}")
 
                             # Bouton pour voir la recette
                             if st.button("👀", key=f"voir_recette_{recette.id}_{nom_ingredient}"):

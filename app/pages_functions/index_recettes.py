@@ -1,9 +1,11 @@
 from collections import defaultdict
 
 import streamlit as st
+from sqlalchemy.orm import joinedload
 
 # Import des utilitaires
 from app.utils.navigation import navigate_to_recipe_detail
+from app.utils.recipe_display import format_recette_display_name
 from src.db import get_db_session
 from src.model import Recette
 
@@ -17,7 +19,15 @@ def index_recettes_page():
     st.markdown('<div id="top"></div>', unsafe_allow_html=True)
 
     with get_db_session() as session:
-        recettes = session.query(Recette).all()
+        recettes = (
+            session.query(Recette)
+            .options(
+                joinedload(Recette.source),
+                joinedload(Recette.executions),
+                joinedload(Recette.categories),
+            )
+            .all()
+        )
 
         if not recettes:
             st.info("Aucune recette trouvée.")
@@ -87,7 +97,9 @@ def _render_recipe_grid(recettes):
 def _render_recipe_card(recette):
     """Affiche une carte de recette"""
     with st.container():
-        st.markdown(f"**{recette.nom}**")
+        # Utiliser le nom formaté
+        formatted_name = format_recette_display_name(recette)
+        st.markdown(f"**{formatted_name}**")
 
         # Informations rapides
         temps_total = (recette.preparation or 0) + (recette.cuisson or 0)
@@ -101,7 +113,7 @@ def _render_recipe_card(recette):
             st.caption(f"🏷️ {categories_str}")
 
         # Bouton vers la recette
-        if st.button("👀 Voir", key=f"voir_{recette.id}"):
+        if st.button("👀 Voir", key=f"voir_index_{recette.id}"):
             navigate_to_recipe_detail(str(recette.id))
 
 
