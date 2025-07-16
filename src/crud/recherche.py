@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional
 
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.model import Categorie, Ingredient, Recette, Tag
 
@@ -48,4 +48,8 @@ def rechercher_recettes(
     if categories:
         query = query.join(Recette.categories).filter(Categorie.nom.in_(categories)).group_by(Recette.id)
 
-    return query.all()
+    return query.options(
+        joinedload(Recette.source),
+        joinedload(Recette.executions),
+        joinedload(Recette.categories),
+    ).all()
