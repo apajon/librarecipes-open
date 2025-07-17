@@ -1,5 +1,6 @@
 """
 Gestionnaire pour les photos des recettes
+Support Android avec configuration adaptative
 """
 
 import uuid
@@ -7,6 +8,30 @@ from pathlib import Path
 from typing import Any, Dict
 
 import streamlit as st
+
+
+def get_android_config():
+    """
+    Configuration Android adaptative avec fallback pour développement.
+
+    Returns:
+        dict: Configuration Android ou par défaut
+    """
+    try:
+        # Essayer d'importer la configuration Android si disponible
+        import sys
+
+        sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+        from config.android_config import get_android_config as _get_android_config
+
+        return _get_android_config()
+    except ImportError:
+        # Configuration par défaut pour développement
+        return {
+            "photos_path": "./data/photos",
+            "is_android": False,
+            "android_data_path": "/data/data/com.librarecipes/files",
+        }
 
 
 class PhotosManager:

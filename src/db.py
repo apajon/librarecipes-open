@@ -1,10 +1,33 @@
-from contextlib import contextmanager
 import os
+import sys
+from contextlib import contextmanager
+from pathlib import Path
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-from config.android_config import get_database_url
+
+# Configuration de base de données avec fallback
+def get_database_url():
+    """
+    Obtient l'URL de la base de données adaptée à l'environnement.
+    Utilise une configuration par défaut pour le développement.
+
+    Returns:
+        str: URL de la base de données SQLite
+    """
+    try:
+        # Essayer d'importer la configuration Android si disponible
+        project_root = Path(__file__).parent.parent
+        sys.path.insert(0, str(project_root))
+
+        from config.android_config import get_database_url as _get_android_database_url
+
+        return _get_android_database_url()
+    except ImportError:
+        # Configuration par défaut pour l'environnement de développement
+        return "sqlite:///./data/recettes.db"
+
 
 # URL de base de données adaptative (développement/Android)
 DATABASE_URL = get_database_url()

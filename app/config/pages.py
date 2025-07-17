@@ -1,15 +1,15 @@
 """Configuration des pages de l'application LibraRecipes"""
 
 import streamlit as st
-from pages_functions.add_recette import add_recette_page
-from pages_functions.card_recette import card_recette_page
-from pages_functions.home import home_page
-from pages_functions.index_ingredients import index_ingredients_page
-from pages_functions.index_recettes import index_recettes_page
-from pages_functions.modify_recette import modify_recette_page
-from pages_functions.photos_recette import photos_recette_page
-from pages_functions.que_cuisiner import que_cuisiner_page
-from pages_functions.recherche_recette import recherche_recette_page
+from app.pages_functions.add_recette import add_recette_page
+from app.pages_functions.card_recette import card_recette_page
+from app.pages_functions.home import home_page
+from app.pages_functions.index_ingredients import index_ingredients_page
+from app.pages_functions.index_recettes import index_recettes_page
+from app.pages_functions.modify_recette import modify_recette_page
+from app.pages_functions.photos_recette import photos_recette_page
+from app.pages_functions.que_cuisiner import que_cuisiner_page
+from app.pages_functions.recherche_recette import recherche_recette_page
 
 
 def create_page_objects():

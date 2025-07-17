@@ -1,4 +1,6 @@
-- [1. LibraRecipes - Android Port TODO List](#1-librarecipes---android-port-todo-list)
+# LibraRecipes - Android Port TODO List
+
+- [LibraRecipes - Android Port TODO List](#librarecipes---android-port-todo-list)
   - [1.1. 📱 Phase 1 : Préparation et Architecture](#11--phase-1--préparation-et-architecture)
     - [1.1.1. Configuration du projet](#111-configuration-du-projet)
     - [1.1.2. Scripts de configuration](#112-scripts-de-configuration)
@@ -25,8 +27,6 @@
     - [1.7.1. Dépendances Python à vérifier](#171-dépendances-python-à-vérifier)
     - [1.7.2. Limitations connues](#172-limitations-connues)
     - [1.7.3. Alternatives à considérer](#173-alternatives-à-considérer)
-
-# 1. LibraRecipes - Android Port TODO List
 
 ## 1.1. 📱 Phase 1 : Préparation et Architecture
 
