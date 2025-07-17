@@ -1,9 +1,9 @@
 import os
 import uuid
-from pathlib import Path
 
 import streamlit as st
 
+from config.android_config import get_android_config
 from src.crud.recettes import get_recette_by_id
 from src.db import get_db_session
 from src.model import Photo
@@ -107,7 +107,10 @@ def photos_recette_page():
         # Vérifier si un fichier a été uploadé et qu'il n'a pas déjà été traité
         upload_session_key = f"uploaded_file_{recette.id}"
         if uploaded and uploaded.name not in st.session_state.get(upload_session_key, set()):
-            path_dir = Path("data") / "photos" / str(recette.id)
+            # Utiliser la configuration Android pour le stockage des photos
+            config = get_android_config()
+            photos_base_dir = config.get_photos_directory()
+            path_dir = photos_base_dir / str(recette.id)
             path_dir.mkdir(parents=True, exist_ok=True)
 
             filename = f"{uuid.uuid4()}.jpg"

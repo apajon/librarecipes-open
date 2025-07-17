@@ -39,7 +39,13 @@ class PhotosManager:
 
     def __init__(self, recette_id: str):
         self.recette_id = recette_id
-        self.photos_dir = Path("data/photos") / recette_id
+
+        # Utiliser la configuration Android pour le répertoire photos
+        config = get_android_config()
+        self.photos_base_dir = config.get_photos_directory()
+
+        # Créer le répertoire spécifique à la recette
+        self.photos_dir = self.photos_base_dir / recette_id
         self.photos_dir.mkdir(parents=True, exist_ok=True)
 
     def save_uploaded_photo(self, uploaded_file, categorie: str = "final") -> Dict[str, Any]:
@@ -92,3 +98,90 @@ class PhotosManager:
         categorie = st.selectbox("Catégorie", ["final", "cuisson", "ingrédient", "préparation", "autre"])
 
         return uploaded, categorie
+
+    def get_photos_directory_info(self) -> Dict[str, Any]:
+        """Retourne les informations sur le répertoire photos pour débogage"""
+        config = get_android_config()
+        return {
+            "recette_id": self.recette_id,
+            "photos_base_dir": str(self.photos_base_dir),
+            "photos_dir": str(self.photos_dir),
+            "photos_dir_exists": self.photos_dir.exists(),
+            "is_android": config.is_android,
+            "android_storage_root": str(config.storage_root),
+        }
+
+    def test_photo_storage(self) -> Dict[str, Any]:
+        """Teste les capacités de stockage pour Android"""
+        test_results = {
+            "directory_creation": False,
+            "file_write": False,
+            "file_read": False,
+            "file_delete": False,
+            "error": None,
+        }
+
+        try:
+            # Test 1: Création de répertoire
+            test_dir = self.photos_dir / "test"
+            test_dir.mkdir(parents=True, exist_ok=True)
+            test_results["directory_creation"] = test_dir.exists()
+
+            # Test 2: Écriture de fichier
+            test_file = test_dir / "test_photo.txt"
+            test_content = "Test photo storage for Android"
+            test_file.write_text(test_content)
+            test_results["file_write"] = test_file.exists()
+
+            # Test 3: Lecture de fichier
+            read_content = test_file.read_text()
+            test_results["file_read"] = read_content == test_content
+
+            # Test 4: Suppression de fichier
+            test_file.unlink()
+            test_dir.rmdir()
+            test_results["file_delete"] = not test_file.exists()
+
+        except Exception as e:
+            test_results["error"] = str(e)
+
+        return test_results
+
+    def migrate_photos_to_android(self, old_photos_dir: Path) -> Dict[str, Any]:
+        """Migre les photos existantes vers le nouveau stockage Android"""
+        migration_results = {
+            "total_photos": 0,
+            "migrated_photos": 0,
+            "failed_photos": 0,
+            "errors": [],
+        }
+
+        if not old_photos_dir.exists():
+            return migration_results
+
+        try:
+            for photo_file in old_photos_dir.rglob("*"):
+                if photo_file.is_file() and photo_file.suffix.lower() in [".jpg", ".jpeg", ".png"]:
+                    migration_results["total_photos"] += 1
+
+                    try:
+                        # Déterminer le chemin de destination
+                        relative_path = photo_file.relative_to(old_photos_dir)
+                        new_path = self.photos_dir / relative_path
+
+                        # Créer le répertoire de destination
+                        new_path.parent.mkdir(parents=True, exist_ok=True)
+
+                        # Copier le fichier
+                        new_path.write_bytes(photo_file.read_bytes())
+
+                        migration_results["migrated_photos"] += 1
+
+                    except Exception as e:
+                        migration_results["failed_photos"] += 1
+                        migration_results["errors"].append(f"{photo_file}: {str(e)}")
+
+        except Exception as e:
+            migration_results["errors"].append(f"Erreur globale: {str(e)}")
+
+        return migration_results

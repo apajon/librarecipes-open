@@ -64,10 +64,10 @@
   - [X] Tester les migrations si nécessaires
 
 ### 1.2.2. Gestion des photos
-- [ ] Adapter `app/utils/photos_manager.py`
-  - [ ] Configurer le stockage des photos sur Android
-  - [ ] Modifier les chemins vers le stockage interne Android
-  - [ ] Tester l'upload et la gestion des images
+- [X] Adapter `app/utils/photos_manager.py`
+  - [X] Configurer le stockage des photos sur Android
+  - [X] Modifier les chemins vers le stockage interne Android
+  - [X] Tester l'upload et la gestion des images
 
 ### 1.2.3. Configuration Streamlit
 - [ ] Créer `.streamlit/config.toml` pour Android

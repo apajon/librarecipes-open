@@ -15,12 +15,8 @@ sys.path.insert(0, str(root_dir))
 
 def test_database_compatibility():
     """Teste la compatibilité de la base de données pour Android"""
-    from src.db import (
-        get_current_database_info,
-        init_database_for_android,
-        test_android_database_path,
-    )
-    from src.model import Recette, Ingredient, Etape, Photo
+    from src.db import get_current_database_info, init_database_for_android, test_android_database_path
+    from src.model import Etape, Ingredient, Photo, Recette
 
     print("🧪 Test de compatibilité de la base de données Android\n")
 

@@ -283,6 +283,74 @@ if __name__ == "__main__":
 
         return summary
 
+    def migrate_photos_to_android(self) -> dict:
+        """Migre les photos existantes vers le stockage Android"""
+        click.echo(f"{Fore.BLUE}📸 Migration des photos vers Android...{Style.RESET_ALL}")
+
+        migration_results = {
+            "total_photos": 0,
+            "migrated_photos": 0,
+            "failed_photos": 0,
+            "errors": [],
+        }
+
+        # Chemin photos existant
+        old_photos_dir = self.project_root / "data" / "photos"
+
+        if not old_photos_dir.exists():
+            click.echo("   ⚠️ Aucun répertoire photos existant trouvé")
+            return migration_results
+
+        try:
+            # Import config Android
+            sys.path.insert(0, str(self.project_root))
+            from config.android_config import get_android_config
+
+            config = get_android_config()
+            new_photos_dir = config.get_photos_directory()
+
+            # Parcourir les photos existantes
+            for photo_file in old_photos_dir.rglob("*"):
+                if photo_file.is_file() and photo_file.suffix.lower() in [".jpg", ".jpeg", ".png"]:
+                    migration_results["total_photos"] += 1
+
+                    try:
+                        # Déterminer le chemin de destination
+                        relative_path = photo_file.relative_to(old_photos_dir)
+                        new_path = new_photos_dir / relative_path
+
+                        # Créer le répertoire de destination
+                        new_path.parent.mkdir(parents=True, exist_ok=True)
+
+                        # Copier le fichier (pas déplacer pour éviter les pertes)
+                        new_path.write_bytes(photo_file.read_bytes())
+
+                        migration_results["migrated_photos"] += 1
+
+                        if migration_results["migrated_photos"] % 10 == 0:
+                            click.echo(f"   📸 {migration_results['migrated_photos']} photos migrées...")
+
+                    except Exception as e:
+                        migration_results["failed_photos"] += 1
+                        migration_results["errors"].append(f"{photo_file}: {str(e)}")
+
+            # Résumé de la migration
+            click.echo("   ✅ Migration terminée:")
+            click.echo(f"      • Total: {migration_results['total_photos']} photos")
+            click.echo(f"      • Migrées: {migration_results['migrated_photos']} photos")
+            click.echo(f"      • Échecs: {migration_results['failed_photos']} photos")
+
+            if migration_results["errors"]:
+                click.echo("   ⚠️ Erreurs:")
+                for error in migration_results["errors"][:5]:  # Limiter à 5 erreurs
+                    click.echo(f"      - {error}")
+
+        except Exception as e:
+            migration_results["errors"].append(f"Erreur globale: {str(e)}")
+            click.echo(f"   ❌ Erreur lors de la migration: {e}")
+
+        return migration_results
+
     def run_full_setup(self, verbose: bool = False):
         """Exécute la configuration complète"""
         click.echo(f"{Fore.CYAN}🚀 Configuration Android LibraRecipes{Style.RESET_ALL}")
