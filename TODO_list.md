@@ -55,13 +55,13 @@
 ## 1.2. 🔧 Phase 2 : Adaptation du Code Existant
 
 ### 1.2.1. Base de données
-- [ ] Modifier `src/db.py`
-  - [ ] Adapter la fonction `get_database_url()` pour Android
-  - [ ] Configurer le chemin SQLite pour le stockage Android
-  - [ ] Tester la création de base avec `os.path.join(os.getcwd(), "my_local_db.db")`
-- [ ] Adapter les modèles SQLAlchemy
-  - [ ] Vérifier la compatibilité des modèles avec Android
-  - [ ] Tester les migrations si nécessaires
+- [X] Modifier `src/db.py`
+  - [X] Adapter la fonction `get_database_url()` pour Android
+  - [X] Configurer le chemin SQLite pour le stockage Android
+  - [X] Tester la création de base avec `os.path.join(os.getcwd(), "my_local_db.db")`
+- [X] Adapter les modèles SQLAlchemy
+  - [X] Vérifier la compatibilité des modèles avec Android
+  - [X] Tester les migrations si nécessaires
 
 ### 1.2.2. Gestion des photos
 - [ ] Adapter `app/utils/photos_manager.py`

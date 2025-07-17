@@ -30,9 +30,9 @@ class AndroidConfig:
     def _detect_android_environment(self) -> bool:
         """Détecte si on est dans un environnement Android/Chaquopy"""
         android_indicators = [
-            "ANDROID_STORAGE",
-            "ANDROID_ROOT",
-            "ANDROID_DATA",
+            # Utiliser des indicateurs plus fiables
+            "ANDROID_ROOT" in os.environ,
+            "ANDROID_DATA" in os.environ,
             "com.termux" in os.getenv("PREFIX", ""),
             "chaquo" in str(sys.modules.keys()),
         ]
@@ -72,9 +72,9 @@ class AndroidConfig:
         project_root = Path(__file__).parent.parent
         self.storage_root = project_root / "data"
 
-        # Simulation Android pour développement
+        # Simulation Android pour développement - utiliser un dossier local
         android_sim = os.getenv("ANDROID_STORAGE")
-        if android_sim:
+        if android_sim and Path(android_sim).exists():
             self.storage_root = Path(android_sim)
 
         self.database_path = self.storage_root / "recettes.db"
