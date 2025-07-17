@@ -1,0 +1,241 @@
+/* Styles CSS pour LibraRecipes Android - Mobile Responsive */
+
+/* === CONFIGURATION RESPONSIVE GÉNÉRALE === */
+@media screen and (max-width: 768px) {
+    /* Container principal plus adapté au mobile */
+    .main .block-container {
+        padding: 1rem 0.5rem !important;
+        max-width: 100% !important;
+    }
+
+    /* Sidebar plus compacte sur mobile */
+    .css-1d391kg {
+        width: 280px !important;
+    }
+}
+
+/* === FORMULAIRES OPTIMISÉS TACTILE === */
+/* Boutons plus grands pour tactile */
+.stButton > button {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    touch-action: manipulation;
+}
+
+/* Champs de saisie plus grands */
+.stTextInput > div > div > input {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 0.75rem !important;
+}
+
+/* TextArea plus grand */
+.stTextArea > div > div > textarea {
+    min-height: 120px !important;
+    font-size: 16px !important;
+    padding: 0.75rem !important;
+}
+
+/* Selectbox optimisé */
+.stSelectbox > div > div > select {
+    min-height: 44px !important;
+    font-size: 16px !important;
+    padding: 0.5rem !important;
+}
+
+/* === COLONNES ADAPTATIVES === */
+@media screen and (max-width: 768px) {
+    /* Forcer les colonnes en stack vertical sur mobile */
+    .row-widget.stHorizontal {
+        flex-direction: column !important;
+    }
+
+    .row-widget.stHorizontal > div {
+        width: 100% !important;
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* === PHOTOS ET IMAGES === */
+/* Images responsives */
+.stImage {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+/* Upload de fichiers optimisé mobile */
+.stFileUploader {
+    border: 2px dashed #ccc !important;
+    border-radius: 8px !important;
+    padding: 2rem !important;
+    text-align: center !important;
+}
+
+.stFileUploader [data-testid="stFileUploaderDropzone"] {
+    min-height: 120px !important;
+}
+
+/* === NAVIGATION ET SIDEBAR === */
+/* Améliorer la navigation mobile */
+.css-1rs6os {
+    padding: 0.5rem !important;
+}
+
+/* Sidebar avec scroll amélioré */
+.css-1d391kg {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* === TABLEAUX RESPONSIFS === */
+@media screen and (max-width: 768px) {
+    /* Tableaux avec scroll horizontal */
+    .stDataFrame {
+        overflow-x: auto !important;
+    }
+
+    .stDataFrame table {
+        min-width: 300px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* === MÉTRIQUES ET STATISTIQUES === */
+.metric-container {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+/* === CARTES DE RECETTES === */
+.recipe-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.recipe-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.recipe-card-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .recipe-card {
+        padding: 1rem;
+    }
+
+    .recipe-card-image {
+        height: 150px;
+    }
+}
+
+/* === BOUTONS D'ACTION === */
+/* Boutons principaux colorés */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%) !important;
+    border: none !important;
+    color: white !important;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%) !important;
+    border: none !important;
+    color: white !important;
+}
+
+/* === ALERTES ET MESSAGES === */
+.stAlert {
+    border-radius: 8px !important;
+    border-left: 4px solid !important;
+}
+
+/* === OPTIMISATIONS TACTILES === */
+/* Éviter le zoom lors du focus sur iOS */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea,
+select {
+    font-size: 16px !important;
+}
+
+/* Améliorer le scroll sur mobile */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* === LOADING ET SPINNER === */
+.stSpinner {
+    margin: 2rem auto !important;
+}
+
+/* === CONTENEURS SPÉCIAUX === */
+.container-fluid {
+    padding: 0 1rem;
+}
+
+@media screen and (max-width: 768px) {
+    .container-fluid {
+        padding: 0 0.5rem;
+    }
+}
+
+/* === FOOTER ADAPTATIF === */
+.footer {
+    margin-top: 3rem;
+    padding: 2rem 0;
+    text-align: center;
+    color: #666;
+    border-top: 1px solid #eee;
+}
+
+/* === MASQUER ÉLÉMENTS SUR MOBILE === */
+@media screen and (max-width: 768px) {
+    /* Masquer certains éléments non essentiels sur mobile */
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
+
+/* === AMÉLIORATIONS ACCESSIBILITÉ === */
+/* Focus visible pour navigation clavier */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 2px solid #667eea !important;
+    outline-offset: 2px !important;
+}
+
+/* === ANIMATIONS DOUCES === */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -70,13 +70,13 @@
   - [X] Tester l'upload et la gestion des images
 
 ### 1.2.3. Configuration Streamlit
-- [ ] Créer `.streamlit/config.toml` pour Android
-  - [ ] Configuration headless
-  - [ ] Désactiver CORS et XSRF
-  - [ ] Configuration du port local
-- [ ] Adapter les styles CSS pour mobile
-  - [ ] Responsive design pour les formulaires
-  - [ ] Ajuster les boutons et composants pour mobile
+- [X] Créer `.streamlit/config.toml` pour Android
+  - [X] Configuration headless
+  - [X] Désactiver CORS et XSRF
+  - [X] Configuration du port local
+- [X] Adapter les styles CSS pour mobile
+  - [X] Responsive design pour les formulaires
+  - [X] Ajuster les boutons et composants pour mobile
 
 ## 1.3. 🚀 Phase 3 : Développement Android
 
