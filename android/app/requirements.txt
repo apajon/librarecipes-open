@@ -1,0 +1,16 @@
+# Requirements Python pour Chaquopy
+streamlit==1.46.1
+sqlalchemy==2.0.41
+streamlit-tags==1.2.8
+pillow==11.3.0
+watchdog==6.0.0
+psutil==7.0.0
+requests==2.32.4
+pyyaml==6.0.2
+tomli==2.2.1
+click==8.2.1
+colorama==0.4.6
+tqdm==4.67.1
+pathlib2==2.3.7
+python-dotenv==1.1.1
+pathvalidate==3.2.0

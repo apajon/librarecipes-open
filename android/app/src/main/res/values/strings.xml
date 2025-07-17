@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LibraRecipes</string>
+    <string name="loading_message">Démarrage de LibraRecipes...</string>
+    <string name="error_message">Erreur lors du démarrage de l\'application</string>
+</resources>

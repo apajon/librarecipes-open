@@ -31,14 +31,14 @@
 ## 1.1. 📱 Phase 1 : Préparation et Architecture
 
 ### 1.1.1. Configuration du projet
-- [ ] Créer la structure de dossiers Android
-  - [ ] Créer `/android/` pour le projet Android Studio
-  - [ ] Créer `/config/` pour les configurations Android
-  - [ ] Créer `/scripts/` pour les scripts d'automatisation
-- [ ] Créer le projet Android Studio
-  - [ ] Initialiser le projet avec Kotlin
-  - [ ] Configurer Chaquopy dans `build.gradle`
-  - [ ] Ajouter les permissions nécessaires dans `AndroidManifest.xml`
+- [X] Créer la structure de dossiers Android
+  - [X] Créer `/android/` pour le projet Android Studio
+  - [X] Créer `/config/` pour les configurations Android
+  - [X] Créer `/scripts/` pour les scripts d'automatisation
+- [X] Créer le projet Android Studio
+  - [X] Initialiser le projet avec Kotlin
+  - [X] Configurer Chaquopy dans `build.gradle`
+  - [X] Ajouter les permissions nécessaires dans `AndroidManifest.xml`
 
 ### 1.1.2. Scripts de configuration
 - [ ] Créer `scripts/android_setup.py`
