@@ -41,16 +41,16 @@
   - [X] Ajouter les permissions nécessaires dans `AndroidManifest.xml`
 
 ### 1.1.2. Scripts de configuration
-- [ ] Créer `scripts/android_setup.py`
-  - [ ] Fonction de copie du code Streamlit vers Android
-  - [ ] Fonction de copie de la logique métier
-  - [ ] Création du bridge Android-Python
-- [ ] Créer `scripts/sync_to_android.py`
-  - [ ] Synchronisation automatique du code
-  - [ ] Mode watch pour le développement
-- [ ] Créer `config/android_config.py`
-  - [ ] Configuration des chemins de stockage Android
-  - [ ] Gestion de la base de données SQLite
+- [X] Créer `scripts/android_setup.py`
+  - [X] Fonction de copie du code Streamlit vers Android
+  - [X] Fonction de copie de la logique métier
+  - [X] Création du bridge Android-Python
+- [X] Créer `scripts/sync_to_android.py`
+  - [X] Synchronisation automatique du code
+  - [X] Mode watch pour le développement
+- [X] Créer `config/android_config.py`
+  - [X] Configuration des chemins de stockage Android
+  - [X] Gestion de la base de données SQLite
 
 ## 1.2. 🔧 Phase 2 : Adaptation du Code Existant
 
