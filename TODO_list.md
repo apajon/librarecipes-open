@@ -154,10 +154,10 @@
   - [X] Performance et optimisation mémoire
 
 ### 4.2. Tests de base de données
-- [ ] Tester la création de la base SQLite
-- [ ] Vérifier les opérations CRUD
-- [ ] Tester la persistance des données
-- [ ] Vérifier la gestion des photos
+- [X] Tester la création de la base SQLite
+- [X] Vérifier les opérations CRUD
+- [X] Tester la persistance des données
+- [X] Vérifier la gestion des photos
 
 ### 4.3. Optimisation mobile
 - [ ] Optimiser l'interface pour mobile
