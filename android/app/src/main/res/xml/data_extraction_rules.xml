@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup>
+        <!-- Inclure les données utilisateur importantes -->
+        <include domain="database" path="." />
+        <include domain="file" path="." />
+
+        <!-- Exclure les données sensibles -->
+        <exclude domain="file" path="temp/" />
+        <exclude domain="cache" path="." />
+    </cloud-backup>
+
+    <device-transfer>
+        <!-- Permettre le transfert lors du changement d'appareil -->
+        <include domain="database" path="." />
+        <include domain="file" path="." />
+    </device-transfer>
+</data-extraction-rules>

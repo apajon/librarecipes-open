@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Inclure la base de données et les photos -->
+    <include domain="database" path="." />
+    <include domain="file" path="." />
+
+    <!-- Exclure les fichiers temporaires -->
+    <exclude domain="file" path="temp/" />
+    <exclude domain="cache" path="." />
+</full-backup-content>

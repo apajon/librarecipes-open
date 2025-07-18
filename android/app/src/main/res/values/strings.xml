@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">LibraRecipes</string>
-    <string name="loading_message">Démarrage de LibraRecipes...</string>
+    <string name="loading_message">Démarrage de LibraRecipes…\nInitialisation en cours</string>
+    <string name="error_title">Oops !</string>
     <string name="error_message">Erreur lors du démarrage de l\'application</string>
+    <string name="retry_button">Réessayer</string>
+    <string name="permission_denied_message">Les permissions sont nécessaires pour faire fonctionner LibraRecipes</string>
 </resources>

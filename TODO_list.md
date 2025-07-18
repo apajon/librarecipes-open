@@ -80,14 +80,22 @@
 ## 3. 🚀 Phase 3 : Développement Android
 
 ### 3.1. MainActivity et WebView
-- [ ] Créer `android/app/src/main/java/com/librarecipes/MainActivity.kt`
-  - [ ] Initialisation de Chaquopy
-  - [ ] Configuration de la WebView
-  - [ ] Gestion du serveur Streamlit local
-- [ ] Configurer les permissions Android
-  - [ ] Permission de stockage
-  - [ ] Permission Internet
-  - [ ] Permission d'accès aux fichiers
+- [X] Créer `android/app/src/main/java/com/librarecipes/MainActivity.kt`
+  - [X] Initialisation de Chaquopy
+  - [X] Configuration de la WebView
+  - [X] Gestion du serveur Streamlit local
+  - [X] Écran de chargement avec feedback utilisateur
+  - [X] Gestion d'erreur améliorée avec retry
+  - [X] Optimisations WebView pour mobile
+- [X] Configurer les permissions Android
+  - [X] Permission de stockage
+  - [X] Permission Internet
+  - [X] Permission d'accès aux fichiers
+- [X] Améliorer l'interface utilisateur
+  - [X] Layout avec écran de chargement
+  - [X] Gestion des états (loading, error, success)
+  - [X] Thème personnalisé LibraRecipes
+  - [X] Configuration réseau sécurisée
 
 ### 3.2. Bridge Python-Android
 - [ ] Créer `android_bridge.py`
