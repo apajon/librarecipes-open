@@ -4,6 +4,13 @@ plugins {
     id 'com.chaquo.python'
 }
 
+// Lecture des propriétés de keystore pour la signature
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace 'com.librarecipes'
     compileSdk 34
@@ -12,7 +19,7 @@ android {
         applicationId "com.librarecipes"
         minSdk 24
         targetSdk 34
-        versionCode 2
+        versionCode 3
         versionName "2.7.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -29,12 +36,43 @@ android {
         ndk {
             abiFilters "arm64-v8a", "x86_64"
         }
+
+        // Configuration pour optimiser l'APK
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    // Configuration des signatures
+    signingConfigs {
+        release {
+            if (keystoreProperties['STORE_FILE']) {
+                keyAlias keystoreProperties['KEY_ALIAS']
+                keyPassword keystoreProperties['KEY_PASSWORD']
+                storeFile file(keystoreProperties['STORE_FILE'])
+                storePassword keystoreProperties['STORE_PASSWORD']
+            }
+        }
     }
 
     buildTypes {
-        release {
+        debug {
+            debuggable true
             minifyEnabled false
+            shrinkResources false
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+        }
+
+        release {
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            // Configuration de signature
+            if (keystoreProperties['STORE_FILE']) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 
@@ -49,17 +87,66 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
+    }
+
+    // Configuration du packaging
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+            excludes += '/META-INF/INDEX.LIST'
+            excludes += '/META-INF/DEPENDENCIES'
+        }
+    }
+
+    // Configuration lint
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
     }
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.12.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'androidx.webkit:webkit:1.8.0'
+    // AndroidX Core
+    implementation 'androidx.core:core-ktx:1.13.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.activity:activity-ktx:1.9.0'
+    implementation 'androidx.fragment:fragment-ktx:1.8.0'
 
+    // Material Design
+    implementation 'com.google.android.material:material:1.12.0'
+
+    // Layout
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
+
+    // WebView et réseau
+    implementation 'androidx.webkit:webkit:1.11.0'
+
+    // Lifecycle
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.2'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.2'
+
+    // Permissions
+    implementation 'androidx.core:core-ktx:1.13.1'
+
+    // Coroutines pour Kotlin
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // Logging
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    // Testing
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:5.4.0'
+    testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3'
+
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-web:3.5.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test:rules:1.5.0'
 }
+
+// Inclure les tâches Gradle personnalisées
+apply from: 'gradle-tasks.gradle'
