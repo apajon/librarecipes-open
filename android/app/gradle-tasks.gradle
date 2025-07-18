@@ -1,0 +1,69 @@
+// Scripts Gradle personnalisés pour LibraRecipes
+
+// Tâche pour nettoyer et copier les assets Python
+task syncPythonAssets(type: Exec) {
+    group 'LibraRecipes'
+    description 'Synchronise le code Python dans les assets Android'
+
+    workingDir rootProject.projectDir.parent
+    commandLine 'python', 'scripts/sync_to_android.py'
+}
+
+// Tâche pour nettoyer complètement le projet
+task cleanAll(type: Delete) {
+    group 'LibraRecipes'
+    description 'Nettoie complètement le projet (build + assets)'
+
+    delete project.buildDir
+    delete fileTree(dir: 'src/main/assets/python', exclude: ['android_bridge.py', '.streamlit/**', '__init__.py'])
+}
+
+// Tâche pour construire l'APK de debug avec assets à jour
+task buildDebugWithAssets {
+    group 'LibraRecipes'
+    description 'Build debug avec synchronisation des assets Python'
+
+    dependsOn syncPythonAssets
+    finalizedBy assembleDebug
+}
+
+// Tâche pour construire l'APK de release avec assets à jour
+task buildReleaseWithAssets {
+    group 'LibraRecipes'
+    description 'Build release avec synchronisation des assets Python'
+
+    dependsOn syncPythonAssets
+    finalizedBy assembleRelease
+}
+
+// Tâche pour vérifier la configuration
+task checkConfig {
+    group 'LibraRecipes'
+    description 'Vérifie la configuration du projet'
+
+    doLast {
+        println "=== Configuration LibraRecipes ==="
+        println "Version: ${android.defaultConfig.versionName}"
+        println "VersionCode: ${android.defaultConfig.versionCode}"
+        println "Min SDK: ${android.defaultConfig.minSdk}"
+        println "Target SDK: ${android.defaultConfig.targetSdk}"
+        println "Application ID: ${android.defaultConfig.applicationId}"
+
+        def keystoreFile = rootProject.file("keystore.properties")
+        if (keystoreFile.exists()) {
+            println "Keystore: ✅ Configuré"
+        } else {
+            println "Keystore: ❌ Non configuré (builds release non signés)"
+        }
+
+        def pythonAssets = file('src/main/assets/python')
+        if (pythonAssets.exists()) {
+            println "Assets Python: ✅ Présents (${pythonAssets.listFiles().length} fichiers)"
+        } else {
+            println "Assets Python: ❌ Manquants"
+        }
+    }
+}
+
+// Hook pour synchroniser automatiquement avant le build
+preBuild.dependsOn syncPythonAssets
