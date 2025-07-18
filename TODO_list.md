@@ -160,14 +160,14 @@
 - [X] Vérifier la gestion des photos
 
 ### 4.3. Optimisation mobile
-- [ ] Optimiser l'interface pour mobile
-  - [ ] Ajuster les tailles de police
-  - [ ] Optimiser les formulaires pour tactile
-  - [ ] Améliorer la navigation mobile
-- [ ] Optimiser les performances
-  - [ ] Temps de démarrage du serveur
-  - [ ] Réactivité de la WebView
-  - [ ] Gestion mémoire
+- [X] Optimiser l'interface pour mobile
+  - [X] Ajuster les tailles de police
+  - [X] Optimiser les formulaires pour tactile
+  - [X] Améliorer la navigation mobile
+- [X] Optimiser les performances
+  - [X] Temps de démarrage du serveur
+  - [X] Réactivité de la WebView
+  - [X] Gestion mémoire
 
 ## 5. 📦 Phase 5 : Build et Déploiement
 
