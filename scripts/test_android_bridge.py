@@ -3,8 +3,8 @@ Script de test pour le bridge Android-Python
 Teste la fonctionnalité du bridge en mode développement
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Ajouter le chemin du bridge aux imports

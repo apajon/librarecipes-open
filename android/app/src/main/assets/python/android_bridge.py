@@ -3,14 +3,14 @@ Bridge Python-Android pour LibraRecipes
 Ce module fait le lien entre l'application Android (Kotlin) et le serveur Streamlit Python.
 """
 
+import logging
 import os
+import socket
 import sys
 import threading
 import time
-import socket
-import logging
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 # Configuration du logging pour Android
 logging.basicConfig(
@@ -123,7 +123,7 @@ class AndroidBridge:
             logger.info("Initialisation de la base de données...")
 
             # Importer les modules de base de données
-            from src.db import get_database_url, create_tables
+            from src.db import create_tables, get_database_url
 
             # Vérifier la configuration de la base de données
             db_url = get_database_url()

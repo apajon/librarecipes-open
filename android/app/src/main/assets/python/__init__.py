@@ -3,7 +3,7 @@ Module d'initialisation pour LibraRecipes Android
 Point d'entrée principal pour l'application Android
 """
 
-from android_bridge import start_streamlit_server, stop_streamlit_server, get_server_status
+from android_bridge import get_server_status, start_streamlit_server, stop_streamlit_server
 
 __all__ = ["start_streamlit_server", "stop_streamlit_server", "get_server_status"]
 
