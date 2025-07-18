@@ -178,10 +178,10 @@
 - [X] Tester le build de production
 
 ### 5.2. Documentation
-- [ ] Documenter l'installation Android Studio
-- [ ] Documenter la configuration Chaquopy
-- [ ] Créer un guide de développement
-- [ ] Documenter le processus de build
+- [X] Documenter l'installation Android Studio
+- [X] Documenter la configuration Chaquopy
+- [X] Créer un guide de développement
+- [X] Documenter le processus de build
 
 ### 5.3. Tests finaux
 - [ ] Tests sur différents appareils Android

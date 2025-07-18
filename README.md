@@ -150,6 +150,65 @@ PYTHONPATH=. streamlit run app/Home.py
 - **Catégories et Tags** : Pour classification
 - **Convives et Exécutions** : Suivi des réalisations
 
+
+## 📱 Développement Android
+
+### Prérequis
+
+- **Android Studio** (version 2023.1 ou supérieure recommandée)
+- **SDK Android** (API 34 minimum)
+- **Chaquopy** (géré via build.gradle)
+- **Java 8+** et **Kotlin**
+
+### Installation Android Studio
+
+1. Télécharger et installer [Android Studio](https://developer.android.com/studio)
+2. Ouvrir le dossier `android/` comme projet Android Studio
+3. Laisser Android Studio télécharger les dépendances nécessaires (Gradle, SDK, etc.)
+
+### Configuration Chaquopy
+
+- Chaquopy est déjà configuré dans `android/app/build.gradle` (voir le bloc `python { ... }`)
+- Les dépendances Python sont listées dans `android/app/requirements.txt`
+- Les assets Python sont synchronisés via le script `scripts/sync_to_android.py`
+
+### Build et Signature APK/AAB
+
+#### Build debug
+```bash
+cd android
+./gradlew assembleDebug
+# APK généré : android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+#### Build release (signé)
+```bash
+cd android
+# Assurez-vous d'avoir un fichier keystore.properties et un keystore valide
+./gradlew assembleRelease
+# APK généré : android/app/build/outputs/apk/release/app-release.apk
+```
+
+#### Script de build automatisé
+```bash
+./scripts/build-android.sh [debug|release|clean|all]
+```
+
+#### ProGuard & Optimisation
+- ProGuard est activé pour le build release (`proguard-rules.pro`)
+- Les ressources inutilisées sont supprimées (`shrinkResources true`)
+- Les architectures supportées sont filtrées (`abiFilters`)
+
+#### Bonnes pratiques
+- Toujours synchroniser les assets Python avant un build (`python3 scripts/sync_to_android.py`)
+- Tester l’APK sur un vrai appareil Android
+- Utiliser le build release pour la publication/distribution
+
+### Dépannage
+- Si le build échoue, vérifier les logs Gradle dans Android Studio
+- Pour les erreurs Chaquopy, vérifier la version de Python et les dépendances dans `requirements.txt`
+
+---
 ## 🔧 Technologies
 
 - **Frontend** : Streamlit + streamlit-tags
