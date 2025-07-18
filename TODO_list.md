@@ -172,10 +172,10 @@
 ## 5. 📦 Phase 5 : Build et Déploiement
 
 ### 5.1. Configuration de build
-- [ ] Configurer le build de release
-- [ ] Optimiser la taille de l'APK
-- [ ] Configurer ProGuard si nécessaire
-- [ ] Tester le build de production
+- [X] Configurer le build de release
+- [X] Optimiser la taille de l'APK
+- [X] Configurer ProGuard si nécessaire
+- [X] Tester le build de production
 
 ### 5.2. Documentation
 - [ ] Documenter l'installation Android Studio
