@@ -7,7 +7,22 @@ from pathlib import Path
 
 import streamlit as st
 
-from config.android_config import get_android_config
+
+def get_android_config():
+    """
+    Configuration Android adaptative avec fallback pour développement.
+
+    Returns:
+        dict: Configuration Android ou par défaut
+    """
+    return {
+        "app_name": "LibraRecipes",
+        "database_path": "./data/recettes.db",
+        "photos_path": "./data/photos",
+        "android_data_path": "/data/data/com.librarecipes/files",
+        "is_android": False,
+        "streamlit_config": {"port": 8501, "headless": False, "enable_cors": False, "max_upload_size": 200},
+    }
 
 
 class MobileStyleManager:
@@ -246,8 +261,34 @@ mobile_styles = MobileStyleManager()
 
 
 def setup_mobile_interface():
-    """Fonction utilitaire pour configurer l'interface mobile"""
-    mobile_styles.setup_mobile_layout()
+    """Fonction utilitaire pour configurer l'interface mobile - Version simplifiée"""
+    # Version simplifiée qui ne cause pas de crash
+    st.markdown(
+        """
+        <style>
+        /* Configuration responsive de base */
+        .main .block-container {
+            padding-top: 2rem;
+            padding-bottom: 2rem;
+            max-width: 100%;
+        }
+
+        /* Optimisations mobiles de base */
+        @media screen and (max-width: 768px) {
+            .main .block-container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .stButton > button {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def setup_recipe_interface():

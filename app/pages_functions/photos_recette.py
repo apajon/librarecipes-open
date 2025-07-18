@@ -3,7 +3,7 @@ import uuid
 
 import streamlit as st
 
-from config.android_config import get_android_config
+from app.utils.android_helper import get_android_config
 from src.crud.recettes import get_recette_by_id
 from src.db import get_db_session
 from src.model import Photo

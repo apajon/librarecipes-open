@@ -22,7 +22,7 @@ def get_android_config():
         import sys
 
         sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-        from config.android_config import get_android_config as _get_android_config
+        from app.utils.android_helper import get_android_config as _get_android_config
 
         return _get_android_config()
     except ImportError:

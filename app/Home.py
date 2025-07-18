@@ -7,8 +7,8 @@ Support Android avec styles mobiles adaptatifs
 # Configuration et modules principaux
 from app.config.app import run_app, setup_navigation, setup_page_config
 from app.config.pages import create_page_objects, get_pages_config, setup_session_state_pages
-from app.utils.sidebar import setup_sidebar
 from app.utils.mobile_styles import setup_mobile_interface
+from app.utils.sidebar import setup_sidebar
 
 
 def main():

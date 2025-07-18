@@ -5,39 +5,23 @@
 headless = false
 port = 8501
 address = "127.0.0.1"
-enableCORS = true
-enableXsrfProtection = true
+enableCORS = false
+enableXsrfProtection = false
 maxUploadSize = 200
 maxMessageSize = 200
 enableWebsocketCompression = false
 
 [browser]
 gatherUsageStats = false
-serverAddress = "127.0.0.1"
-serverPort = 8501
-
-[client]
-caching = true
-displayEnabled = true
-showErrorDetails = true
 
 [global]
-developmentMode = true
-suppressDeprecationWarnings = false
-disableWatchdogWarning = false
+developmentMode = false
+suppressDeprecationWarnings = true
 
 [theme]
-base = "light"
+base = "dark"
 primaryColor = "#FF6B6B"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
+backgroundColor = "#0E1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#FAFAFA"
 font = "sans serif"
-
-[logger]
-level = "DEBUG"
-enableLogging = true
-
-[deprecation]
-showPyplotGlobalUse = false
-showfileUploaderEncoding = false
