@@ -49,3 +49,26 @@ def prepare_recipe_data(
         "ingredients": ingredients,
         "etapes": etapes_formatted,
     }
+
+
+class RecipeValidator:
+    """Classe pour la validation des recettes"""
+
+    @staticmethod
+    def validate_recipe_data(nom: str, ingredients: List[Dict[str, Any]], etapes: List[str]) -> Tuple[bool, List[str]]:
+        """Valide les données d'une recette et retourne les erreurs"""
+        return validate_recipe_data(nom, ingredients, etapes)
+
+    @staticmethod
+    def prepare_recipe_data(
+        nom: str,
+        preparation: int,
+        cuisson: int,
+        portions: int,
+        categories: List[str],
+        tags: List[str],
+        ingredients: List[Dict[str, Any]],
+        etapes: List[str],
+    ) -> Dict[str, Any]:
+        """Prépare les données de recette pour la sauvegarde"""
+        return prepare_recipe_data(nom, preparation, cuisson, portions, categories, tags, ingredients, etapes)

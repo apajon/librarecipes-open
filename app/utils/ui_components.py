@@ -163,3 +163,64 @@ def create_recipe_navigation_buttons(recette_id: str) -> Tuple[bool, bool, bool]
         delete_clicked = st.button("🗑️ Supprimer cette recette", type="secondary", use_container_width=True)
 
     return modify_clicked, photos_clicked, delete_clicked
+
+
+def create_mobile_button(text: str, key: str, icon: str = "") -> str:
+    """Crée un bouton optimisé pour mobile"""
+    button_style = """
+    <style>
+    .mobile-button {
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 100%;
+        margin: 8px 0;
+        touch-action: manipulation;
+    }
+    .mobile-button:hover {
+        background-color: #ff5252;
+    }
+    </style>
+    """
+
+    button_html = f"""
+    {button_style}
+    <button class="mobile-button" id="{key}">
+        {icon} {text}
+    </button>
+    """
+
+    return button_html
+
+
+def create_mobile_form(title: str) -> str:
+    """Crée un formulaire optimisé pour mobile"""
+    form_style = """
+    <style>
+    .mobile-form {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin: 16px 0;
+    }
+    .mobile-form h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.2em;
+    }
+    </style>
+    """
+
+    form_html = f"""
+    {form_style}
+    <div class="mobile-form">
+        <h3>{title}</h3>
+    </div>
+    """
+
+    return form_html
