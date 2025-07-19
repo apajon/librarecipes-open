@@ -23,6 +23,10 @@
     - [5.4.4. ProGuard \& Optimisation](#544-proguard--optimisation)
     - [5.4.5. Bonnes pratiques](#545-bonnes-pratiques)
   - [5.5. Dépannage](#55-dépannage)
+- [7. 🧪 Tests finaux Android](#7--tests-finaux-android)
+  - [Tests automatisés](#tests-automatisés)
+  - [Tests sur appareils Android](#tests-sur-appareils-android)
+  - [Validation de l’expérience utilisateur](#validation-de-lexpérience-utilisateur)
 - [6. 🔧 Technologies](#6--technologies)
 
 LibraRecipes est une application de gestion de recettes de cuisine développée avec Streamlit et SQLAlchemy. Elle permet de créer, rechercher, et organiser vos recettes avec photos, ingrédients, étapes et métadonnées.
@@ -231,6 +235,39 @@ cd android
 ### 5.5. Dépannage
 - Si le build échoue, vérifier les logs Gradle dans Android Studio
 - Pour les erreurs Chaquopy, vérifier la version de Python et les dépendances dans `requirements.txt`
+
+---
+
+## 7. 🧪 Tests finaux Android
+
+### Tests automatisés
+
+- Exécuter tous les tests fonctionnels et d’intégration :
+  ```bash
+  python3 tests/run_android_tests.py
+  # ou
+  python3 tests/test_functional_android.py
+  python3 tests/test_integration_android.py
+  ```
+- Les tests couvrent : démarrage, navigation, CRUD, persistance, stockage photos, performance, UI mobile…
+
+### Tests sur appareils Android
+
+- Installer l’APK release sur différents appareils (Android 8+ recommandé)
+- Tester :
+  - Démarrage rapide
+  - Navigation fluide
+  - Création/modification de recettes
+  - Upload/affichage de photos
+  - Recherche et filtres
+  - Persistance des données après redémarrage
+
+### Validation de l’expérience utilisateur
+
+- Vérifier l’ergonomie tactile (boutons, formulaires, navigation)
+- Tester la réactivité de l’interface (WebView, transitions)
+- S’assurer que l’application reste stable même après plusieurs opérations
+- Recueillir des retours utilisateurs réels si possible
 
 ---
 ## 6. 🔧 Technologies
