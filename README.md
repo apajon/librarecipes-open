@@ -1,13 +1,38 @@
 # LibraRecipes 🍽️
 
+- [1. 🚀 Fonctionnalités](#1--fonctionnalités)
+  - [1.1. ✅ Implémentées](#11--implémentées)
+  - [1.2. 📋 Architecture Moderne](#12--architecture-moderne)
+- [2. 🛠️ Installation et Lancement](#2-️-installation-et-lancement)
+  - [2.1. Prérequis](#21-prérequis)
+  - [2.2. Installation](#22-installation)
+  - [2.3. Lancement](#23-lancement)
+- [3. 📝 Utilisation](#3--utilisation)
+  - [3.1. Ajouter une nouvelle recette](#31-ajouter-une-nouvelle-recette)
+  - [3.2. Modifier une recette existante](#32-modifier-une-recette-existante)
+  - [3.3. Fonctionnalités avancées](#33-fonctionnalités-avancées)
+- [4. 🗄️ Modèle de données](#4-️-modèle-de-données)
+- [5. 📱 Développement Android](#5--développement-android)
+  - [5.1. Prérequis](#51-prérequis)
+  - [5.2. Installation Android Studio](#52-installation-android-studio)
+  - [5.3. Configuration Chaquopy](#53-configuration-chaquopy)
+  - [5.4. Build et Signature APK/AAB](#54-build-et-signature-apkaab)
+    - [5.4.1. Build debug](#541-build-debug)
+    - [5.4.2. Build release (signé)](#542-build-release-signé)
+    - [5.4.3. Script de build automatisé](#543-script-de-build-automatisé)
+    - [5.4.4. ProGuard \& Optimisation](#544-proguard--optimisation)
+    - [5.4.5. Bonnes pratiques](#545-bonnes-pratiques)
+  - [5.5. Dépannage](#55-dépannage)
+- [6. 🔧 Technologies](#6--technologies)
+
 LibraRecipes est une application de gestion de recettes de cuisine développée avec Streamlit et SQLAlchemy. Elle permet de créer, rechercher, et organiser vos recettes avec photos, ingrédients, étapes et métadonnées.
 
 **✨ Nouvelle version avec `st.Page` et `st.navigation` !**
 Cette application utilise maintenant la nouvelle API de navigation de Streamlit pour une expérience utilisateur améliorée.
 
-## 🚀 Fonctionnalités
+## 1. 🚀 Fonctionnalités
 
-### ✅ Implémentées
+### 1.1. ✅ Implémentées
 
 - **🏠 Page d'accueil** : Vue d'ensemble et navigation principale
 - **🔍 Recherche & Exploration** :
@@ -24,7 +49,7 @@ Cette application utilise maintenant la nouvelle API de navigation de Streamlit 
   - Gestion des temps de préparation et cuisson
   - Support des sources (maison, URL, livre)
 
-### 📋 Architecture Moderne
+### 1.2. 📋 Architecture Moderne
 
 ```text
 ├── app/                           # Interface Streamlit
@@ -48,14 +73,14 @@ Cette application utilise maintenant la nouvelle API de navigation de Streamlit 
 └── tests/                       # Tests unitaires
 ```
 
-## 🛠️ Installation et Lancement
+## 2. 🛠️ Installation et Lancement
 
-### Prérequis
+### 2.1. Prérequis
 
 - Python 3.12+
 - Poetry (gestionnaire de dépendances)
 
-### Installation
+### 2.2. Installation
 
 ```bash
 # Cloner le projet
@@ -69,7 +94,7 @@ poetry install --no-root
 PYTHONPATH=. python scripts/init_db.py
 ```
 
-### Lancement
+### 2.3. Lancement
 
 ```bash
 # Via le script
@@ -79,9 +104,9 @@ PYTHONPATH=. python scripts/init_db.py
 PYTHONPATH=. streamlit run app/Home.py
 ```
 
-## 📝 Utilisation
+## 3. 📝 Utilisation
 
-### Ajouter une nouvelle recette
+### 3.1. Ajouter une nouvelle recette
 
 1. **Accédez à la page d'ajout** : Depuis l'accueil, cliquez sur "➕ Ajouter une recette"
 
@@ -107,7 +132,7 @@ PYTHONPATH=. streamlit run app/Home.py
 
 6. **Enregistrez** : La recette est créée en base avec toutes ses données
 
-### Modifier une recette existante
+### 3.2. Modifier une recette existante
 
 1. **Accédez à la page de modification** : Depuis la page de détail d'une recette, cliquez sur "✏️ Modifier cette recette"
 
@@ -132,7 +157,7 @@ PYTHONPATH=. streamlit run app/Home.py
 
 6. **Enregistrez** : Les modifications sont appliquées immédiatement
 
-### Fonctionnalités avancées
+### 3.3. Fonctionnalités avancées
 
 - **Validation** : Vérification des champs obligatoires
 - **Gestion d'erreurs** : Messages d'erreur explicites
@@ -140,7 +165,7 @@ PYTHONPATH=. streamlit run app/Home.py
 - **Réorganisation** : Déplacement des étapes, suppression d'éléments
 - **Lien direct** : Accès immédiat à la recette créée
 
-## 🗄️ Modèle de données
+## 4. 🗄️ Modèle de données
 
 - **Recette** : Entité principale avec métadonnées
 - **Ingrédients** : Avec quantités, unités et alternatives
@@ -150,38 +175,37 @@ PYTHONPATH=. streamlit run app/Home.py
 - **Catégories et Tags** : Pour classification
 - **Convives et Exécutions** : Suivi des réalisations
 
+## 5. 📱 Développement Android
 
-## 📱 Développement Android
-
-### Prérequis
+### 5.1. Prérequis
 
 - **Android Studio** (version 2023.1 ou supérieure recommandée)
 - **SDK Android** (API 34 minimum)
 - **Chaquopy** (géré via build.gradle)
 - **Java 8+** et **Kotlin**
 
-### Installation Android Studio
+### 5.2. Installation Android Studio
 
 1. Télécharger et installer [Android Studio](https://developer.android.com/studio)
 2. Ouvrir le dossier `android/` comme projet Android Studio
 3. Laisser Android Studio télécharger les dépendances nécessaires (Gradle, SDK, etc.)
 
-### Configuration Chaquopy
+### 5.3. Configuration Chaquopy
 
 - Chaquopy est déjà configuré dans `android/app/build.gradle` (voir le bloc `python { ... }`)
 - Les dépendances Python sont listées dans `android/app/requirements.txt`
 - Les assets Python sont synchronisés via le script `scripts/sync_to_android.py`
 
-### Build et Signature APK/AAB
+### 5.4. Build et Signature APK/AAB
 
-#### Build debug
+#### 5.4.1. Build debug
 ```bash
 cd android
 ./gradlew assembleDebug
 # APK généré : android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
-#### Build release (signé)
+#### 5.4.2. Build release (signé)
 ```bash
 cd android
 # Assurez-vous d'avoir un fichier keystore.properties et un keystore valide
@@ -189,27 +213,27 @@ cd android
 # APK généré : android/app/build/outputs/apk/release/app-release.apk
 ```
 
-#### Script de build automatisé
+#### 5.4.3. Script de build automatisé
 ```bash
 ./scripts/build-android.sh [debug|release|clean|all]
 ```
 
-#### ProGuard & Optimisation
+#### 5.4.4. ProGuard & Optimisation
 - ProGuard est activé pour le build release (`proguard-rules.pro`)
 - Les ressources inutilisées sont supprimées (`shrinkResources true`)
 - Les architectures supportées sont filtrées (`abiFilters`)
 
-#### Bonnes pratiques
+#### 5.4.5. Bonnes pratiques
 - Toujours synchroniser les assets Python avant un build (`python3 scripts/sync_to_android.py`)
 - Tester l’APK sur un vrai appareil Android
 - Utiliser le build release pour la publication/distribution
 
-### Dépannage
+### 5.5. Dépannage
 - Si le build échoue, vérifier les logs Gradle dans Android Studio
 - Pour les erreurs Chaquopy, vérifier la version de Python et les dépendances dans `requirements.txt`
 
 ---
-## 🔧 Technologies
+## 6. 🔧 Technologies
 
 - **Frontend** : Streamlit + streamlit-tags
 - **Backend** : SQLAlchemy + SQLite
