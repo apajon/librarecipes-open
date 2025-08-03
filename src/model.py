@@ -1,12 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Any, TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
-
-if TYPE_CHECKING:
-    from sqlalchemy.orm import Relationship
 
 Base = declarative_base()
 
