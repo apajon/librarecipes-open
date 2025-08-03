@@ -680,6 +680,7 @@ class AddRecipeScreen(MDScreen):
                 'etapes': self.steps,
                 'categories': [cat.strip() for cat in self.categories.text.split(',') if cat.strip()],
                 'tags': [tag.strip() for tag in self.tags.text.split(',') if tag.strip()],
+                'photos': self.photos,
                 'source': {'type': 'homemade'}
             }
             
