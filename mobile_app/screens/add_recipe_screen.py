@@ -6,7 +6,7 @@ Form to create new recipes with ingredients and steps
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.button import MDRaisedButton, MDIconButton
+from kivymd.uix.button import MDRaisedButton, MDIconButton, MDFlatButton
 from kivymd.uix.toolbar import MDTopAppBar
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.card import MDCard
@@ -15,11 +15,18 @@ from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.list import MDList, ThreeLineListItem
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.gridlayout import MDGridLayout
 from kivy.metrics import dp
 from kivy.app import App
 
 from src.db import get_db_session
 from src.crud.recettes import create_recette
+
+# Import photo manager
+try:
+    from utils.photo_manager import PhotoManager
+except ImportError:
+    PhotoManager = None
 
 
 class AddRecipeScreen(MDScreen):
