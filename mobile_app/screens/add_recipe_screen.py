@@ -708,8 +708,10 @@ class AddRecipeScreen(MDScreen):
         self.tags.text = ""
         self.ingredients = []
         self.steps = []
+        self.photos = []
         self.refresh_ingredients_list()
         self.refresh_steps_list()
+        self.refresh_photos_grid()
     
     def go_back(self):
         """Go back to previous screen"""
