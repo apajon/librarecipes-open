@@ -82,6 +82,10 @@ class AddRecipeScreen(MDScreen):
         steps_section = self.create_steps_section()
         content.add_widget(steps_section)
         
+        # Photos section
+        photos_section = self.create_photos_section()
+        content.add_widget(photos_section)
+        
         # Save button
         save_btn = MDRaisedButton(
             text="💾 Save Recipe",
