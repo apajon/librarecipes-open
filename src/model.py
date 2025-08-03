@@ -121,7 +121,7 @@ class Convive(Base):
     nom = Column(String, unique=True, nullable=False)
     groupe = Column(String)  # famille, amis...
 
-    feedbacks: "Relationship[Any]" = relationship(
+    feedbacks = relationship(
         "FeedbackExecution", back_populates="convive", cascade="all, delete-orphan"
     )
 
