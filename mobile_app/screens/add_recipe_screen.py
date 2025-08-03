@@ -290,6 +290,59 @@ class AddRecipeScreen(MDScreen):
         card.add_widget(layout)
         return card
     
+    def create_photos_section(self):
+        """Create photos management section"""
+        card = MDCard(
+            padding=dp(20),
+            spacing=dp(15),
+            elevation=2,
+            radius=[dp(10)],
+            adaptive_height=True
+        )
+        
+        layout = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(12),
+            adaptive_height=True
+        )
+        
+        # Section title with camera button
+        title_layout = MDBoxLayout(
+            orientation='horizontal',
+            size_hint_y=None,
+            height=dp(40)
+        )
+        
+        title = MDLabel(
+            text="📷 Recipe Photos",
+            font_size=dp(18),
+            bold=True,
+            theme_text_color="Primary"
+        )
+        
+        camera_btn = MDIconButton(
+            icon="camera",
+            theme_icon_color="Custom",
+            icon_color=App.get_running_app().colors['primary'],
+            on_release=lambda x: self.show_photo_options()
+        )
+        
+        title_layout.add_widget(title)
+        title_layout.add_widget(camera_btn)
+        
+        # Photos grid
+        self.photos_grid = MDGridLayout(
+            cols=3,
+            spacing=dp(10),
+            adaptive_height=True
+        )
+        
+        layout.add_widget(title_layout)
+        layout.add_widget(self.photos_grid)
+        
+        card.add_widget(layout)
+        return card
+    
     def add_ingredient_dialog(self):
         """Show dialog to add ingredient"""
         content = MDBoxLayout(
