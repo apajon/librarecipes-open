@@ -49,7 +49,11 @@ def rechercher_recettes(
         query = query.join(Recette.categories).filter(Categorie.nom.in_(categories)).group_by(Recette.id)
 
     return query.options(
-        joinedload(Recette.source),
-        joinedload(Recette.executions),
         joinedload(Recette.categories),
+        joinedload(Recette.tags),
+        joinedload(Recette.ingredients),
+        joinedload(Recette.etapes),
+        joinedload(Recette.photos),
+        joinedload(Recette.source),
+        joinedload(Recette.executions)
     ).all()
