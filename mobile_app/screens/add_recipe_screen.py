@@ -523,6 +523,137 @@ class AddRecipeScreen(MDScreen):
             self.steps.pop(index)
             self.refresh_steps_list()
     
+    def show_photo_options(self):
+        """Show photo capture/selection options"""
+        if not self.photo_manager:
+            Snackbar(text="Photo features not available").open()
+            return
+        
+        content = MDBoxLayout(
+            orientation='vertical',
+            spacing=dp(15),
+            adaptive_height=True
+        )
+        
+        camera_btn = MDRaisedButton(
+            text="📷 Take Photo",
+            md_bg_color=App.get_running_app().colors['primary'],
+            theme_text_color="Custom",
+            text_color="white",
+            size_hint_y=None,
+            height=dp(40),
+            on_release=lambda x: self.take_photo()
+        )
+        
+        gallery_btn = MDRaisedButton(
+            text="🖼️ Choose from Gallery",
+            md_bg_color=App.get_running_app().colors['navy'],
+            theme_text_color="Custom",
+            text_color="white",
+            size_hint_y=None,
+            height=dp(40),
+            on_release=lambda x: self.select_from_gallery()
+        )
+        
+        content.add_widget(camera_btn)
+        content.add_widget(gallery_btn)
+        
+        self.dialog = MDDialog(
+            title="Add Recipe Photo",
+            type="custom",
+            content_cls=content,
+            buttons=[
+                MDFlatButton(
+                    text="Cancel",
+                    on_release=lambda x: self.dialog.dismiss()
+                )
+            ]
+        )
+        self.dialog.open()
+    
+    def take_photo(self):
+        """Take a photo using camera"""
+        if self.photo_manager:
+            recipe_name = self.recipe_name.text.strip() or "recipe"
+            filename = self.photo_manager.generate_photo_filename(
+                recipe_name.replace(" ", "_"), "recipe"
+            )
+            
+            self.photo_manager.take_photo(
+                filename, 
+                callback=self.on_photo_captured
+            )
+        self.dialog.dismiss()
+    
+    def select_from_gallery(self):
+        """Select photo from gallery"""
+        if self.photo_manager:
+            self.photo_manager.select_from_gallery(
+                callback=self.on_photo_captured
+            )
+        self.dialog.dismiss()
+    
+    def on_photo_captured(self, photo_path, error):
+        """Handle photo capture result"""
+        if error:
+            Snackbar(text=f"Photo error: {error}").open()
+            return
+        
+        if photo_path:
+            self.photos.append({
+                'chemin': photo_path,
+                'categorie': 'recipe'
+            })
+            self.refresh_photos_grid()
+            Snackbar(text="Photo added successfully!").open()
+    
+    def refresh_photos_grid(self):
+        """Refresh photos display"""
+        self.photos_grid.clear_widgets()
+        
+        for i, photo in enumerate(self.photos):
+            photo_card = MDCard(
+                size_hint_y=None,
+                height=dp(80),
+                elevation=2,
+                radius=[dp(5)],
+                on_release=lambda x, idx=i: self.remove_photo(idx)
+            )
+            
+            photo_layout = MDBoxLayout(
+                orientation='vertical',
+                spacing=dp(5),
+                padding=dp(10)
+            )
+            
+            photo_icon = MDLabel(
+                text="📸",
+                font_size=dp(24),
+                halign="center"
+            )
+            
+            photo_label = MDLabel(
+                text=f"Photo {i+1}",
+                font_size=dp(12),
+                halign="center",
+                theme_text_color="Secondary"
+            )
+            
+            photo_layout.add_widget(photo_icon)
+            photo_layout.add_widget(photo_label)
+            photo_card.add_widget(photo_layout)
+            
+            self.photos_grid.add_widget(photo_card)
+    
+    def remove_photo(self, index):
+        """Remove photo from list"""
+        if 0 <= index < len(self.photos):
+            photo = self.photos.pop(index)
+            if self.photo_manager:
+                self.photo_manager.delete_photo(photo['chemin'])
+            self.refresh_photos_grid()
+            Snackbar(text="Photo removed").open()
+    
     def save_recipe(self):
         """Save the recipe to database"""
         # Validate required fields
