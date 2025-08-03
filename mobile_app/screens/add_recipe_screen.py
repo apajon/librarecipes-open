@@ -36,7 +36,12 @@ class AddRecipeScreen(MDScreen):
         super().__init__(**kwargs)
         self.ingredients = []
         self.steps = []
+        self.photos = []
         self.dialog = None
+        
+        # Initialize photo manager
+        self.photo_manager = PhotoManager() if PhotoManager else None
+        
         self.build_screen()
     
     def build_screen(self):
