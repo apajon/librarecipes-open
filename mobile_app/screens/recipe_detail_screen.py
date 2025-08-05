@@ -19,6 +19,7 @@ from kivymd.uix.button import MDButton
 from kivymd.uix.button.button import MDButtonText
 from kivymd.uix.card import MDCard
 from kivymd.uix.chip import MDChip
+from kivymd.uix.chip.chip import MDChipText
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import MDList
@@ -142,7 +143,7 @@ class RecipeDetailScreen(MDScreen):
 
         if self.recipe and self.recipe.preparation:
             prep_label = MDLabel(
-                text=f"⏱️ Prep: {self.recipe.preparation}min",
+                text=f"Prep: {self.recipe.preparation}min",
                 font_size=dp(14),
                 theme_text_color="Secondary",
                 size_hint_x=None,
@@ -152,7 +153,7 @@ class RecipeDetailScreen(MDScreen):
 
         if self.recipe and self.recipe.cuisson:
             cook_label = MDLabel(
-                text=f"🔥 Cook: {self.recipe.cuisson}min",
+                text=f"Cook: {self.recipe.cuisson}min",
                 font_size=dp(14),
                 theme_text_color="Secondary",
                 size_hint_x=None,
@@ -162,7 +163,7 @@ class RecipeDetailScreen(MDScreen):
 
         if self.recipe and self.recipe.portions:
             portions_label = MDLabel(
-                text=f"👥 Serves: {self.recipe.portions}",
+                text=f"Serves: {self.recipe.portions}",
                 font_size=dp(14),
                 theme_text_color="Secondary",
                 size_hint_x=None,
@@ -176,7 +177,7 @@ class RecipeDetailScreen(MDScreen):
             total_time = (self.recipe.preparation or 0) + (self.recipe.cuisson or 0)
         if total_time > 0:
             total_label = MDLabel(
-                text=f"⏰ Total: {total_time}min",
+                text=f"Total: {total_time}min",
                 font_size=dp(14),
                 bold=True,
                 theme_text_color="Custom",
@@ -198,7 +199,7 @@ class RecipeDetailScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="🏷️ Categories & Tags",
+            text="Categories & Tags",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -213,9 +214,9 @@ class RecipeDetailScreen(MDScreen):
 
             for category in self.recipe.categories:
                 chip = MDChip(
-                    text=category.nom,
+                    MDChipText(text=category.nom),
                     md_bg_color=App.get_running_app().colors["secondary_peach"],
-                    text_color=App.get_running_app().colors["dark_curry"],
+                    theme_text_color="Custom",
                     size_hint_x=None,
                     height=dp(32),
                 )
@@ -229,9 +230,9 @@ class RecipeDetailScreen(MDScreen):
 
             for tag in self.recipe.tags:
                 chip = MDChip(
-                    text=tag.nom,
+                    MDChipText(text=tag.nom),
                     md_bg_color=App.get_running_app().colors["navy"],
-                    text_color="white",
+                    theme_text_color="Custom",
                     size_hint_x=None,
                     height=dp(32),
                 )
@@ -250,7 +251,7 @@ class RecipeDetailScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="🧂 Ingredients",
+            text="Ingredients",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -297,7 +298,7 @@ class RecipeDetailScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="📋 Preparation Steps",
+            text="Preparation Steps",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -355,7 +356,7 @@ class RecipeDetailScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="ℹ️ Recipe Info",
+            text="Recipe Info",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -368,7 +369,7 @@ class RecipeDetailScreen(MDScreen):
         if self.recipe and self.recipe.date_ajout:
             date_added = self.recipe.date_ajout.strftime("%B %d, %Y")
         date_label = MDLabel(
-            text=f"📅 Added: {date_added}",
+            text=f"Added: {date_added}",
             font_size=dp(14),
             theme_text_color="Secondary",
             size_hint_y=None,
@@ -376,12 +377,12 @@ class RecipeDetailScreen(MDScreen):
         )
 
         # Source info
-        source_text = "🏠 Homemade recipe"
+        source_text = "Homemade recipe"
         if self.recipe and self.recipe.source:
             if self.recipe.source.type == "url" and self.recipe.source.url:
-                source_text = f"🌐 From: {self.recipe.source.url}"
+                source_text = f"From: {self.recipe.source.url}"
             elif self.recipe.source.type == "book" and self.recipe.source.book_title:
-                source_text = f"📚 From: {self.recipe.source.book_title}"
+                source_text = f"From: {self.recipe.source.book_title}"
 
         source_label = MDLabel(
             text=source_text, font_size=dp(14), theme_text_color="Secondary", size_hint_y=None, height=dp(25)
@@ -404,7 +405,7 @@ class RecipeDetailScreen(MDScreen):
 
         error_layout = MDBoxLayout(orientation="vertical", spacing=dp(10))
 
-        error_label = MDLabel(text=f"❌ {message}", font_size=dp(18), halign="center", theme_text_color="Error")
+        error_label = MDLabel(text=f"Error: {message}", font_size=dp(18), halign="center", theme_text_color="Error")
 
         back_btn = MDButton(
             size_hint_x=None,
