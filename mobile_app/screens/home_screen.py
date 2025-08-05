@@ -101,7 +101,7 @@ class HomeScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="📊 Your Recipe Collection",
+            text="Your Recipe Collection",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -116,8 +116,8 @@ class HomeScreen(MDScreen):
         stats = self.get_recipe_stats()
 
         # Recipe count
-        recipe_stat = self.create_stat_item("#", "Recipes", str(stats["recipes"]))
-        category_stat = self.create_stat_item("@", "Categories", str(stats["categories"]))
+        recipe_stat = self.create_stat_item("", "Recipes", str(stats["recipes"]))
+        category_stat = self.create_stat_item("", "Categories", str(stats["categories"]))
 
         stats_grid.add_widget(recipe_stat)
         stats_grid.add_widget(category_stat)
@@ -165,7 +165,7 @@ class HomeScreen(MDScreen):
 
         # Title
         title = MDLabel(
-            text="🚀 Quick Actions",
+            text="Quick Actions",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",

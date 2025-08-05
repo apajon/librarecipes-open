@@ -3,19 +3,19 @@ Recipe List Screen for LibraRecipes Mobile App
 Shows all recipes in a scrollable list
 """
 
-from kivymd.uix.screen import MDScreen
-from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.label import MDLabel
-from kivymd.uix.card import MDCard
-from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle, MDTopAppBarLeadingButtonContainer, MDActionTopAppBarButton
-from kivymd.uix.scrollview import MDScrollView
-from kivymd.uix.list import MDList
-from kivymd.uix.button import MDIconButton
-from kivy.metrics import dp
 from kivy.app import App
+from kivy.metrics import dp
+from kivymd.uix.appbar import MDActionTopAppBarButton, MDTopAppBar, MDTopAppBarLeadingButtonContainer, MDTopAppBarTitle
+from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.button import MDIconButton
+from kivymd.uix.card import MDCard
+from kivymd.uix.label import MDLabel
+from kivymd.uix.list import MDList
+from kivymd.uix.screen import MDScreen
+from kivymd.uix.scrollview import MDScrollView
 
-from src.db import get_db_session
 from src.crud.recettes import list_recettes
+from src.db import get_db_session
 
 
 class RecipeListScreen(MDScreen):

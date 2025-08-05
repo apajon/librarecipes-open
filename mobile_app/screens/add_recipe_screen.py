@@ -5,6 +5,13 @@ Form to create new recipes with ingredients and steps
 
 from kivy.app import App
 from kivy.metrics import dp
+from kivymd.uix.appbar import (
+    MDActionTopAppBarButton,
+    MDTopAppBar,
+    MDTopAppBarLeadingButtonContainer,
+    MDTopAppBarTitle,
+    MDTopAppBarTrailingButtonContainer,
+)
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDIconButton
 from kivymd.uix.button.button import MDButtonText  # pour gérer le texte dans le bouton
@@ -24,13 +31,6 @@ from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.appbar import (
-    MDTopAppBar,
-    MDTopAppBarTitle,
-    MDTopAppBarLeadingButtonContainer,
-    MDTopAppBarTrailingButtonContainer,
-    MDActionTopAppBarButton,
-)
 
 from src.crud.recettes import create_recette
 from src.db import get_db_session

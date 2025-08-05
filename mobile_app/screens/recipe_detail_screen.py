@@ -4,8 +4,16 @@ Shows full recipe details with ingredients, steps, and photos
 """
 
 from typing import Optional
+
 from kivy.app import App
 from kivy.metrics import dp
+from kivymd.uix.appbar import (
+    MDActionTopAppBarButton,
+    MDTopAppBar,
+    MDTopAppBarLeadingButtonContainer,
+    MDTopAppBarTitle,
+    MDTopAppBarTrailingButtonContainer,
+)
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton
 from kivymd.uix.button.button import MDButtonText
@@ -17,13 +25,6 @@ from kivymd.uix.list import MDList
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
-from kivymd.uix.appbar import (
-    MDTopAppBar,
-    MDTopAppBarTitle,
-    MDTopAppBarLeadingButtonContainer,
-    MDTopAppBarTrailingButtonContainer,
-    MDActionTopAppBarButton,
-)
 
 from src.crud.recettes import delete_recette, get_recette_by_id
 from src.db import get_db_session

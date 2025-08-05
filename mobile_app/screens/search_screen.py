@@ -5,6 +5,7 @@ Advanced search and filtering for recipes
 
 from kivy.app import App
 from kivy.metrics import dp
+from kivymd.uix.appbar import MDActionTopAppBarButton, MDTopAppBar, MDTopAppBarLeadingButtonContainer, MDTopAppBarTitle
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton
 from kivymd.uix.button.button import MDButtonText
@@ -21,7 +22,6 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle, MDTopAppBarLeadingButtonContainer, MDActionTopAppBarButton
 
 from src.crud.recherche import IngredientsMode, rechercher_recettes
 from src.db import get_db_session
