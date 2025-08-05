@@ -102,7 +102,7 @@ class AddRecipeScreen(MDScreen):
 
         # Save button
         save_btn = MDButton(
-            children=[MDButtonText(text="💾 Save Recipe")],
+            children=[MDButtonText(text="Save Recipe")],
             md_bg_color=App.get_running_app().colors["primary"],
             size_hint_y=None,
             height=dp(50),
@@ -122,7 +122,7 @@ class AddRecipeScreen(MDScreen):
 
         # Section title
         title = MDLabel(
-            text="📝 Recipe Information",
+            text="Recipe Information",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
@@ -169,7 +169,7 @@ class AddRecipeScreen(MDScreen):
         # Section title with add button
         title_layout = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(40))
 
-        title = MDLabel(text="🧂 Ingredients", font_size=dp(18), bold=True, theme_text_color="Primary")
+        title = MDLabel(text="Ingredients", font_size=dp(18), bold=True, theme_text_color="Primary")
 
         add_ingredient_btn = MDIconButton(
             icon="plus",
@@ -199,7 +199,7 @@ class AddRecipeScreen(MDScreen):
         # Section title with add button
         title_layout = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(40))
 
-        title = MDLabel(text="📋 Preparation Steps", font_size=dp(18), bold=True, theme_text_color="Primary")
+        title = MDLabel(text="Preparation Steps", font_size=dp(18), bold=True, theme_text_color="Primary")
 
         add_step_btn = MDIconButton(
             icon="plus",
@@ -229,7 +229,7 @@ class AddRecipeScreen(MDScreen):
         # Section title with camera button
         title_layout = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(40))
 
-        title = MDLabel(text="📷 Recipe Photos", font_size=dp(18), bold=True, theme_text_color="Primary")
+        title = MDLabel(text="Recipe Photos", font_size=dp(18), bold=True, theme_text_color="Primary")
 
         camera_btn = MDIconButton(
             icon="camera",
@@ -410,7 +410,7 @@ class AddRecipeScreen(MDScreen):
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.take_photo(),
-            children=[MDButtonText(text="📷 Take Photo")],
+            children=[MDButtonText(text="Take Photo")],
         )
 
         gallery_btn = MDButton(
@@ -418,7 +418,7 @@ class AddRecipeScreen(MDScreen):
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.select_from_gallery(),
-            children=[MDButtonText(text="🖼️ Choose from Gallery")],
+            children=[MDButtonText(text="Choose from Gallery")],
         )
 
         content.add_widget(camera_btn)
