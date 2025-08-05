@@ -7,7 +7,6 @@ from kivy.app import App
 from kivy.metrics import dp
 from kivymd.uix.appbar import MDActionTopAppBarButton, MDTopAppBar, MDTopAppBarLeadingButtonContainer, MDTopAppBarTitle
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDIconButton
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import MDList
@@ -118,9 +117,9 @@ class RecipeListScreen(MDScreen):
         # Recipe details
         details = []
         if recipe.preparation:
-            details.append(f"⏱️ {recipe.preparation}min")
+            details.append(f"{recipe.preparation}min")
         if recipe.portions:
-            details.append(f"👥 {recipe.portions} portions")
+            details.append(f"{recipe.portions} portions")
 
         details_text = " | ".join(details) if details else "No timing info"
 
@@ -135,7 +134,7 @@ class RecipeListScreen(MDScreen):
                 categories_text += "..."
 
             categories_label = MDLabel(
-                text=f"🏷️ {categories_text}",
+                text=f"Tags: {categories_text}",
                 font_size=dp(11),
                 theme_text_color="Secondary",
                 size_hint_y=None,
@@ -150,17 +149,7 @@ class RecipeListScreen(MDScreen):
         if recipe.categories:
             info_layout.add_widget(categories_label)
 
-        # Arrow icon
-        arrow_icon = MDIconButton(
-            icon="chevron-right",
-            theme_icon_color="Custom",
-            icon_color=App.get_running_app().colors["primary"],
-            size_hint_x=None,
-            width=dp(40),
-        )
-
         layout.add_widget(info_layout)
-        layout.add_widget(arrow_icon)
         card.add_widget(layout)
 
         return card
