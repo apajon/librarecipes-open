@@ -6,7 +6,7 @@ authors = [
     {name = "Adrien PAJON",email = "adrien.pajon@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<4.0"
 dependencies = [
     "streamlit (>=1.46.1,<2.0.0)",
     "sqlalchemy (>=2.0.41,<3.0.0)",
@@ -33,11 +33,11 @@ bump2version = "^1.0.1"
 
 [tool.poetry.group.mobile_app.dependencies]
 kivy = "^2.3.1"
-kivymd = "^1.2.0"
 buildozer = "^1.5.0"
 sqlalchemy = "^2.0.42"
 pillow = "^11.3.0"
 plyer = "^2.1.0"
+kivymd = {git = "https://github.com/kivymd/KivyMD.git", rev = "master"}
 
 
 
