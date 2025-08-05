@@ -17,6 +17,7 @@ A beautiful, offline Android recipe notebook app built with KivyMD and Python.
 ## 🚀 Features
 
 ### ✅ Core Recipe Management
+
 - Add new recipes with ingredients and preparation steps
 - View detailed recipe information with beautiful Material Design UI
 - Edit and delete recipes
@@ -24,16 +25,19 @@ A beautiful, offline Android recipe notebook app built with KivyMD and Python.
 - Step-by-step preparation instructions
 
 ### ✅ Recipe Organization
+
 - Categories and tags for organization
 - Recipe statistics and quick overview
 - Chronological recipe list
 
 ### ✅ Search & Discovery
+
 - Advanced search by name, ingredients, categories, tags
 - Flexible ingredient matching (any/all ingredients)
 - Real-time search results
 
 ### 🔄 Coming Soon
+
 - Photo capture and gallery integration
 - Recipe sharing and export
 - Offline sync and backup
@@ -44,40 +48,47 @@ A beautiful, offline Android recipe notebook app built with KivyMD and Python.
 ### Desktop Development
 
 1. **Install Dependencies**:
-   ```bash
-   pip install -r mobile_requirements.txt
+
+```bash
+pip install -r mobile_requirements.txt
    ```
 
 2. **Run the App**:
-   ```bash
-   python run_mobile.py
-   ```
+
+```bash
+python run_mobile.py
+```
 
 ### Android APK Build
 
-1. **Install Buildozer**:
-   ```bash
-   pip install buildozer
-   ```
+1. **Install Buildozer**
 
-2. **Initialize Buildozer** (first time only):
-   ```bash
-   buildozer init
-   ```
+```bash
+pip install buildozer
+```
 
-3. **Build APK**:
-   ```bash
-   buildozer android debug
-   ```
+1. **Initialize Buildozer** (first time only):
 
-4. **Install on Device**:
-   ```bash
-   buildozer android deploy
-   ```
+```bash
+buildozer init
+```
+
+2. **Build APK**:
+
+```bash
+buildozer android debug
+```
+
+3. **Install on Device**:
+
+```bash
+buildozer android deploy
+```
 
 ## 🗄️ Database
 
 The app uses SQLite database with the same schema as the original Streamlit app:
+
 - **Recipes**: Core recipe information
 - **Ingredients**: Recipe ingredients with quantities
 - **Steps**: Preparation instructions
@@ -87,7 +98,7 @@ The app uses SQLite database with the same schema as the original Streamlit app:
 
 ## 📂 Project Structure
 
-```
+```text
 mobile_app/
 ├── main.py                 # Main application entry point
 ├── screens/                # UI screens
@@ -118,6 +129,7 @@ src/                        # Shared backend (from original app)
 ## 🎯 Offline First
 
 LibraRecipes is designed to work completely offline:
+
 - Local SQLite database
 - Local photo storage
 - No internet connection required
@@ -126,6 +138,7 @@ LibraRecipes is designed to work completely offline:
 ## 🔐 Permissions
 
 The app requests minimal permissions:
+
 - **Camera**: For recipe photo capture
 - **Storage**: For saving photos and database
 
