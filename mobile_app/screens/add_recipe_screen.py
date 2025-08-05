@@ -6,19 +6,31 @@ Form to create new recipes with ingredients and steps
 from kivy.app import App
 from kivy.metrics import dp
 from kivymd.uix.boxlayout import MDBoxLayout
-from kivymd.uix.button import MDButton, MDFlatButton, MDIconButton
+from kivymd.uix.button import MDButton, MDIconButton
 from kivymd.uix.button.button import MDButtonText  # pour gérer le texte dans le bouton
 from kivymd.uix.card import MDCard
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import MDList, ThreeLineListItem
+from kivymd.uix.list import (
+    MDList,
+    MDListItem,
+    MDListItemHeadlineText,
+    MDListItemSupportingText,
+    MDListItemTertiaryText,
+)
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
-from kivymd.uix.snackbar import Snackbar
+from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.toolbar import MDTopAppBar
+from kivymd.uix.appbar import (
+    MDTopAppBar,
+    MDTopAppBarTitle,
+    MDTopAppBarLeadingButtonContainer,
+    MDTopAppBarTrailingButtonContainer,
+    MDActionTopAppBarButton,
+)
 
 from src.crud.recettes import create_recette
 from src.db import get_db_session
@@ -28,6 +40,11 @@ try:
     from utils.photo_manager import PhotoManager
 except ImportError:
     PhotoManager = None
+
+
+def show_snackbar(text: str):
+    """Helper function to show snackbar with KivyMD 2.0 syntax"""
+    MDSnackbar(MDSnackbarText(text=text)).open()
 
 
 class AddRecipeScreen(MDScreen):
@@ -52,11 +69,14 @@ class AddRecipeScreen(MDScreen):
 
         # App bar
         app_bar = MDTopAppBar(
-            title="Add New Recipe",
+            MDTopAppBarLeadingButtonContainer(
+                MDActionTopAppBarButton(icon="arrow-left", on_release=lambda x: self.go_back())
+            ),
+            MDTopAppBarTitle(text="Add New Recipe"),
+            MDTopAppBarTrailingButtonContainer(
+                MDActionTopAppBarButton(icon="content-save", on_release=lambda x: self.save_recipe())
+            ),
             md_bg_color=App.get_running_app().colors["primary"],
-            specific_text_color="white",
-            left_action_items=[["arrow-left", lambda x: self.go_back()]],
-            right_action_items=[["content-save", lambda x: self.save_recipe()]],
         )
         main_layout.add_widget(app_bar)
 
@@ -84,8 +104,6 @@ class AddRecipeScreen(MDScreen):
         save_btn = MDButton(
             children=[MDButtonText(text="💾 Save Recipe")],
             md_bg_color=App.get_running_app().colors["primary"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(50),
             on_release=lambda x: self.save_recipe(),
@@ -267,8 +285,6 @@ class AddRecipeScreen(MDScreen):
                 ),
                 MDButton(
                     md_bg_color=App.get_running_app().colors["primary"],
-                    theme_text_color="Custom",
-                    text_color="white",
                     on_release=lambda x: self.confirm_add_ingredient(
                         name_field.text, quantity_field.text, unit_field.text, essential_checkbox.active
                     ),
@@ -281,7 +297,7 @@ class AddRecipeScreen(MDScreen):
     def confirm_add_ingredient(self, name, quantity, unit, essential):
         """Add ingredient to list"""
         if not name.strip():
-            Snackbar(text="Please enter ingredient name").open()
+            show_snackbar("Please enter ingredient name")
             return
 
         ingredient = {
@@ -315,8 +331,6 @@ class AddRecipeScreen(MDScreen):
                 ),
                 MDButton(
                     md_bg_color=App.get_running_app().colors["primary"],
-                    theme_text_color="Custom",
-                    text_color="white",
                     on_release=lambda x: self.confirm_add_step(step_field.text),
                     children=[MDButtonText(text="Add")],
                 ),
@@ -327,7 +341,7 @@ class AddRecipeScreen(MDScreen):
     def confirm_add_step(self, description):
         """Add step to list"""
         if not description.strip():
-            Snackbar(text="Please enter step description").open()
+            show_snackbar("Please enter step description")
             return
 
         self.steps.append(description.strip())
@@ -348,10 +362,10 @@ class AddRecipeScreen(MDScreen):
 
             secondary_text = "Essential" if ingredient["indispensable"] else "Optional"
 
-            item = ThreeLineListItem(
-                text=text,
-                secondary_text=secondary_text,
-                tertiary_text=f"Ingredient {i+1}",  # noqa E226
+            item = MDListItem(
+                MDListItemHeadlineText(text=text),
+                MDListItemSupportingText(text=secondary_text),
+                MDListItemTertiaryText(text=f"Ingredient {i+1}"),  # noqa E226
                 on_release=lambda x, idx=i: self.remove_ingredient(idx),
             )
 
@@ -362,10 +376,10 @@ class AddRecipeScreen(MDScreen):
         self.steps_list.clear_widgets()
 
         for i, step in enumerate(self.steps):
-            item = ThreeLineListItem(
-                text=f"Step {i+1}",  # noqa E226
-                secondary_text=step[:50] + "..." if len(step) > 50 else step,
-                tertiary_text="Tap to remove",
+            item = MDListItem(
+                MDListItemHeadlineText(text=f"Step {i+1}"),  # noqa E226
+                MDListItemSupportingText(text=step[:50] + "..." if len(step) > 50 else step),
+                MDListItemTertiaryText(text="Tap to remove"),
                 on_release=lambda x, idx=i: self.remove_step(idx),
             )
 
@@ -386,15 +400,13 @@ class AddRecipeScreen(MDScreen):
     def show_photo_options(self):
         """Show photo capture/selection options"""
         if not self.photo_manager:
-            Snackbar(text="Photo features not available").open()
+            show_snackbar("Photo features not available")
             return
 
         content = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
 
         camera_btn = MDButton(
             md_bg_color=App.get_running_app().colors["primary"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.take_photo(),
@@ -403,8 +415,6 @@ class AddRecipeScreen(MDScreen):
 
         gallery_btn = MDButton(
             md_bg_color=App.get_running_app().colors["navy"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.select_from_gallery(),
@@ -418,7 +428,12 @@ class AddRecipeScreen(MDScreen):
             title="Add Recipe Photo",
             type="custom",
             content_cls=content,
-            buttons=[MDFlatButton(text="Cancel", on_release=lambda x: self.dialog.dismiss())],
+            buttons=[
+                MDButton(
+                    on_release=lambda x: self.dialog.dismiss() if self.dialog else None,
+                    children=[MDButtonText(text="Cancel")],
+                )
+            ],
         )
         self.dialog.open()
 
@@ -442,13 +457,13 @@ class AddRecipeScreen(MDScreen):
     def on_photo_captured(self, photo_path, error):
         """Handle photo capture result"""
         if error:
-            Snackbar(text=f"Photo error: {error}").open()
+            show_snackbar(f"Photo error: {error}")
             return
 
         if photo_path:
             self.photos.append({"chemin": photo_path, "categorie": "recipe"})
             self.refresh_photos_grid()
-            Snackbar(text="Photo added successfully!").open()
+            show_snackbar("Photo added successfully!")
 
     def refresh_photos_grid(self):
         """Refresh photos display"""
@@ -487,21 +502,21 @@ class AddRecipeScreen(MDScreen):
             if self.photo_manager:
                 self.photo_manager.delete_photo(photo["chemin"])
             self.refresh_photos_grid()
-            Snackbar(text="Photo removed").open()
+            show_snackbar("Photo removed")
 
     def save_recipe(self):
         """Save the recipe to database"""
         # Validate required fields
         if not self.recipe_name.text.strip():
-            Snackbar(text="Please enter recipe name").open()
+            show_snackbar("Please enter recipe name")
             return
 
         if not self.ingredients:
-            Snackbar(text="Please add at least one ingredient").open()
+            show_snackbar("Please add at least one ingredient")
             return
 
         if not self.steps:
-            Snackbar(text="Please add at least one preparation step").open()
+            show_snackbar("Please add at least one preparation step")
             return
 
         try:
@@ -523,7 +538,7 @@ class AddRecipeScreen(MDScreen):
             with get_db_session() as session:
                 new_recipe = create_recette(session, recipe_data)
 
-            Snackbar(text=f"Recipe '{new_recipe.nom}' saved successfully!").open()
+            show_snackbar(f"Recipe '{new_recipe.nom}' saved successfully!")
 
             # Clear form and go back
             self.clear_form()
@@ -531,7 +546,7 @@ class AddRecipeScreen(MDScreen):
 
         except Exception as e:
             print(f"Error saving recipe: {e}")
-            Snackbar(text="Error saving recipe. Please try again.").open()
+            show_snackbar("Error saving recipe. Please try again.")
 
     def clear_form(self):
         """Clear all form fields"""

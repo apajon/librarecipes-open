@@ -10,12 +10,18 @@ from kivymd.uix.button import MDButton
 from kivymd.uix.button.button import MDButtonText
 from kivymd.uix.card import MDCard
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import MDList, ThreeLineListItem
+from kivymd.uix.list import (
+    MDList,
+    MDListItem,
+    MDListItemHeadlineText,
+    MDListItemSupportingText,
+    MDListItemTertiaryText,
+)
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
 from kivymd.uix.textfield import MDTextField
-from kivymd.uix.toolbar import MDTopAppBar
+from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle, MDTopAppBarLeadingButtonContainer, MDActionTopAppBarButton
 
 from src.crud.recherche import IngredientsMode, rechercher_recettes
 from src.db import get_db_session
@@ -36,10 +42,11 @@ class SearchScreen(MDScreen):
 
         # App bar
         app_bar = MDTopAppBar(
-            title="Search Recipes",
+            MDTopAppBarLeadingButtonContainer(
+                MDActionTopAppBarButton(icon="arrow-left", on_release=lambda x: self.go_back())
+            ),
+            MDTopAppBarTitle(text="Search Recipes"),
             md_bg_color=App.get_running_app().colors["primary"],
-            specific_text_color="white",
-            left_action_items=[["arrow-left", lambda x: self.go_back()]],
         )
         main_layout.add_widget(app_bar)
 
@@ -111,8 +118,6 @@ class SearchScreen(MDScreen):
         # Search button
         search_btn = MDButton(
             md_bg_color=App.get_running_app().colors["primary"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.perform_search(),
@@ -182,9 +187,9 @@ class SearchScreen(MDScreen):
 
         except Exception as e:
             print(f"Search error: {e}")
-            from kivymd.uix.snackbar import Snackbar
+            from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
 
-            Snackbar(text="Search error. Please try again.").open()
+            MDSnackbar(MDSnackbarText(text="Search error. Please try again.")).open()
 
     def update_results_display(self):
         """Update the results display with search results"""
@@ -227,10 +232,10 @@ class SearchScreen(MDScreen):
             if len(recipe.categories) > 2:
                 tertiary_text += "..."
 
-        item = ThreeLineListItem(
-            text=primary_text,
-            secondary_text=secondary_text,
-            tertiary_text=tertiary_text,
+        item = MDListItem(
+            MDListItemHeadlineText(text=primary_text),
+            MDListItemSupportingText(text=secondary_text),
+            MDListItemTertiaryText(text=tertiary_text),
             on_release=lambda x: self.view_recipe(recipe.id),
         )
 

@@ -16,11 +16,22 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.list import MDList
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
-from kivymd.uix.snackbar import Snackbar
-from kivymd.uix.toolbar import MDTopAppBar
+from kivymd.uix.snackbar import MDSnackbar, MDSnackbarText
+from kivymd.uix.appbar import (
+    MDTopAppBar,
+    MDTopAppBarTitle,
+    MDTopAppBarLeadingButtonContainer,
+    MDTopAppBarTrailingButtonContainer,
+    MDActionTopAppBarButton,
+)
 
 from src.crud.recettes import delete_recette, get_recette_by_id
 from src.db import get_db_session
+
+
+def show_snackbar(text: str):
+    """Helper function to show snackbar with KivyMD 2.0 syntax"""
+    MDSnackbar(MDSnackbarText(text=text)).open()
 
 
 class RecipeDetailScreen(MDScreen):
@@ -38,11 +49,14 @@ class RecipeDetailScreen(MDScreen):
 
         # App bar
         self.app_bar = MDTopAppBar(
-            title="Recipe Details",
+            MDTopAppBarLeadingButtonContainer(
+                MDActionTopAppBarButton(icon="arrow-left", on_release=lambda x: self.go_back())
+            ),
+            MDTopAppBarTitle(text="Recipe Details"),
+            MDTopAppBarTrailingButtonContainer(
+                MDActionTopAppBarButton(icon="delete", on_release=lambda x: self.delete_recipe())
+            ),
             md_bg_color=App.get_running_app().colors["primary"],
-            specific_text_color="white",
-            left_action_items=[["arrow-left", lambda x: self.go_back()]],
-            right_action_items=[["delete", lambda x: self.delete_recipe()]],
         )
         self.main_layout.add_widget(self.app_bar)
 
@@ -415,13 +429,13 @@ class RecipeDetailScreen(MDScreen):
                 success = delete_recette(session, self.recipe.id)
 
             if success:
-                Snackbar(text=f"Recipe '{self.recipe.nom if self.recipe else 'Unknown'}' deleted").open()
+                show_snackbar(f"Recipe '{self.recipe.nom if self.recipe else 'Unknown'}' deleted")
                 self.manager.current = "recipe_list"
             else:
-                Snackbar(text="Error deleting recipe").open()
+                show_snackbar("Error deleting recipe")
         except Exception as e:
             print(f"Error deleting recipe: {e}")
-            Snackbar(text="Error deleting recipe").open()
+            show_snackbar("Error deleting recipe")
 
     def go_back(self):
         """Go back to recipe list"""

@@ -12,7 +12,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.toolbar import MDTopAppBar
+from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle
 
 from src.crud.metadata import get_all_categories
 from src.crud.recettes import list_recettes
@@ -33,7 +33,7 @@ class HomeScreen(MDScreen):
 
         # App bar
         app_bar = MDTopAppBar(
-            title="LibraRecipes", md_bg_color=App.get_running_app().colors["primary"], specific_text_color="white"
+            MDTopAppBarTitle(text="LibraRecipes"), md_bg_color=App.get_running_app().colors["primary"]
         )
         main_layout.add_widget(app_bar)
 
@@ -186,8 +186,6 @@ class HomeScreen(MDScreen):
         # Add recipe button
         add_btn = MDButton(
             md_bg_color=App.get_running_app().colors["primary"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("add_recipe"),
@@ -197,8 +195,6 @@ class HomeScreen(MDScreen):
         # Browse recipes button
         browse_btn = MDButton(
             md_bg_color=App.get_running_app().colors["navy"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("recipe_list"),
@@ -208,8 +204,6 @@ class HomeScreen(MDScreen):
         # Search button
         search_btn = MDButton(
             md_bg_color=App.get_running_app().colors["dark_curry"],
-            theme_text_color="Custom",
-            text_color="white",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("search"),
