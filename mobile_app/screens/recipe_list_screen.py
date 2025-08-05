@@ -50,7 +50,7 @@ class RecipeListScreen(MDScreen):
         """Create scrollable list of recipes"""
         scroll = MDScrollView()
 
-        list_widget = MDList()
+        list_widget = MDList(spacing=dp(15))
 
         # Load recipes from database
         recipes = self.load_recipes()
