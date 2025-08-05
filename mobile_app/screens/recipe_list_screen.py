@@ -90,13 +90,18 @@ class RecipeListScreen(MDScreen):
 
     def create_recipe_item(self, recipe):
         """Create a single recipe list item"""
+        # Calculate height based on content
+        base_height = dp(80)  # Base height for title + details
+        if recipe.categories:
+            base_height += dp(25)  # Extra height for categories line
+
         card = MDCard(
             padding=dp(15),
             spacing=dp(10),
             elevation=2,
             radius=[dp(8)],
             size_hint_y=None,
-            height=dp(80),
+            height=base_height,
             on_release=lambda x: self.view_recipe(recipe.id),
         )
 
@@ -136,10 +141,14 @@ class RecipeListScreen(MDScreen):
                 size_hint_y=None,
                 height=dp(18),
             )
-            info_layout.add_widget(categories_label)
 
+        # Add widgets in correct order: name, details, then categories
         info_layout.add_widget(name_label)
         info_layout.add_widget(details_label)
+
+        # Add categories last if they exist
+        if recipe.categories:
+            info_layout.add_widget(categories_label)
 
         # Arrow icon
         arrow_icon = MDIconButton(
