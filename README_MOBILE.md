@@ -67,19 +67,19 @@ python run_mobile.py
 pip install buildozer
 ```
 
-1. **Initialize Buildozer** (first time only):
+2. **Initialize Buildozer** (first time only):
 
 ```bash
 buildozer init
 ```
 
-2. **Build APK**:
+3. **Build APK**:
 
 ```bash
 buildozer android debug
 ```
 
-3. **Install on Device**:
+4. **Install on Device**:
 
 ```bash
 buildozer android deploy
