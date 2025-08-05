@@ -3,16 +3,15 @@ Home Screen for LibraRecipes Mobile App
 Main dashboard with quick stats and navigation
 """
 
-from kivy.app import App
 from kivy.metrics import dp
+from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton
-from kivymd.uix.button.button import MDButtonText
+from kivymd.uix.button.button import MDButtonIcon, MDButtonText
 from kivymd.uix.card import MDCard
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
-from kivymd.uix.appbar import MDTopAppBar, MDTopAppBarTitle
 
 from src.crud.metadata import get_all_categories
 from src.crud.recettes import list_recettes
@@ -32,9 +31,7 @@ class HomeScreen(MDScreen):
         main_layout = MDBoxLayout(orientation="vertical", spacing=dp(16), padding=dp(16))
 
         # App bar
-        app_bar = MDTopAppBar(
-            MDTopAppBarTitle(text="LibraRecipes"), md_bg_color=App.get_running_app().colors["primary"]
-        )
+        app_bar = MDTopAppBar(MDTopAppBarTitle(text="LibraRecipes"))
         main_layout.add_widget(app_bar)
 
         # Content area
@@ -58,7 +55,6 @@ class HomeScreen(MDScreen):
     def create_welcome_card(self):
         """Create welcome card with app branding"""
         card = MDCard(
-            md_bg_color=App.get_running_app().colors["secondary_peach"],
             padding=dp(20),
             spacing=dp(10),
             elevation=2,
@@ -74,8 +70,7 @@ class HomeScreen(MDScreen):
             text="LibraRecipes",
             font_size=dp(28),
             bold=True,
-            theme_text_color="Custom",
-            text_color=App.get_running_app().colors["primary"],
+            theme_text_color="Primary",
             halign="center",
             size_hint_y=None,
             height=dp(40),
@@ -85,8 +80,7 @@ class HomeScreen(MDScreen):
         slogan = MDLabel(
             text="The recipe notebook you will never lose.",
             font_size=dp(16),
-            theme_text_color="Custom",
-            text_color=App.get_running_app().colors["dark_curry"],
+            theme_text_color="Secondary",
             halign="center",
             italic=True,
             size_hint_y=None,
@@ -122,8 +116,8 @@ class HomeScreen(MDScreen):
         stats = self.get_recipe_stats()
 
         # Recipe count
-        recipe_stat = self.create_stat_item("🍽️", "Recipes", str(stats["recipes"]))
-        category_stat = self.create_stat_item("🏷️", "Categories", str(stats["categories"]))
+        recipe_stat = self.create_stat_item("#", "Recipes", str(stats["recipes"]))
+        category_stat = self.create_stat_item("@", "Categories", str(stats["categories"]))
 
         stats_grid.add_widget(recipe_stat)
         stats_grid.add_widget(category_stat)
@@ -147,8 +141,7 @@ class HomeScreen(MDScreen):
             text=value,
             font_size=dp(24),
             bold=True,
-            theme_text_color="Custom",
-            text_color=App.get_running_app().colors["primary"],
+            theme_text_color="Primary",
         )
 
         top_layout.add_widget(icon_label)
@@ -185,29 +178,32 @@ class HomeScreen(MDScreen):
 
         # Add recipe button
         add_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["primary"],
+            MDButtonIcon(icon="plus"),
+            MDButtonText(text="Add New Recipe"),
+            style="filled",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("add_recipe"),
-            children=[MDButtonText(text="➕ Add New Recipe")],
         )
 
         # Browse recipes button
         browse_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["navy"],
+            MDButtonIcon(icon="book-open-variant"),
+            MDButtonText(text="Browse Recipes"),
+            style="filled",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("recipe_list"),
-            children=[MDButtonText(text="📚 Browse Recipes")],
         )
 
         # Search button
         search_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["dark_curry"],
+            MDButtonIcon(icon="magnify"),
+            MDButtonText(text="Search Recipes"),
+            style="filled",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.navigate_to_screen("search"),
-            children=[MDButtonText(text="🔍 Search Recipes")],
         )
 
         actions_layout.add_widget(add_btn)
