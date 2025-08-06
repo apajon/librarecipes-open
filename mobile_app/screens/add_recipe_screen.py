@@ -3,7 +3,6 @@ Add Recipe Screen for LibraRecipes Mobile App
 Form to create new recipes with ingredients and steps
 """
 
-from kivy.app import App
 from kivy.metrics import dp
 from kivymd.uix.appbar import (
     MDActionTopAppBarButton,
@@ -76,7 +75,6 @@ class AddRecipeScreen(MDScreen):
             MDTopAppBarTrailingButtonContainer(
                 MDActionTopAppBarButton(icon="content-save", on_release=lambda x: self.save_recipe())
             ),
-            md_bg_color=App.get_running_app().colors["primary"],
         )
         main_layout.add_widget(app_bar)
 
@@ -103,7 +101,7 @@ class AddRecipeScreen(MDScreen):
         # Save button
         save_btn = MDButton(
             children=[MDButtonText(text="Save Recipe")],
-            md_bg_color=App.get_running_app().colors["primary"],
+            style="filled",
             size_hint_y=None,
             height=dp(50),
             on_release=lambda x: self.save_recipe(),
@@ -116,9 +114,9 @@ class AddRecipeScreen(MDScreen):
 
     def create_basic_info_section(self):
         """Create basic recipe information form"""
-        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(280))
+        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], adaptive_height=True)
 
-        layout = MDBoxLayout(orientation="vertical", spacing=dp(12))
+        layout = MDBoxLayout(orientation="vertical", spacing=dp(8), adaptive_height=True)
 
         # Section title
         title = MDLabel(
@@ -126,35 +124,103 @@ class AddRecipeScreen(MDScreen):
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
-            size_hint_y=None,
-            height=dp(30),
+            adaptive_height=True,
+            markup=True,
         )
 
         # Recipe name
-        self.recipe_name = MDTextField(hint_text="Recipe name*", required=True, size_hint_y=None, height=dp(40))
+        name_label = MDLabel(
+            text="Nom de la recette*", theme_text_color="Primary", adaptive_height=True, text_size=(None, None)
+        )
 
-        # Time and portions in grid
-        time_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(40))
+        self.recipe_name = MDTextField(hint_text="Recipe name*", mode="outlined", size_hint_y=None, height=dp(56))
 
-        self.prep_time = MDTextField(hint_text="Prep time (min)", input_filter="int", size_hint_x=0.33)
+        # Time and portions in grid with individual labels
+        time_labels_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), adaptive_height=True)
 
-        self.cook_time = MDTextField(hint_text="Cook time (min)", input_filter="int", size_hint_x=0.33)
+        prep_label = MDLabel(
+            text="Prep. (min)",
+            theme_text_color="Secondary",
+            font_size=dp(12),
+            size_hint_x=0.33,
+            halign="center",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
 
-        self.portions = MDTextField(hint_text="Portions", input_filter="int", size_hint_x=0.33)
+        cook_label = MDLabel(
+            text="Cuisson (min)",
+            theme_text_color="Secondary",
+            font_size=dp(12),
+            size_hint_x=0.33,
+            halign="center",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
+
+        portions_label = MDLabel(
+            text="Portions",
+            theme_text_color="Secondary",
+            font_size=dp(12),
+            size_hint_x=0.33,
+            halign="center",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
+
+        time_labels_layout.add_widget(prep_label)
+        time_labels_layout.add_widget(cook_label)
+        time_labels_layout.add_widget(portions_label)
+
+        time_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(56))
+
+        self.prep_time = MDTextField(
+            hint_text="Ex: 15", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
+        )
+
+        self.cook_time = MDTextField(
+            hint_text="Ex: 30", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
+        )
+
+        self.portions = MDTextField(
+            hint_text="Ex: 4", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
+        )
 
         time_layout.add_widget(self.prep_time)
         time_layout.add_widget(self.cook_time)
         time_layout.add_widget(self.portions)
 
         # Categories and tags
-        self.categories = MDTextField(hint_text="Categories (comma separated)", size_hint_y=None, height=dp(40))
+        categories_label = MDLabel(
+            text="Catégories (séparées par des virgules)",
+            theme_text_color="Primary",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
 
-        self.tags = MDTextField(hint_text="Tags (comma separated)", size_hint_y=None, height=dp(40))
+        self.categories = MDTextField(
+            hint_text="Ex: plat principal, végétarien", mode="outlined", size_hint_y=None, height=dp(56)
+        )
+
+        tags_label = MDLabel(
+            text="Tags (séparés par des virgules)",
+            theme_text_color="Primary",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
+
+        self.tags = MDTextField(
+            hint_text="Ex: facile, rapide, économique", mode="outlined", size_hint_y=None, height=dp(56)
+        )
 
         layout.add_widget(title)
+        layout.add_widget(name_label)
         layout.add_widget(self.recipe_name)
+        layout.add_widget(time_labels_layout)
         layout.add_widget(time_layout)
+        layout.add_widget(categories_label)
         layout.add_widget(self.categories)
+        layout.add_widget(tags_label)
         layout.add_widget(self.tags)
 
         card.add_widget(layout)
@@ -173,8 +239,7 @@ class AddRecipeScreen(MDScreen):
 
         add_ingredient_btn = MDIconButton(
             icon="plus",
-            theme_icon_color="Custom",
-            icon_color=App.get_running_app().colors["primary"],
+            theme_icon_color="Primary",
             on_release=lambda x: self.add_ingredient_dialog(),
         )
 
@@ -203,8 +268,7 @@ class AddRecipeScreen(MDScreen):
 
         add_step_btn = MDIconButton(
             icon="plus",
-            theme_icon_color="Custom",
-            icon_color=App.get_running_app().colors["primary"],
+            theme_icon_color="Primary",
             on_release=lambda x: self.add_step_dialog(),
         )
 
@@ -233,8 +297,7 @@ class AddRecipeScreen(MDScreen):
 
         camera_btn = MDIconButton(
             icon="camera",
-            theme_icon_color="Custom",
-            icon_color=App.get_running_app().colors["primary"],
+            theme_icon_color="Primary",
             on_release=lambda x: self.show_photo_options(),
         )
 
@@ -284,7 +347,7 @@ class AddRecipeScreen(MDScreen):
                     children=[MDButtonText(text="Cancel")],
                 ),
                 MDButton(
-                    md_bg_color=App.get_running_app().colors["primary"],
+                    style="filled",
                     on_release=lambda x: self.confirm_add_ingredient(
                         name_field.text, quantity_field.text, unit_field.text, essential_checkbox.active
                     ),
@@ -330,7 +393,7 @@ class AddRecipeScreen(MDScreen):
                     children=[MDButtonText(text="Cancel")],
                 ),
                 MDButton(
-                    md_bg_color=App.get_running_app().colors["primary"],
+                    style="filled",
                     on_release=lambda x: self.confirm_add_step(step_field.text),
                     children=[MDButtonText(text="Add")],
                 ),
@@ -406,7 +469,7 @@ class AddRecipeScreen(MDScreen):
         content = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
 
         camera_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["primary"],
+            style="filled",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.take_photo(),
@@ -414,7 +477,7 @@ class AddRecipeScreen(MDScreen):
         )
 
         gallery_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["navy"],
+            style="tonal",
             size_hint_y=None,
             height=dp(40),
             on_release=lambda x: self.select_from_gallery(),
