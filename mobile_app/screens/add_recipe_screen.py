@@ -638,11 +638,12 @@ class AddRecipeScreen(MDScreen):
         self.ingredients_list.clear_widgets()
 
         for i, ingredient in enumerate(self.ingredients):
-            text = ingredient["nom"]
+            name_text = ingredient["nom"]
+            quantity_text = ""
             if ingredient["quantite"]:
-                text += f" - {ingredient['quantite']}"
-            if ingredient["unite"]:
-                text += f" {ingredient['unite']}"
+                quantity_text = ingredient["quantite"]
+                if ingredient["unite"]:
+                    quantity_text += f" {ingredient['unite']}"
 
             # Build secondary text with essential status
             if ingredient["indispensable"]:
@@ -669,19 +670,32 @@ class AddRecipeScreen(MDScreen):
                 MDBoxLayout(
                     MDBoxLayout(
                         MDLabel(
-                            text=text,
+                            text=name_text,
                             theme_text_color="Primary",
                             font_style="Body",
+                            bold=True,
                             size_hint_y=None,
-                            height=dp(32),
+                            height=dp(28),
                             adaptive_height=True,
+                        ),
+                        (
+                            MDLabel(
+                                text=quantity_text,
+                                theme_text_color="Primary",
+                                font_style="Body",
+                                size_hint_y=None,
+                                height=dp(20) if quantity_text else dp(0),
+                                adaptive_height=True,
+                            )
+                            if quantity_text
+                            else MDLabel(height=dp(0))
                         ),
                         MDLabel(
                             text=secondary_text,
                             theme_text_color="Secondary",
                             font_style="Body",
                             size_hint_y=None,
-                            height=dp(24),
+                            height=dp(20),
                             adaptive_height=True,
                         ),
                         MDLabel(
