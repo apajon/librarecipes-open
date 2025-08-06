@@ -197,10 +197,11 @@ class AddRecipeScreen(MDScreen):
 
         # Save button
         save_btn = MDButton(
-            children=[MDButtonText(text="Save Recipe")],
+            MDButtonText(text="💾 Sauvegarder la recette"),
             style="filled",
             size_hint_y=None,
-            height=dp(50),
+            height=dp(56),
+            md_bg_color="#4CAF50",  # Green color
             on_release=lambda x: self.save_recipe(),
         )
         content.add_widget(save_btn)
