@@ -68,91 +68,163 @@ class SearchScreen(MDScreen):
 
     def create_search_form(self):
         """Create search form with filters"""
-        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(300))
+        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], adaptive_height=True)
 
-        layout = MDBoxLayout(orientation="vertical", spacing=dp(12))
+        layout = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
 
         # Title
         title = MDLabel(
-            text="🔍 Search Filters",
+            text="🔍 Recherche de recettes",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
             size_hint_y=None,
             height=dp(30),
         )
+        layout.add_widget(title)
 
-        # Recipe name search
-        self.name_field = MDTextField(hint_text="Recipe name...", size_hint_y=None, height=dp(40))
+        # Recipe name section
+        name_section = self.create_search_section("Nom de la recette", "Ex: Pasta, Gâteau au chocolat...")
+        self.name_field = name_section["field"]
+        layout.add_widget(name_section["widget"])
 
-        # Ingredients search
-        self.ingredients_field = MDTextField(
-            hint_text="Ingredients (comma separated)...", size_hint_y=None, height=dp(40)
-        )
+        # Ingredients section
+        ingredients_section = self.create_ingredients_section()
+        layout.add_widget(ingredients_section)
 
-        # Ingredients mode
-        ingredients_mode_layout = MDBoxLayout(
-            orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(40)
-        )
+        # Categories section
+        categories_section = self.create_search_section("Catégories", "Ex: Dessert, Plat principal, Entrée...")
+        self.categories_field = categories_section["field"]
+        layout.add_widget(categories_section["widget"])
 
-        self.any_ingredients_check = MDCheckbox(active=True, group="ingredients_mode", size_hint_x=None, width=dp(30))
-
-        any_label = MDLabel(text="Any ingredient", theme_text_color="Primary", font_size=dp(14))
-
-        self.all_ingredients_check = MDCheckbox(active=False, group="ingredients_mode", size_hint_x=None, width=dp(30))
-
-        all_label = MDLabel(text="All ingredients", theme_text_color="Primary", font_size=dp(14))
-
-        ingredients_mode_layout.add_widget(self.any_ingredients_check)
-        ingredients_mode_layout.add_widget(any_label)
-        ingredients_mode_layout.add_widget(self.all_ingredients_check)
-        ingredients_mode_layout.add_widget(all_label)
-
-        # Categories and tags
-        self.categories_field = MDTextField(
-            hint_text="Categories (comma separated)...", size_hint_y=None, height=dp(40)
-        )
-
-        self.tags_field = MDTextField(hint_text="Tags (comma separated)...", size_hint_y=None, height=dp(40))
+        # Tags section
+        tags_section = self.create_search_section("Tags", "Ex: Rapide, Végétarien, Sans gluten...")
+        self.tags_field = tags_section["field"]
+        layout.add_widget(tags_section["widget"])
 
         # Search button
         search_btn = MDButton(
-            md_bg_color=App.get_running_app().colors["primary"],
+            MDButtonText(text="🔍 Rechercher"),
+            style="filled",
+            md_bg_color="#4CAF50",
             size_hint_y=None,
-            height=dp(40),
+            height=dp(50),
             on_release=lambda x: self.perform_search(),
-            children=[MDButtonText(text="🔍 Search")],
         )
 
-        layout.add_widget(title)
-        layout.add_widget(self.name_field)
-        layout.add_widget(self.ingredients_field)
-        layout.add_widget(ingredients_mode_layout)
-        layout.add_widget(self.categories_field)
-        layout.add_widget(self.tags_field)
-        layout.add_widget(search_btn)
+        # Clear button
+        clear_btn = MDButton(
+            MDButtonText(text="🗑️ Effacer"),
+            style="outlined",
+            size_hint_y=None,
+            height=dp(50),
+            on_release=lambda x: self.clear_search(),
+        )
+
+        # Button layout
+        button_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(50))
+        button_layout.add_widget(clear_btn)
+        button_layout.add_widget(search_btn)
+
+        layout.add_widget(button_layout)
 
         card.add_widget(layout)
         return card
+
+    def create_search_section(self, label_text, hint_text):
+        """Create a labeled search section"""
+        section_layout = MDBoxLayout(orientation="vertical", spacing=dp(5), size_hint_y=None, height=dp(75))
+
+        # Label
+        label = MDLabel(
+            text=label_text, font_size=dp(14), bold=True, theme_text_color="Primary", size_hint_y=None, height=dp(25)
+        )
+
+        # Text field
+        field = MDTextField(hint_text=hint_text, mode="outlined", size_hint_y=None, height=dp(50))
+
+        section_layout.add_widget(label)
+        section_layout.add_widget(field)
+
+        return {"widget": section_layout, "field": field}
+
+    def create_ingredients_section(self):
+        """Create ingredients search section with mode selection"""
+        section_layout = MDBoxLayout(orientation="vertical", spacing=dp(8), size_hint_y=None, height=dp(130))
+
+        # Label
+        label = MDLabel(
+            text="Ingrédients",
+            font_size=dp(14),
+            bold=True,
+            theme_text_color="Primary",
+            size_hint_y=None,
+            height=dp(25),
+        )
+
+        # Text field
+        self.ingredients_field = MDTextField(
+            hint_text="Ex: Tomate, Basilic, Mozzarella...", mode="outlined", size_hint_y=None, height=dp(50)
+        )
+
+        # Mode selection with clear labels
+        mode_layout = MDBoxLayout(orientation="vertical", spacing=dp(5), size_hint_y=None, height=dp(45))
+
+        mode_label = MDLabel(
+            text="Mode de recherche:", font_size=dp(12), theme_text_color="Secondary", size_hint_y=None, height=dp(20)
+        )
+
+        # Radio buttons with better layout
+        radio_layout = MDBoxLayout(orientation="horizontal", spacing=dp(20), size_hint_y=None, height=dp(25))
+
+        # Any ingredient option
+        any_layout = MDBoxLayout(orientation="horizontal", spacing=dp(5), size_hint_x=None, width=dp(150))
+        self.any_ingredients_check = MDCheckbox(active=True, group="ingredients_mode", size_hint_x=None, width=dp(25))
+        any_label = MDLabel(
+            text="N'importe lequel", theme_text_color="Primary", font_size=dp(12), size_hint_y=None, height=dp(25)
+        )
+        any_layout.add_widget(self.any_ingredients_check)
+        any_layout.add_widget(any_label)
+
+        # All ingredients option
+        all_layout = MDBoxLayout(orientation="horizontal", spacing=dp(5), size_hint_x=None, width=dp(120))
+        self.all_ingredients_check = MDCheckbox(active=False, group="ingredients_mode", size_hint_x=None, width=dp(25))
+        all_label = MDLabel(
+            text="Tous requis", theme_text_color="Primary", font_size=dp(12), size_hint_y=None, height=dp(25)
+        )
+        all_layout.add_widget(self.all_ingredients_check)
+        all_layout.add_widget(all_label)
+
+        radio_layout.add_widget(any_layout)
+        radio_layout.add_widget(all_layout)
+
+        mode_layout.add_widget(mode_label)
+        mode_layout.add_widget(radio_layout)
+
+        section_layout.add_widget(label)
+        section_layout.add_widget(self.ingredients_field)
+        section_layout.add_widget(mode_layout)
+
+        return section_layout
 
     def create_results_section(self):
         """Create results display section"""
         card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], adaptive_height=True)
 
-        layout = MDBoxLayout(orientation="vertical", spacing=dp(12), adaptive_height=True)
+        layout = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
 
         # Results title
         self.results_title = MDLabel(
-            text="🍽️ Search Results",
+            text="🍽️ Résultats de recherche",
             font_size=dp(18),
             bold=True,
             theme_text_color="Primary",
             size_hint_y=None,
-            height=dp(30),
+            height=dp(35),
         )
 
-        # Results list
-        self.results_list = MDList(adaptive_height=True)
+        # Results list with proper spacing
+        self.results_list = MDList(adaptive_height=True, spacing=dp(8))
 
         # Initial empty state
         self.show_empty_results()
@@ -197,7 +269,7 @@ class SearchScreen(MDScreen):
 
         # Update title with count
         count = len(self.search_results)
-        self.results_title.text = f"🍽️ Search Results ({count})"
+        self.results_title.text = f"🍽️ Résultats de recherche ({count})"
 
         if not self.search_results:
             self.show_no_results()
@@ -222,7 +294,7 @@ class SearchScreen(MDScreen):
         if recipe.portions:
             secondary_parts.append(f"👥 {recipe.portions} portions")
 
-        secondary_text = " | ".join(secondary_parts) if secondary_parts else "No timing info"
+        secondary_text = " | ".join(secondary_parts) if secondary_parts else "Pas d'info timing"
 
         # Tertiary text with categories
         tertiary_text = ""
@@ -235,8 +307,10 @@ class SearchScreen(MDScreen):
         item = MDListItem(
             MDListItemHeadlineText(text=primary_text),
             MDListItemSupportingText(text=secondary_text),
-            MDListItemTertiaryText(text=tertiary_text),
+            MDListItemTertiaryText(text=tertiary_text) if tertiary_text else None,
             on_release=lambda x: self.view_recipe(recipe.id),
+            size_hint_y=None,
+            height=dp(80),  # Fixed height to prevent overflow
         )
 
         return item
@@ -244,19 +318,20 @@ class SearchScreen(MDScreen):
     def show_empty_results(self):
         """Show empty search state"""
         empty_label = MDLabel(
-            text="🔍 Enter search criteria above to find recipes",
+            text="🔍 Saisissez vos critères de recherche ci-dessus pour trouver des recettes",
             font_size=dp(14),
             halign="center",
             theme_text_color="Secondary",
             size_hint_y=None,
-            height=dp(40),
+            height=dp(60),
+            text_size=(dp(300), None),
         )
         self.results_list.add_widget(empty_label)
 
     def show_no_results(self):
         """Show no results found state"""
         no_results_label = MDLabel(
-            text="❌ No recipes found matching your criteria",
+            text="❌ Aucune recette ne correspond à vos critères",
             font_size=dp(14),
             halign="center",
             theme_text_color="Secondary",
@@ -266,7 +341,7 @@ class SearchScreen(MDScreen):
         self.results_list.add_widget(no_results_label)
 
         suggestion_label = MDLabel(
-            text="Try adjusting your search filters",
+            text="Essayez d'ajuster vos filtres de recherche",
             font_size=dp(12),
             halign="center",
             theme_text_color="Secondary",
@@ -291,7 +366,7 @@ class SearchScreen(MDScreen):
         self.search_results = []
         self.results_list.clear_widgets()
         self.show_empty_results()
-        self.results_title.text = "🍽️ Search Results"
+        self.results_title.text = "🍽️ Résultats de recherche"
 
     def go_back(self):
         """Go back to home screen"""
