@@ -3,6 +3,7 @@ Add Recipe Screen for LibraRecipes Mobile App
 Form to create new recipes with ingredients and steps
 """
 
+from kivy.app import App
 from kivy.metrics import dp
 from kivymd.uix.appbar import (
     MDActionTopAppBarButton,
@@ -50,6 +51,7 @@ class AddRecipeScreen(MDScreen):
         self.dialog = None
         self.editing_ingredient_index = None  # For tracking which ingredient is being edited
         self.editing_step_index = None  # For tracking which step is being edited
+        self.editing_recipe_id = None  # For tracking if we're editing an existing recipe
 
         # Initialize photo manager
         self.photo_manager = PhotoManager() if PhotoManager else None
@@ -1266,12 +1268,24 @@ class AddRecipeScreen(MDScreen):
 
             # Save to database
             with get_db_session() as session:
-                new_recipe = create_recette(session, recipe_data)
+                if self.editing_recipe_id:
+                    # Update existing recipe
+                    from src.crud.recettes import update_recette
 
-            show_snackbar(f"Recipe '{new_recipe.nom}' saved successfully!")
+                    updated_recipe = update_recette(session, self.editing_recipe_id, recipe_data)
+                    if updated_recipe:
+                        show_snackbar(f"Recipe '{updated_recipe.nom}' updated successfully!")
+                    else:
+                        show_snackbar("Error updating recipe")
+                        return
+                else:
+                    # Create new recipe
+                    new_recipe = create_recette(session, recipe_data)
+                    show_snackbar(f"Recipe '{new_recipe.nom}' saved successfully!")
 
             # Clear form and go back
             self.clear_form()
+            self.editing_recipe_id = None  # Reset editing mode
             self.manager.current = "recipe_list"
 
         except Exception as e:
@@ -1307,6 +1321,7 @@ class AddRecipeScreen(MDScreen):
         self.ingredients = []
         self.steps = []
         self.photos = []
+        self.editing_recipe_id = None  # Reset editing mode
         self.refresh_ingredients_list()
         self.refresh_steps_list()
         self.refresh_photos_grid()
@@ -1317,5 +1332,76 @@ class AddRecipeScreen(MDScreen):
 
     def on_enter(self):
         """Called when screen is entered"""
-        # Clear form when entering screen
-        self.clear_form()
+        app = App.get_running_app()
+
+        # Check if we're in edit mode
+        if app and hasattr(app, "editing_recipe_id") and app.editing_recipe_id:
+            self.load_recipe_for_editing(app.editing_recipe_id)
+            app.editing_recipe_id = None  # Clear the editing ID
+        else:
+            # Clear form when entering screen in add mode
+            self.clear_form()
+
+    def load_recipe_for_editing(self, recipe_id):
+        """Load recipe data for editing"""
+        try:
+            from src.crud.recettes import get_recette_by_id
+            from src.db import get_db_session
+
+            with get_db_session() as session:
+                recipe = get_recette_by_id(session, recipe_id)
+
+                if recipe:
+                    # Fill form with recipe data
+                    self.recipe_name.text = recipe.nom or ""
+                    self.prep_time.text = str(recipe.preparation) if recipe.preparation else ""
+                    self.cook_time.text = str(recipe.cuisson) if recipe.cuisson else ""
+                    self.portions.text = str(recipe.portions) if recipe.portions else "1"
+
+                    # Load categories and tags
+                    categories_list = [cat.nom for cat in recipe.categories] if recipe.categories else []
+                    self.categories.text = ", ".join(categories_list)
+
+                    tags_list = [tag.nom for tag in recipe.tags] if recipe.tags else []
+                    self.tags.text = ", ".join(tags_list)
+
+                    # Load ingredients
+                    self.ingredients = []
+                    for ingredient in recipe.ingredients:
+                        self.ingredients.append(
+                            {
+                                "nom": ingredient.nom,
+                                "quantite": ingredient.quantite,
+                                "unite": ingredient.unite,
+                                "indispensable": ingredient.indispensable,
+                                "alternatives": ingredient.alternatives,
+                            }
+                        )
+
+                    # Load steps
+                    self.steps = []
+                    for step in recipe.etapes:
+                        self.steps.append(step.description)
+
+                    # Load photos
+                    self.photos = []
+                    for photo in recipe.photos:
+                        self.photos.append({"chemin": photo.chemin, "categorie": photo.categorie})
+
+                    # Refresh all lists
+                    self.refresh_ingredients_list()
+                    self.refresh_steps_list()
+                    self.refresh_photos_grid()
+
+                    # Store the recipe ID for updating
+                    self.editing_recipe_id = recipe_id
+
+                    show_snackbar(f"Loaded recipe: {recipe.nom}")
+                else:
+                    show_snackbar("Recipe not found")
+                    self.clear_form()
+
+        except Exception as e:
+            print(f"Error loading recipe for editing: {e}")
+            show_snackbar("Error loading recipe")
+            self.clear_form()

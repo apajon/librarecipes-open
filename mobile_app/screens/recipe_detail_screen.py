@@ -56,7 +56,8 @@ class RecipeDetailScreen(MDScreen):
             ),
             MDTopAppBarTitle(text="Recipe Details"),
             MDTopAppBarTrailingButtonContainer(
-                MDActionTopAppBarButton(icon="delete", on_release=lambda x: self.delete_recipe())
+                MDActionTopAppBarButton(icon="pencil", on_release=lambda x: self.edit_recipe()),
+                MDActionTopAppBarButton(icon="delete", on_release=lambda x: self.delete_recipe()),
             ),
             md_bg_color=App.get_running_app().colors["primary"],
         )
@@ -438,6 +439,26 @@ class RecipeDetailScreen(MDScreen):
         except Exception as e:
             print(f"Error deleting recipe: {e}")
             show_snackbar("Error deleting recipe")
+
+    def edit_recipe(self):
+        """Edit the current recipe"""
+        if not self.recipe:
+            show_snackbar("No recipe to edit")
+            return
+
+        try:
+            # Store the recipe ID for the edit screen
+            app = App.get_running_app()
+            if app:
+                app.editing_recipe_id = self.recipe.id
+
+            # Navigate to add recipe screen in edit mode
+            self.manager.current = "add_recipe"
+            show_snackbar(f"Editing recipe: {self.recipe.nom}")
+
+        except Exception as e:
+            print(f"Error starting recipe edit: {e}")
+            show_snackbar("Error opening recipe for editing")
 
     def go_back(self):
         """Go back to recipe list"""
