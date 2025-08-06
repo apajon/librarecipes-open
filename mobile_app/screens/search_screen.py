@@ -353,6 +353,7 @@ class SearchScreen(MDScreen):
     def view_recipe(self, recipe_id):
         """Navigate to recipe detail view"""
         App.get_running_app().selected_recipe_id = recipe_id
+        App.get_running_app().previous_screen = "search"  # Remember we came from search
         self.manager.current = "recipe_detail"
 
     def clear_search(self):
@@ -374,5 +375,12 @@ class SearchScreen(MDScreen):
 
     def on_enter(self):
         """Called when screen is entered"""
-        # Clear search when entering screen
-        self.clear_search()
+        # Only clear search if we're not returning from recipe detail
+        returning = getattr(App.get_running_app(), "returning_from_detail", False)
+
+        if not returning:
+            # Clear search when entering screen for the first time or from non-detail screens
+            self.clear_search()
+        else:
+            # Reset the flag
+            App.get_running_app().returning_from_detail = False

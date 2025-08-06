@@ -477,8 +477,14 @@ class RecipeDetailScreen(MDScreen):
             show_snackbar("Error opening recipe for editing")
 
     def go_back(self):
-        """Go back to recipe list"""
-        self.manager.current = "recipe_list"
+        """Go back to previous screen"""
+        # Check where we came from
+        previous = getattr(App.get_running_app(), "previous_screen", "recipe_list")
+        if previous == "search":
+            App.get_running_app().returning_from_detail = True  # Preserve search state
+            self.manager.current = "search"
+        else:
+            self.manager.current = "recipe_list"
 
     def on_enter(self):
         """Called when screen is entered"""

@@ -130,6 +130,9 @@ class RecipeListScreen(MDScreen):
         layout.add_widget(order_layout)
         card.add_widget(layout)
 
+        # Apply correct colors after creation
+        self.update_sort_buttons()
+
         return card
 
     def set_sort_type(self, sort_type):
@@ -157,9 +160,19 @@ class RecipeListScreen(MDScreen):
             if self.sort_type == btn_type:
                 btn.style = "filled"
                 btn.md_bg_color = color
+                # Set text color to white for filled buttons
+                for child in btn.children:
+                    if hasattr(child, "theme_text_color"):
+                        child.theme_text_color = "Custom"
+                        child.text_color = [1, 1, 1, 1]  # White
             else:
                 btn.style = "outlined"
                 btn.md_bg_color = [0, 0, 0, 0]
+                # Set text color to green for outlined buttons
+                for child in btn.children:
+                    if hasattr(child, "theme_text_color"):
+                        child.theme_text_color = "Custom"
+                        child.text_color = "#4CAF50"  # Green
 
         # Update sort order buttons
         order_buttons = [(self.asc_btn, "asc", "#4CAF50"), (self.desc_btn, "desc", "#F44336")]
@@ -168,9 +181,19 @@ class RecipeListScreen(MDScreen):
             if self.sort_order == btn_order:
                 btn.style = "filled"
                 btn.md_bg_color = color
+                # Set text color to white for filled buttons
+                for child in btn.children:
+                    if hasattr(child, "theme_text_color"):
+                        child.theme_text_color = "Custom"
+                        child.text_color = [1, 1, 1, 1]  # White
             else:
                 btn.style = "outlined"
                 btn.md_bg_color = [0, 0, 0, 0]
+                # Set text color to green for outlined buttons
+                for child in btn.children:
+                    if hasattr(child, "theme_text_color"):
+                        child.theme_text_color = "Custom"
+                        child.text_color = "#4CAF50"  # Green
 
     def refresh_recipe_list(self):
         """Refresh the recipe list with current sorting"""
@@ -406,6 +429,7 @@ class RecipeListScreen(MDScreen):
         """Navigate to recipe detail view"""
         # Store recipe ID in app for detail screen
         App.get_running_app().selected_recipe_id = recipe_id
+        App.get_running_app().previous_screen = "recipe_list"  # Remember we came from recipe list
         self.manager.current = "recipe_detail"
 
     def go_back(self):
