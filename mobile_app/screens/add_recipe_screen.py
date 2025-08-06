@@ -16,7 +16,6 @@ from kivymd.uix.button import MDButton, MDIconButton
 from kivymd.uix.button.button import MDButtonText  # pour gérer le texte dans le bouton
 from kivymd.uix.card import MDCard
 from kivymd.uix.floatlayout import MDFloatLayout
-from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import MDList
 from kivymd.uix.screen import MDScreen
@@ -406,7 +405,7 @@ class AddRecipeScreen(MDScreen):
         # Section title with camera button
         title_layout = MDBoxLayout(orientation="horizontal", size_hint_y=None, height=dp(40))
 
-        title = MDLabel(text="Recipe Photos", font_size=dp(18), bold=True, theme_text_color="Primary")
+        title = MDLabel(text="Photos de la recette", font_size=dp(18), bold=True, theme_text_color="Primary")
 
         camera_btn = MDIconButton(
             icon="camera",
@@ -417,8 +416,8 @@ class AddRecipeScreen(MDScreen):
         title_layout.add_widget(title)
         title_layout.add_widget(camera_btn)
 
-        # Photos grid
-        self.photos_grid = MDGridLayout(cols=3, spacing=dp(10), adaptive_height=True)
+        # Photos list (changed from grid to vertical list)
+        self.photos_grid = MDList(adaptive_height=True, spacing=dp(8))
 
         layout.add_widget(title_layout)
         layout.add_widget(self.photos_grid)
@@ -1011,10 +1010,79 @@ class AddRecipeScreen(MDScreen):
             self.step_description_field.text = step
 
     def show_photo_options(self):
-        """Show photo capture/selection options - TODO: Update to KivyMD 2.0"""
-        show_snackbar("Dialogue photos en cours de migration vers KivyMD 2.0")
-        # Temporary placeholder
-        pass
+        """Show photo capture/selection options"""
+        # Create overlay background
+        self.photo_dialog_overlay = MDFloatLayout(
+            md_bg_color=(0, 0, 0, 0.5),  # Semi-transparent background
+            size_hint=(1, 1),
+        )
+
+        # Create dialog card
+        dialog_card = MDCard(
+            MDBoxLayout(
+                MDLabel(
+                    text="Ajouter une photo",
+                    font_style="Headline",
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=dp(40),
+                    halign="center",
+                ),
+                # Camera button
+                MDButton(
+                    MDButtonText(text="📷 Prendre une photo"),
+                    style="outlined",
+                    on_release=self.take_photo_and_close,
+                    size_hint_y=None,
+                    height=dp(56),
+                ),
+                # Gallery button
+                MDButton(
+                    MDButtonText(text="🖼️ Choisir depuis la galerie"),
+                    style="outlined",
+                    on_release=self.choose_from_gallery_and_close,
+                    size_hint_y=None,
+                    height=dp(56),
+                ),
+                # Cancel button
+                MDButton(
+                    MDButtonText(text="Annuler"),
+                    style="text",
+                    on_release=self.close_photo_dialog,
+                    size_hint_y=None,
+                    height=dp(48),
+                ),
+                orientation="vertical",
+                spacing=dp(16),
+                padding=dp(20),
+                adaptive_height=True,
+            ),
+            style="filled",
+            size_hint=(0.8, None),
+            adaptive_height=True,
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            elevation=8,
+            radius=[dp(12)],
+        )
+
+        self.photo_dialog_overlay.add_widget(dialog_card)
+        self.add_widget(self.photo_dialog_overlay)
+
+    def close_photo_dialog(self, *args):
+        """Close the photo dialog"""
+        if hasattr(self, "photo_dialog_overlay"):
+            self.remove_widget(self.photo_dialog_overlay)
+            delattr(self, "photo_dialog_overlay")
+
+    def take_photo_and_close(self, *args):
+        """Take photo and close dialog"""
+        self.close_photo_dialog()
+        self.take_photo()
+
+    def choose_from_gallery_and_close(self, *args):
+        """Choose from gallery and close dialog"""
+        self.close_photo_dialog()
+        self.choose_from_gallery()
 
     def take_photo(self):
         """Take a photo using camera"""
@@ -1025,6 +1093,10 @@ class AddRecipeScreen(MDScreen):
             self.photo_manager.take_photo(filename, callback=self.on_photo_captured)
         if self.dialog:
             self.dialog.dismiss()
+
+    def choose_from_gallery(self):
+        """Choose photo from gallery - alias for select_from_gallery"""
+        self.select_from_gallery()
 
     def select_from_gallery(self):
         """Select photo from gallery"""
@@ -1049,30 +1121,87 @@ class AddRecipeScreen(MDScreen):
         self.photos_grid.clear_widgets()
 
         for i, photo in enumerate(self.photos):
-            photo_card = MDCard(
+            # Create a card for each photo similar to ingredients/steps
+            card = MDCard(
+                MDBoxLayout(
+                    MDBoxLayout(
+                        MDLabel(
+                            text="📸",
+                            font_size=dp(32),
+                            theme_text_color="Primary",
+                            size_hint_y=None,
+                            height=dp(40),
+                            halign="center",
+                        ),
+                        MDLabel(
+                            text=f"Photo {i + 1}",
+                            theme_text_color="Primary",
+                            font_style="Body",
+                            bold=True,
+                            size_hint_y=None,
+                            height=dp(24),
+                            halign="center",
+                        ),
+                        MDLabel(
+                            text=photo.get("chemin", "").split("/")[-1] if photo.get("chemin") else "Image",
+                            theme_text_color="Secondary",
+                            font_style="Body",
+                            size_hint_y=None,
+                            height=dp(20),
+                            halign="center",
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
+                        size_hint_x=0.85,
+                        adaptive_height=True,
+                    ),
+                    MDBoxLayout(
+                        MDIconButton(
+                            icon="chevron-up",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_photo_up(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == 0,  # Disable if first item
+                        ),
+                        MDIconButton(
+                            icon="chevron-down",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_photo_down(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == len(self.photos) - 1,  # Disable if last item
+                        ),
+                        MDIconButton(
+                            icon="delete",
+                            theme_icon_color="Custom",
+                            icon_color="red",
+                            on_release=lambda x, idx=i: self.remove_photo(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
+                        size_hint_x=0.15,
+                        adaptive_height=True,
+                    ),
+                    orientation="horizontal",
+                    spacing=dp(12),
+                    padding=[dp(16), dp(12), dp(16), dp(12)],
+                    adaptive_height=True,
+                ),
+                style="outlined",
                 size_hint_y=None,
-                height=dp(80),
-                elevation=2,
-                radius=[dp(5)],
-                on_release=lambda x, idx=i: self.remove_photo(idx),
+                adaptive_height=True,
+                on_release=lambda x, idx=i: self.view_photo(idx),
+                elevation=1,
+                radius=[dp(8)],
             )
 
-            photo_layout = MDBoxLayout(orientation="vertical", spacing=dp(5), padding=dp(10))
-
-            photo_icon = MDLabel(text="📸", font_size=dp(24), halign="center")
-
-            photo_label = MDLabel(
-                text=f"Photo {i+1}",  # noqa E226
-                font_size=dp(12),
-                halign="center",
-                theme_text_color="Secondary",
-            )
-
-            photo_layout.add_widget(photo_icon)
-            photo_layout.add_widget(photo_label)
-            photo_card.add_widget(photo_layout)
-
-            self.photos_grid.add_widget(photo_card)
+            self.photos_grid.add_widget(card)
 
     def remove_photo(self, index):
         """Remove photo from list"""
@@ -1082,6 +1211,27 @@ class AddRecipeScreen(MDScreen):
                 self.photo_manager.delete_photo(photo["chemin"])
             self.refresh_photos_grid()
             show_snackbar("Photo removed")
+
+    def move_photo_up(self, index):
+        """Move photo up in the list"""
+        if index > 0 and index < len(self.photos):
+            # Swap with previous photo
+            self.photos[index], self.photos[index - 1] = self.photos[index - 1], self.photos[index]
+            self.refresh_photos_grid()
+
+    def move_photo_down(self, index):
+        """Move photo down in the list"""
+        if index >= 0 and index < len(self.photos) - 1:
+            # Swap with next photo
+            self.photos[index], self.photos[index + 1] = self.photos[index + 1], self.photos[index]
+            self.refresh_photos_grid()
+
+    def view_photo(self, index):
+        """View photo in full screen - placeholder for future implementation"""
+        if 0 <= index < len(self.photos):
+            photo_path = self.photos[index].get("chemin", "")
+            show_snackbar(f"Visualisation photo: {photo_path.split('/')[-1]}")
+            # TODO: Implement photo viewer dialog
 
     def save_recipe(self):
         """Save the recipe to database"""
