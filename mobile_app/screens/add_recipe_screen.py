@@ -647,7 +647,7 @@ class AddRecipeScreen(MDScreen):
             # Build secondary text with essential status
             if ingredient["indispensable"]:
                 secondary_text = "Essentiel"
-                tertiary_text = f"Ingrédient {i+1}"  # noqa E226
+                tertiary_text = ""  # Remove numbering
             else:
                 secondary_text = "Optionnel"
                 if ingredient.get("alternatives"):
@@ -662,7 +662,7 @@ class AddRecipeScreen(MDScreen):
                         # Show first 2 and indicate more
                         tertiary_text = f"Alt: {', '.join(alt_parts[:2])} (+{len(alt_parts) - 2} autres)"
                 else:
-                    tertiary_text = f"Ingrédient {i+1}"  # noqa E226
+                    tertiary_text = ""  # Remove numbering
 
             # Create a custom card layout for better control
             card = MDCard(
@@ -697,15 +697,38 @@ class AddRecipeScreen(MDScreen):
                         size_hint_x=0.85,
                         adaptive_height=True,
                     ),
-                    MDIconButton(
-                        icon="delete",
-                        theme_icon_color="Custom",
-                        icon_color="red",
-                        on_release=lambda x, idx=i: self.remove_ingredient(idx),
+                    MDBoxLayout(
+                        MDIconButton(
+                            icon="chevron-up",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_ingredient_up(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == 0,  # Disable if first item
+                        ),
+                        MDIconButton(
+                            icon="chevron-down",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_ingredient_down(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == len(self.ingredients) - 1,  # Disable if last item
+                        ),
+                        MDIconButton(
+                            icon="delete",
+                            theme_icon_color="Custom",
+                            icon_color="red",
+                            on_release=lambda x, idx=i: self.remove_ingredient(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
                         size_hint_x=0.15,
-                        size_hint_y=None,
-                        height=dp(48),
-                        width=dp(48),
+                        adaptive_height=True,
                     ),
                     orientation="horizontal",
                     spacing=dp(12),
@@ -740,6 +763,20 @@ class AddRecipeScreen(MDScreen):
         """Remove ingredient from list"""
         if 0 <= index < len(self.ingredients):
             self.ingredients.pop(index)
+            self.refresh_ingredients_list()
+
+    def move_ingredient_up(self, index):
+        """Move ingredient up in the list"""
+        if index > 0 and index < len(self.ingredients):
+            # Swap with previous ingredient
+            self.ingredients[index], self.ingredients[index - 1] = self.ingredients[index - 1], self.ingredients[index]
+            self.refresh_ingredients_list()
+
+    def move_ingredient_down(self, index):
+        """Move ingredient down in the list"""
+        if index >= 0 and index < len(self.ingredients) - 1:
+            # Swap with next ingredient
+            self.ingredients[index], self.ingredients[index + 1] = self.ingredients[index + 1], self.ingredients[index]
             self.refresh_ingredients_list()
 
     def edit_ingredient(self, index):
