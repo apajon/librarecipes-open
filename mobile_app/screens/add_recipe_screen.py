@@ -142,7 +142,7 @@ class AddRecipeScreen(MDScreen):
             text="Prep. (min)",
             theme_text_color="Secondary",
             font_size=dp(12),
-            size_hint_x=0.33,
+            size_hint_x=0.5,
             halign="center",
             adaptive_height=True,
             text_size=(None, None),
@@ -152,17 +152,7 @@ class AddRecipeScreen(MDScreen):
             text="Cuisson (min)",
             theme_text_color="Secondary",
             font_size=dp(12),
-            size_hint_x=0.33,
-            halign="center",
-            adaptive_height=True,
-            text_size=(None, None),
-        )
-
-        portions_label = MDLabel(
-            text="Portions",
-            theme_text_color="Secondary",
-            font_size=dp(12),
-            size_hint_x=0.33,
+            size_hint_x=0.5,
             halign="center",
             adaptive_height=True,
             text_size=(None, None),
@@ -170,25 +160,48 @@ class AddRecipeScreen(MDScreen):
 
         time_labels_layout.add_widget(prep_label)
         time_labels_layout.add_widget(cook_label)
-        time_labels_layout.add_widget(portions_label)
 
         time_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), size_hint_y=None, height=dp(56))
 
         self.prep_time = MDTextField(
-            hint_text="Ex: 15", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
+            hint_text="Ex: 15", input_filter="int", mode="outlined", size_hint_x=0.5, size_hint_y=None, height=dp(56)
         )
 
         self.cook_time = MDTextField(
-            hint_text="Ex: 30", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
-        )
-
-        self.portions = MDTextField(
-            hint_text="Ex: 4", input_filter="int", mode="outlined", size_hint_x=0.33, size_hint_y=None, height=dp(56)
+            hint_text="Ex: 30", input_filter="int", mode="outlined", size_hint_x=0.5, size_hint_y=None, height=dp(56)
         )
 
         time_layout.add_widget(self.prep_time)
         time_layout.add_widget(self.cook_time)
-        time_layout.add_widget(self.portions)
+
+        # Portions section separate
+        portions_label = MDLabel(
+            text="Portions",
+            theme_text_color="Secondary",
+            font_size=dp(12),
+            halign="center",
+            adaptive_height=True,
+            text_size=(None, None),
+        )
+
+        self.portions = MDTextField(
+            text="1", input_filter="int", mode="outlined", size_hint_x=0.5, size_hint_y=None, height=dp(56)
+        )
+
+        # Create portions layout with +/- buttons
+        portions_layout = MDBoxLayout(orientation="horizontal", spacing=dp(5), adaptive_height=True)
+
+        minus_btn = MDIconButton(
+            icon="minus", theme_icon_color="Primary", size_hint_x=0.25, on_release=self.decrease_portions
+        )
+
+        plus_btn = MDIconButton(
+            icon="plus", theme_icon_color="Primary", size_hint_x=0.25, on_release=self.increase_portions
+        )
+
+        portions_layout.add_widget(minus_btn)
+        portions_layout.add_widget(self.portions)
+        portions_layout.add_widget(plus_btn)
 
         # Categories and tags
         categories_label = MDLabel(
@@ -218,6 +231,8 @@ class AddRecipeScreen(MDScreen):
         layout.add_widget(self.recipe_name)
         layout.add_widget(time_labels_layout)
         layout.add_widget(time_layout)
+        layout.add_widget(portions_label)
+        layout.add_widget(portions_layout)
         layout.add_widget(categories_label)
         layout.add_widget(self.categories)
         layout.add_widget(tags_label)
@@ -611,12 +626,30 @@ class AddRecipeScreen(MDScreen):
             print(f"Error saving recipe: {e}")
             show_snackbar("Error saving recipe. Please try again.")
 
+    def increase_portions(self, *args):
+        """Increase portions count"""
+        try:
+            current = int(self.portions.text) if self.portions.text else 1
+            if current < 99:  # Limit to 99 portions max
+                self.portions.text = str(current + 1)
+        except ValueError:
+            self.portions.text = "1"
+
+    def decrease_portions(self, *args):
+        """Decrease portions count"""
+        try:
+            current = int(self.portions.text) if self.portions.text else 1
+            if current > 1:  # Minimum 1 portion
+                self.portions.text = str(current - 1)
+        except ValueError:
+            self.portions.text = "1"
+
     def clear_form(self):
         """Clear all form fields"""
         self.recipe_name.text = ""
         self.prep_time.text = ""
         self.cook_time.text = ""
-        self.portions.text = ""
+        self.portions.text = "1"
         self.categories.text = ""
         self.tags.text = ""
         self.ingredients = []
