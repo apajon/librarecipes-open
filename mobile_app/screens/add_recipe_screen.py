@@ -430,6 +430,24 @@ class AddRecipeScreen(MDScreen):
         card.add_widget(layout)
         return card
 
+    def on_essential_changed(self, checkbox, value):
+        """Show/hide alternatives field based on essential checkbox"""
+        if value:  # Essential is checked
+            # Hide alternatives
+            self.alternatives_label.opacity = 0
+            self.alternatives_label.height = 0
+            self.alternatives_field.opacity = 0
+            self.alternatives_field.height = 0
+            self.alternatives_field.disabled = True
+            self.alternatives_field.text = ""  # Clear text
+        else:  # Essential is unchecked (optional ingredient)
+            # Show alternatives
+            self.alternatives_label.opacity = 1
+            self.alternatives_label.height = dp(18)  # Restore height
+            self.alternatives_field.opacity = 1
+            self.alternatives_field.height = dp(56)  # Restore height
+            self.alternatives_field.disabled = False
+
     def add_ingredient_dialog(self):
         """Show dialog to add ingredient"""
         # Create dialog content
@@ -439,7 +457,7 @@ class AddRecipeScreen(MDScreen):
             elevation=10,
             radius=[dp(15)],
             size_hint=(0.9, None),
-            height=dp(500),
+            height=dp(580),  # Increased height for alternatives field
             pos_hint={"center_x": 0.5, "center_y": 0.5},
         )
 
@@ -474,10 +492,33 @@ class AddRecipeScreen(MDScreen):
 
         # Essential checkbox
         essential_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), adaptive_height=True)
-        self.essential_checkbox = MDCheckbox(active=True, size_hint_x=None, width=dp(30))
+        self.essential_checkbox = MDCheckbox(
+            active=True,
+            size_hint_x=None,
+            width=dp(30),
+            on_active=self.on_essential_changed,  # Add callback for checkbox change
+        )
         essential_label = MDLabel(text="Ingrédient essentiel", theme_text_color="Primary", adaptive_height=True)
         essential_layout.add_widget(self.essential_checkbox)
         essential_layout.add_widget(essential_label)
+
+        # Alternatives section (hidden by default)
+        self.alternatives_label = MDLabel(
+            text="Alternatives (séparées par des points-virgules)",
+            theme_text_color="Primary",
+            adaptive_height=True,
+            opacity=0,  # Hidden by default
+            height=0,
+        )
+
+        self.alternatives_field = MDTextField(
+            hint_text="Ex: sauce soja; tamari; sel de céleri",
+            mode="outlined",
+            size_hint_y=None,
+            height=dp(56),
+            opacity=0,  # Hidden by default
+            disabled=True,  # Disabled when essential is True
+        )
 
         # Buttons
         button_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), adaptive_height=True)
@@ -500,6 +541,8 @@ class AddRecipeScreen(MDScreen):
         content.add_widget(unit_label)
         content.add_widget(self.unit_button)
         content.add_widget(essential_layout)
+        content.add_widget(self.alternatives_label)
+        content.add_widget(self.alternatives_field)
         content.add_widget(button_layout)
 
         dialog_card.add_widget(content)
@@ -523,15 +566,16 @@ class AddRecipeScreen(MDScreen):
         quantity = self.quantity_field.text.strip()
         unit = self.selected_unit  # Use selected unit instead of text field
         essential = self.essential_checkbox.active
+        alternatives = self.alternatives_field.text.strip() if not essential else ""
 
         if not name:
             show_snackbar("Veuillez entrer le nom de l'ingrédient")
             return
 
-        self.confirm_add_ingredient(name, quantity, unit, essential)
+        self.confirm_add_ingredient(name, quantity, unit, essential, alternatives)
         self.close_ingredient_dialog()
 
-    def confirm_add_ingredient(self, name, quantity, unit, essential):
+    def confirm_add_ingredient(self, name, quantity, unit, essential, alternatives=""):
         """Add ingredient to list"""
         if not name.strip():
             show_snackbar("Please enter ingredient name")
@@ -542,6 +586,7 @@ class AddRecipeScreen(MDScreen):
             "quantite": quantity.strip() if quantity else None,
             "unite": unit.strip() if unit else None,
             "indispensable": essential,
+            "alternatives": alternatives.strip() if alternatives else None,
         }
 
         self.ingredients.append(ingredient)
@@ -577,15 +622,33 @@ class AddRecipeScreen(MDScreen):
             if ingredient["unite"]:
                 text += f" {ingredient['unite']}"
 
-            secondary_text = "Essential" if ingredient["indispensable"] else "Optional"
+            # Build secondary text with essential status
+            if ingredient["indispensable"]:
+                secondary_text = "Essentiel"
+                tertiary_text = f"Ingrédient {i+1}"  # noqa E226
+            else:
+                secondary_text = "Optionnel"
+                if ingredient.get("alternatives"):
+                    # Show only first few alternatives to avoid truncation
+                    alternatives = ingredient["alternatives"]
+                    alt_parts = [alt.strip() for alt in alternatives.split(";") if alt.strip()]
 
+                    if len(alt_parts) <= 2:
+                        # Show all if 2 or less
+                        tertiary_text = f"Alt: {', '.join(alt_parts)}"
+                    else:
+                        # Show first 2 and indicate more
+                        tertiary_text = f"Alt: {', '.join(alt_parts[:2])} (+{len(alt_parts) - 2} autres)"
+                else:
+                    tertiary_text = f"Ingrédient {i+1}"  # noqa E226
+
+            # Use standard list item for all ingredients
             item = MDListItem(
                 MDListItemHeadlineText(text=text),
                 MDListItemSupportingText(text=secondary_text),
-                MDListItemTertiaryText(text=f"Ingredient {i+1}"),  # noqa E226
+                MDListItemTertiaryText(text=tertiary_text),
                 on_release=lambda x, idx=i: self.remove_ingredient(idx),
             )
-
             self.ingredients_list.add_widget(item)
 
     def refresh_steps_list(self):
