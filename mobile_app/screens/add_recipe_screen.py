@@ -197,6 +197,10 @@ class AddRecipeScreen(MDScreen):
         photos_section = self.create_photos_section()
         content.add_widget(photos_section)
 
+        # Source section
+        source_section = self.create_source_section()
+        content.add_widget(source_section)
+
         # Save button
         save_btn = MDButton(
             MDButtonText(text="💾 Sauvegarder la recette"),
@@ -427,6 +431,124 @@ class AddRecipeScreen(MDScreen):
 
         card.add_widget(layout)
         return card
+
+    def create_source_section(self):
+        """Create source section for recipe origin"""
+        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], adaptive_height=True)
+
+        layout = MDBoxLayout(orientation="vertical", spacing=dp(12), adaptive_height=True)
+
+        # Section title
+        title = MDLabel(text="Source de la recette", font_size=dp(18), bold=True, theme_text_color="Primary")
+        layout.add_widget(title)
+
+        # Source type selection
+        type_label = MDLabel(text="Type de source", theme_text_color="Primary", adaptive_height=True)
+        layout.add_widget(type_label)
+
+        # Source type buttons
+        type_layout = MDBoxLayout(orientation="horizontal", spacing=dp(8), size_hint_y=None, height=dp(40))
+
+        self.source_type = "homemade"  # Default value
+
+        # Homemade button
+        self.homemade_btn = MDButton(
+            MDButtonText(text="🏠 Maison"),
+            style="filled",
+            md_bg_color="#4CAF50",
+            size_hint_x=0.33,
+            on_release=lambda x: self.set_source_type("homemade"),
+        )
+
+        # URL button
+        self.url_btn = MDButton(
+            MDButtonText(text="🌐 URL"),
+            style="outlined",
+            size_hint_x=0.33,
+            on_release=lambda x: self.set_source_type("url"),
+        )
+
+        # Book button
+        self.book_btn = MDButton(
+            MDButtonText(text="📚 Livre"),
+            style="outlined",
+            size_hint_x=0.33,
+            on_release=lambda x: self.set_source_type("book"),
+        )
+
+        type_layout.add_widget(self.homemade_btn)
+        type_layout.add_widget(self.url_btn)
+        type_layout.add_widget(self.book_btn)
+        layout.add_widget(type_layout)
+
+        # Dynamic fields container
+        self.source_fields_layout = MDBoxLayout(orientation="vertical", spacing=dp(8), adaptive_height=True)
+        layout.add_widget(self.source_fields_layout)
+
+        card.add_widget(layout)
+        return card
+
+    def set_source_type(self, source_type):
+        """Set source type and update UI"""
+        self.source_type = source_type
+
+        # Update button styles
+        buttons = [self.homemade_btn, self.url_btn, self.book_btn]
+        for btn in buttons:
+            btn.style = "outlined"
+            btn.md_bg_color = [0, 0, 0, 0]  # Reset background
+
+        # Highlight selected button
+        if source_type == "homemade":
+            self.homemade_btn.style = "filled"
+            self.homemade_btn.md_bg_color = "#4CAF50"
+        elif source_type == "url":
+            self.url_btn.style = "filled"
+            self.url_btn.md_bg_color = "#2196F3"
+        elif source_type == "book":
+            self.book_btn.style = "filled"
+            self.book_btn.md_bg_color = "#FF9800"
+
+        # Update fields
+        self.update_source_fields()
+
+    def update_source_fields(self):
+        """Update source fields based on selected type"""
+        # Clear existing fields
+        self.source_fields_layout.clear_widgets()
+
+        if self.source_type == "url":
+            # URL field
+            url_label = MDLabel(text="URL de la recette", theme_text_color="Primary", adaptive_height=True)
+            self.source_url_field = MDTextField(
+                hint_text="https://exemple.com/recette", mode="outlined", size_hint_y=None, height=dp(56)
+            )
+            self.source_fields_layout.add_widget(url_label)
+            self.source_fields_layout.add_widget(self.source_url_field)
+
+        elif self.source_type == "book":
+            # Book fields
+            title_label = MDLabel(text="Titre du livre/magazine", theme_text_color="Primary", adaptive_height=True)
+            self.source_book_title_field = MDTextField(
+                hint_text="Nom du livre ou magazine", mode="outlined", size_hint_y=None, height=dp(56)
+            )
+
+            authors_label = MDLabel(text="Auteur(s)", theme_text_color="Primary", adaptive_height=True)
+            self.source_book_authors_field = MDTextField(
+                hint_text="Nom des auteurs", mode="outlined", size_hint_y=None, height=dp(56)
+            )
+
+            page_label = MDLabel(text="Page (optionnel)", theme_text_color="Primary", adaptive_height=True)
+            self.source_book_page_field = MDTextField(
+                hint_text="Numéro de page", mode="outlined", size_hint_y=None, height=dp(56)
+            )
+
+            self.source_fields_layout.add_widget(title_label)
+            self.source_fields_layout.add_widget(self.source_book_title_field)
+            self.source_fields_layout.add_widget(authors_label)
+            self.source_fields_layout.add_widget(self.source_book_authors_field)
+            self.source_fields_layout.add_widget(page_label)
+            self.source_fields_layout.add_widget(self.source_book_page_field)
 
     def on_essential_changed(self, checkbox, value):
         """Show/hide alternatives field based on essential checkbox"""
@@ -1236,6 +1358,23 @@ class AddRecipeScreen(MDScreen):
             show_snackbar(f"Visualisation photo: {photo_path.split('/')[-1]}")
             # TODO: Implement photo viewer dialog
 
+    def get_source_data(self):
+        """Get source data based on current selection"""
+        source_data = {"type": self.source_type}
+
+        if self.source_type == "url":
+            if hasattr(self, "source_url_field") and self.source_url_field.text.strip():
+                source_data["url"] = self.source_url_field.text.strip()
+        elif self.source_type == "book":
+            if hasattr(self, "source_book_title_field") and self.source_book_title_field.text.strip():
+                source_data["book_title"] = self.source_book_title_field.text.strip()
+            if hasattr(self, "source_book_authors_field") and self.source_book_authors_field.text.strip():
+                source_data["book_authors"] = self.source_book_authors_field.text.strip()
+            if hasattr(self, "source_book_page_field") and self.source_book_page_field.text.strip():
+                source_data["book_page"] = self.source_book_page_field.text.strip()
+
+        return source_data
+
     def save_recipe(self):
         """Save the recipe to database"""
         # Validate required fields
@@ -1263,7 +1402,7 @@ class AddRecipeScreen(MDScreen):
                 "categories": [cat.strip() for cat in self.categories.text.split(",") if cat.strip()],
                 "tags": [tag.strip() for tag in self.tags.text.split(",") if tag.strip()],
                 "photos": self.photos,
-                "source": {"type": "homemade"},
+                "source": self.get_source_data(),
             }
 
             # Save to database
@@ -1387,6 +1526,27 @@ class AddRecipeScreen(MDScreen):
                     self.photos = []
                     for photo in recipe.photos:
                         self.photos.append({"chemin": photo.chemin, "categorie": photo.categorie})
+
+                    # Load source data
+                    if recipe.source:
+                        self.source_type = recipe.source.type or "homemade"
+                        self.set_source_type(self.source_type)
+
+                        # Fill source-specific fields if they exist
+                        if self.source_type == "url" and recipe.source.url:
+                            if hasattr(self, "source_url_field"):
+                                self.source_url_field.text = recipe.source.url
+                        elif self.source_type == "book":
+                            if hasattr(self, "source_book_title_field") and recipe.source.book_title:
+                                self.source_book_title_field.text = recipe.source.book_title
+                            if hasattr(self, "source_book_authors_field") and recipe.source.book_authors:
+                                self.source_book_authors_field.text = recipe.source.book_authors
+                            if hasattr(self, "source_book_page_field") and recipe.source.book_page:
+                                self.source_book_page_field.text = recipe.source.book_page
+                    else:
+                        # Default to homemade if no source
+                        self.source_type = "homemade"
+                        self.set_source_type(self.source_type)
 
                     # Refresh all lists
                     self.refresh_ingredients_list()

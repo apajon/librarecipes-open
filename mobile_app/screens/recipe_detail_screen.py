@@ -351,9 +351,11 @@ class RecipeDetailScreen(MDScreen):
 
     def create_info_section(self):
         """Create additional recipe info section"""
-        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(100))
+        card = MDCard(
+            padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, adaptive_height=True
+        )
 
-        layout = MDBoxLayout(orientation="vertical", spacing=dp(10))
+        layout = MDBoxLayout(orientation="vertical", spacing=dp(10), adaptive_height=True)
 
         # Title
         title = MDLabel(
@@ -381,17 +383,31 @@ class RecipeDetailScreen(MDScreen):
         source_text = "Homemade recipe"
         if self.recipe and self.recipe.source:
             if self.recipe.source.type == "url" and self.recipe.source.url:
-                source_text = f"From: {self.recipe.source.url}"
+                # Truncate very long URLs for display
+                url = self.recipe.source.url
+                if len(url) > 50:
+                    url = url[:47] + "..."
+                source_text = f"From: {url}"
             elif self.recipe.source.type == "book" and self.recipe.source.book_title:
-                source_text = f"From: {self.recipe.source.book_title}"
+                book_info = f"Book: {self.recipe.source.book_title}"
+                if self.recipe.source.book_authors:
+                    book_info += f"\nBy: {self.recipe.source.book_authors}"
+                if self.recipe.source.book_page:
+                    book_info += f" (p. {self.recipe.source.book_page})"
+                source_text = book_info
 
         source_label = MDLabel(
-            text=source_text, font_size=dp(14), theme_text_color="Secondary", size_hint_y=None, height=dp(25)
+            text=source_text,
+            font_size=dp(14),
+            theme_text_color="Secondary",
+            size_hint_y=None,
+            adaptive_height=True,
+            text_size=(dp(300), None),  # Allow text wrapping
         )
 
         layout.add_widget(title)
-        layout.add_widget(date_label)
         layout.add_widget(source_label)
+        layout.add_widget(date_label)
         card.add_widget(layout)
 
         return card
