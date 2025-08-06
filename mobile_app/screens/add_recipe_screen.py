@@ -18,13 +18,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
-from kivymd.uix.list import (
-    MDList,
-    MDListItem,
-    MDListItemHeadlineText,
-    MDListItemSupportingText,
-    MDListItemTertiaryText,
-)
+from kivymd.uix.list import MDList
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.selectioncontrol import MDCheckbox
@@ -56,6 +50,7 @@ class AddRecipeScreen(MDScreen):
         self.photos = []
         self.dialog = None
         self.editing_ingredient_index = None  # For tracking which ingredient is being edited
+        self.editing_step_index = None  # For tracking which step is being edited
 
         # Initialize photo manager
         self.photo_manager = PhotoManager() if PhotoManager else None
@@ -617,21 +612,111 @@ class AddRecipeScreen(MDScreen):
             self.refresh_ingredients_list()
 
     def add_step_dialog(self):
-        """Show dialog to add step - TODO: Update to KivyMD 2.0"""
-        show_snackbar("Dialogue étapes en cours de migration vers KivyMD 2.0")
-        # Temporary placeholder
-        pass
+        """Show dialog to add step"""
+        # Create overlay background
+        self.step_dialog_overlay = MDFloatLayout(
+            md_bg_color=(0, 0, 0, 0.5),  # Semi-transparent background
+            size_hint=(1, 1),
+        )
+
+        # Create step description field
+        self.step_description_field = MDTextField(
+            hint_text="Décrivez l'étape de préparation...",
+            mode="outlined",
+            multiline=True,
+            max_height=dp(120),
+            size_hint_y=None,
+            height=dp(120),
+        )
+
+        # Create dialog card
+        dialog_card = MDCard(
+            MDBoxLayout(
+                MDLabel(
+                    text="Ajouter une étape",
+                    font_style="Headline",
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=dp(40),
+                    halign="center",
+                ),
+                # Step description field
+                self.step_description_field,
+                # Buttons
+                MDBoxLayout(
+                    MDButton(
+                        MDButtonText(text="Annuler"),
+                        style="text",
+                        on_release=self.close_step_dialog,
+                        size_hint_x=0.5,
+                    ),
+                    MDButton(
+                        MDButtonText(text="Ajouter"),
+                        style="filled",
+                        on_release=self.add_step_from_dialog,
+                        size_hint_x=0.5,
+                    ),
+                    orientation="horizontal",
+                    spacing=dp(12),
+                    size_hint_y=None,
+                    height=dp(48),
+                ),
+                orientation="vertical",
+                spacing=dp(16),
+                padding=dp(20),
+                adaptive_height=True,
+            ),
+            style="filled",
+            size_hint=(0.9, None),
+            adaptive_height=True,
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            elevation=8,
+            radius=[dp(12)],
+        )
+
+        self.step_dialog_overlay.add_widget(dialog_card)
+        self.add_widget(self.step_dialog_overlay)
+
+    def close_step_dialog(self, *args):
+        """Close the step dialog"""
+        if hasattr(self, "step_dialog_overlay"):
+            self.remove_widget(self.step_dialog_overlay)
+            delattr(self, "step_dialog_overlay")
+
+        # Reset editing mode
+        self.editing_step_index = None
+
+    def add_step_from_dialog(self, *args):
+        """Add or edit step from dialog form"""
+        description = self.step_description_field.text.strip()
+
+        if not description:
+            show_snackbar("Veuillez décrire l'étape")
+            return
+
+        # Check if we're editing an existing step
+        if hasattr(self, "editing_step_index") and self.editing_step_index is not None:
+            self.update_step(self.editing_step_index, description)
+            self.editing_step_index = None  # Reset editing mode
+        else:
+            self.confirm_add_step(description)
+
+        self.close_step_dialog()
 
     def confirm_add_step(self, description):
         """Add step to list"""
         if not description.strip():
-            show_snackbar("Please enter step description")
+            show_snackbar("Veuillez décrire l'étape")
             return
 
         self.steps.append(description.strip())
         self.refresh_steps_list()
-        if self.dialog:
-            self.dialog.dismiss()
+
+    def update_step(self, index, description):
+        """Update existing step at index"""
+        if 0 <= index < len(self.steps):
+            self.steps[index] = description.strip()
+            self.refresh_steps_list()
 
     def refresh_ingredients_list(self):
         """Refresh ingredients display"""
@@ -764,14 +849,78 @@ class AddRecipeScreen(MDScreen):
         self.steps_list.clear_widgets()
 
         for i, step in enumerate(self.steps):
-            item = MDListItem(
-                MDListItemHeadlineText(text=f"Step {i+1}"),  # noqa E226
-                MDListItemSupportingText(text=step[:50] + "..." if len(step) > 50 else step),
-                MDListItemTertiaryText(text="Tap to remove"),
-                on_release=lambda x, idx=i: self.remove_step(idx),
+            # Create a custom card layout for steps
+            card = MDCard(
+                MDBoxLayout(
+                    MDBoxLayout(
+                        MDLabel(
+                            text=f"Étape {i + 1}",
+                            theme_text_color="Primary",
+                            font_style="Body",
+                            bold=True,
+                            size_hint_y=None,
+                            height=dp(24),
+                            adaptive_height=True,
+                        ),
+                        MDLabel(
+                            text=step[:100] + "..." if len(step) > 100 else step,
+                            theme_text_color="Secondary",
+                            font_style="Body",
+                            size_hint_y=None,
+                            adaptive_height=True,
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
+                        size_hint_x=0.85,
+                        adaptive_height=True,
+                    ),
+                    MDBoxLayout(
+                        MDIconButton(
+                            icon="chevron-up",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_step_up(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == 0,  # Disable if first item
+                        ),
+                        MDIconButton(
+                            icon="chevron-down",
+                            theme_icon_color="Primary",
+                            on_release=lambda x, idx=i: self.move_step_down(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                            disabled=i == len(self.steps) - 1,  # Disable if last item
+                        ),
+                        MDIconButton(
+                            icon="delete",
+                            theme_icon_color="Custom",
+                            icon_color="red",
+                            on_release=lambda x, idx=i: self.remove_step(idx),
+                            size_hint_y=None,
+                            height=dp(32),
+                            width=dp(32),
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
+                        size_hint_x=0.15,
+                        adaptive_height=True,
+                    ),
+                    orientation="horizontal",
+                    spacing=dp(12),
+                    padding=[dp(16), dp(12), dp(16), dp(12)],
+                    adaptive_height=True,
+                ),
+                style="outlined",
+                size_hint_y=None,
+                adaptive_height=True,
+                on_release=lambda x, idx=i: self.edit_step(idx),
+                elevation=1,
+                radius=[dp(8)],
             )
 
-            self.steps_list.add_widget(item)
+            self.steps_list.add_widget(card)
 
     def remove_ingredient(self, index):
         """Remove ingredient from list"""
@@ -832,6 +981,34 @@ class AddRecipeScreen(MDScreen):
         if 0 <= index < len(self.steps):
             self.steps.pop(index)
             self.refresh_steps_list()
+
+    def move_step_up(self, index):
+        """Move step up in the list"""
+        if index > 0 and index < len(self.steps):
+            # Swap with previous step
+            self.steps[index], self.steps[index - 1] = self.steps[index - 1], self.steps[index]
+            self.refresh_steps_list()
+
+    def move_step_down(self, index):
+        """Move step down in the list"""
+        if index >= 0 and index < len(self.steps) - 1:
+            # Swap with next step
+            self.steps[index], self.steps[index + 1] = self.steps[index + 1], self.steps[index]
+            self.refresh_steps_list()
+
+    def edit_step(self, index):
+        """Edit existing step"""
+        if 0 <= index < len(self.steps):
+            step = self.steps[index]
+
+            # Store the editing index
+            self.editing_step_index = index
+
+            # Pre-fill the dialog with existing values
+            self.add_step_dialog()
+
+            # Set the value in the dialog field
+            self.step_description_field.text = step
 
     def show_photo_options(self):
         """Show photo capture/selection options - TODO: Update to KivyMD 2.0"""
