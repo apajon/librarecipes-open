@@ -55,6 +55,7 @@ class AddRecipeScreen(MDScreen):
         self.steps = []
         self.photos = []
         self.dialog = None
+        self.editing_ingredient_index = None  # For tracking which ingredient is being edited
 
         # Initialize photo manager
         self.photo_manager = PhotoManager() if PhotoManager else None
@@ -560,8 +561,11 @@ class AddRecipeScreen(MDScreen):
             self.remove_widget(self.dialog_overlay)
             delattr(self, "dialog_overlay")
 
+        # Reset editing mode
+        self.editing_ingredient_index = None
+
     def add_ingredient_from_dialog(self, *args):
-        """Add ingredient from dialog form"""
+        """Add or edit ingredient from dialog form"""
         name = self.name_field.text.strip()
         quantity = self.quantity_field.text.strip()
         unit = self.selected_unit  # Use selected unit instead of text field
@@ -572,7 +576,13 @@ class AddRecipeScreen(MDScreen):
             show_snackbar("Veuillez entrer le nom de l'ingrédient")
             return
 
-        self.confirm_add_ingredient(name, quantity, unit, essential, alternatives)
+        # Check if we're editing an existing ingredient
+        if hasattr(self, "editing_ingredient_index") and self.editing_ingredient_index is not None:
+            self.update_ingredient(self.editing_ingredient_index, name, quantity, unit, essential, alternatives)
+            self.editing_ingredient_index = None  # Reset editing mode
+        else:
+            self.confirm_add_ingredient(name, quantity, unit, essential, alternatives)
+
         self.close_ingredient_dialog()
 
     def confirm_add_ingredient(self, name, quantity, unit, essential, alternatives=""):
@@ -593,6 +603,18 @@ class AddRecipeScreen(MDScreen):
         self.refresh_ingredients_list()
         if self.dialog:
             self.dialog.dismiss()
+
+    def update_ingredient(self, index, name, quantity, unit, essential, alternatives=""):
+        """Update existing ingredient at index"""
+        if 0 <= index < len(self.ingredients):
+            self.ingredients[index] = {
+                "nom": name.strip(),
+                "quantite": quantity.strip() if quantity else None,
+                "unite": unit.strip() if unit else None,
+                "indispensable": essential,
+                "alternatives": alternatives.strip() if alternatives else None,
+            }
+            self.refresh_ingredients_list()
 
     def add_step_dialog(self):
         """Show dialog to add step - TODO: Update to KivyMD 2.0"""
@@ -642,14 +664,63 @@ class AddRecipeScreen(MDScreen):
                 else:
                     tertiary_text = f"Ingrédient {i+1}"  # noqa E226
 
-            # Use standard list item for all ingredients
-            item = MDListItem(
-                MDListItemHeadlineText(text=text),
-                MDListItemSupportingText(text=secondary_text),
-                MDListItemTertiaryText(text=tertiary_text),
-                on_release=lambda x, idx=i: self.remove_ingredient(idx),
+            # Create a custom card layout for better control
+            card = MDCard(
+                MDBoxLayout(
+                    MDBoxLayout(
+                        MDLabel(
+                            text=text,
+                            theme_text_color="Primary",
+                            font_style="Body",
+                            size_hint_y=None,
+                            height=dp(32),
+                            adaptive_height=True,
+                        ),
+                        MDLabel(
+                            text=secondary_text,
+                            theme_text_color="Secondary",
+                            font_style="Body",
+                            size_hint_y=None,
+                            height=dp(24),
+                            adaptive_height=True,
+                        ),
+                        MDLabel(
+                            text=tertiary_text,
+                            theme_text_color="Secondary",
+                            font_style="Body",
+                            size_hint_y=None,
+                            height=dp(24),
+                            adaptive_height=True,
+                        ),
+                        orientation="vertical",
+                        spacing=dp(4),
+                        size_hint_x=0.85,
+                        adaptive_height=True,
+                    ),
+                    MDIconButton(
+                        icon="delete",
+                        theme_icon_color="Custom",
+                        icon_color="red",
+                        on_release=lambda x, idx=i: self.remove_ingredient(idx),
+                        size_hint_x=0.15,
+                        size_hint_y=None,
+                        height=dp(48),
+                        width=dp(48),
+                    ),
+                    orientation="horizontal",
+                    spacing=dp(12),
+                    padding=[dp(16), dp(12), dp(16), dp(12)],
+                    adaptive_height=True,
+                ),
+                style="outlined",
+                size_hint_y=None,
+                adaptive_height=True,
+                on_release=lambda x, idx=i: self.edit_ingredient(idx),
+                elevation=1,
+                radius=[dp(8)],
             )
-            self.ingredients_list.add_widget(item)
+
+            self.ingredients_list.add_widget(card)
 
     def refresh_steps_list(self):
         """Refresh steps display"""
@@ -670,6 +741,40 @@ class AddRecipeScreen(MDScreen):
         if 0 <= index < len(self.ingredients):
             self.ingredients.pop(index)
             self.refresh_ingredients_list()
+
+    def edit_ingredient(self, index):
+        """Edit existing ingredient"""
+        if 0 <= index < len(self.ingredients):
+            ingredient = self.ingredients[index]
+
+            # Store the editing index
+            self.editing_ingredient_index = index
+
+            # Pre-fill the dialog with existing values
+            self.add_ingredient_dialog()
+
+            # Set the values in the dialog fields
+            self.name_field.text = ingredient.get("nom") or ""
+            self.quantity_field.text = ingredient.get("quantite") or ""
+
+            # Set selected unit and update button display
+            unit = ingredient.get("unite") or ""
+            self.selected_unit = unit
+            if unit:
+                # Update the button text to show selected unit
+                self.unit_button.children[0].text = unit
+            else:
+                self.unit_button.children[0].text = "Sélectionner une unité"
+
+            self.essential_checkbox.active = ingredient.get("indispensable", False)
+
+            # Handle alternatives field - ensure we have a string, not None
+            alternatives = ingredient.get("alternatives") or ""
+            self.alternatives_field.text = alternatives
+
+            # Update dialog title to indicate editing
+            if hasattr(self, "ingredient_dialog_title"):
+                self.ingredient_dialog_title.text = "Modifier l'ingrédient"
 
     def remove_step(self, index):
         """Remove step from list"""
