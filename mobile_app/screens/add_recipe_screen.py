@@ -15,7 +15,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDButton, MDIconButton
 from kivymd.uix.button.button import MDButtonText  # pour gérer le texte dans le bouton
 from kivymd.uix.card import MDCard
-from kivymd.uix.dialog import MDDialog
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.list import (
@@ -60,6 +60,108 @@ class AddRecipeScreen(MDScreen):
         self.photo_manager = PhotoManager() if PhotoManager else None
 
         self.build_screen()
+
+    def quantity_filter(self, string, from_undo):
+        """Custom filter for quantity field to allow numbers, decimals and fractions"""
+        # Allow digits, decimal point, and slash for fractions
+        allowed_chars = "0123456789./"
+        return "".join([c for c in string if c in allowed_chars])
+
+    def show_unit_menu(self, *args):
+        """Show unit selection menu"""
+        # List of available units (same as Streamlit app)
+        units = [
+            "g",
+            "kg",
+            "ml",
+            "cl",
+            "l",
+            "c. à c.",
+            "c. à s.",
+            "pièce(s)",
+            "gousse(s)",
+            "pincée(s)",
+            "tasse(s)",
+            "cup(s)",
+            "oz",
+            "lb",
+        ]
+
+        # Create unit selection card with fixed height
+        unit_card = MDCard(
+            padding=dp(15),  # Reduced padding
+            spacing=dp(8),  # Reduced spacing
+            elevation=10,
+            radius=[dp(15)],
+            size_hint=(0.8, None),
+            height=dp(450),  # Reduced height
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+        )
+
+        content = MDBoxLayout(orientation="vertical", spacing=dp(8), adaptive_height=True)  # Reduced spacing
+
+        # Title
+        title = MDLabel(
+            text="Choisir une unité", font_size=dp(18), bold=True, theme_text_color="Primary", adaptive_height=True
+        )
+        content.add_widget(title)
+
+        # Simple scrollable list area
+        from kivy.uix.scrollview import ScrollView
+
+        scroll = ScrollView(
+            size_hint_y=None,
+            height=dp(320),  # Increased scroll area since card is smaller
+            do_scroll_x=False,
+            do_scroll_y=True,
+        )
+
+        units_layout = MDBoxLayout(orientation="vertical", spacing=dp(5), adaptive_height=True)
+
+        for unit in units:
+            unit_btn = MDButton(
+                style="text", size_hint_y=None, height=dp(48), on_release=lambda x, u=unit: self.select_unit(u)
+            )
+            unit_btn.add_widget(MDButtonText(text=unit))
+            units_layout.add_widget(unit_btn)
+
+        # Add "No unit" option
+        no_unit_btn = MDButton(
+            style="text", size_hint_y=None, height=dp(48), on_release=lambda x: self.select_unit("")
+        )
+        no_unit_btn.add_widget(MDButtonText(text="Aucune unité"))
+        units_layout.add_widget(no_unit_btn)
+
+        scroll.add_widget(units_layout)
+        content.add_widget(scroll)
+
+        # Cancel button
+        cancel_btn = MDButton(style="outlined", size_hint_y=None, height=dp(40), on_release=self.close_unit_menu)
+        cancel_btn.add_widget(MDButtonText(text="Annuler"))
+        content.add_widget(cancel_btn)
+
+        unit_card.add_widget(content)
+
+        # Add overlay
+        self.unit_overlay = MDFloatLayout()
+        self.unit_overlay.md_bg_color = (0, 0, 0, 0.5)
+        self.unit_overlay.add_widget(unit_card)
+        self.add_widget(self.unit_overlay)
+
+    def select_unit(self, unit):
+        """Select a unit and update button text"""
+        self.selected_unit = unit
+        if unit:
+            self.unit_button.children[0].text = unit
+        else:
+            self.unit_button.children[0].text = "Aucune unité"
+        self.close_unit_menu()
+
+    def close_unit_menu(self, *args):
+        """Close unit selection menu"""
+        if hasattr(self, "unit_overlay"):
+            self.remove_widget(self.unit_overlay)
+            delattr(self, "unit_overlay")
 
     def build_screen(self):
         """Build the add recipe screen layout"""
@@ -330,47 +432,104 @@ class AddRecipeScreen(MDScreen):
 
     def add_ingredient_dialog(self):
         """Show dialog to add ingredient"""
-        content = MDBoxLayout(orientation="vertical", spacing=dp(10), adaptive_height=True)
+        # Create dialog content
+        dialog_card = MDCard(
+            padding=dp(20),
+            spacing=dp(15),
+            elevation=10,
+            radius=[dp(15)],
+            size_hint=(0.9, None),
+            height=dp(500),
+            pos_hint={"center_x": 0.5, "center_y": 0.5},
+        )
 
-        name_field = MDTextField(hint_text="Ingredient name*", required=True)
+        content = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
 
-        quantity_field = MDTextField(hint_text="Quantity")
+        # Title
+        title = MDLabel(
+            text="Ajouter un ingrédient", font_size=dp(20), bold=True, theme_text_color="Primary", adaptive_height=True
+        )
 
-        unit_field = MDTextField(hint_text="Unit (g, ml, cups, etc.)")
+        # Form fields
+        name_label = MDLabel(text="Nom de l'ingrédient*", theme_text_color="Primary", adaptive_height=True)
 
+        self.name_field = MDTextField(hint_text="Ex: Farine", mode="outlined", size_hint_y=None, height=dp(56))
+
+        quantity_label = MDLabel(text="Quantité", theme_text_color="Primary", adaptive_height=True)
+
+        self.quantity_field = MDTextField(
+            hint_text="Ex: 250, 3/4, 1.5",
+            input_filter=self.quantity_filter,
+            mode="outlined",
+            size_hint_y=None,
+            height=dp(56),
+        )
+
+        unit_label = MDLabel(text="Unité", theme_text_color="Primary", adaptive_height=True)
+
+        # Unit selection button instead of text field
+        self.unit_button = MDButton(style="outlined", size_hint_y=None, height=dp(56), on_release=self.show_unit_menu)
+        self.unit_button.add_widget(MDButtonText(text="Sélectionner une unité"))
+        self.selected_unit = ""  # Store selected unit
+
+        # Essential checkbox
         essential_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), adaptive_height=True)
-
-        essential_checkbox = MDCheckbox(active=True, size_hint_x=None, width=dp(30))
-
-        essential_label = MDLabel(text="Essential ingredient", theme_text_color="Primary")
-
-        essential_layout.add_widget(essential_checkbox)
+        self.essential_checkbox = MDCheckbox(active=True, size_hint_x=None, width=dp(30))
+        essential_label = MDLabel(text="Ingrédient essentiel", theme_text_color="Primary", adaptive_height=True)
+        essential_layout.add_widget(self.essential_checkbox)
         essential_layout.add_widget(essential_label)
 
-        content.add_widget(name_field)
-        content.add_widget(quantity_field)
-        content.add_widget(unit_field)
-        content.add_widget(essential_layout)
+        # Buttons
+        button_layout = MDBoxLayout(orientation="horizontal", spacing=dp(10), adaptive_height=True)
 
-        self.dialog = MDDialog(
-            title="Add Ingredient",
-            type="custom",
-            content_cls=content,
-            buttons=[
-                MDButton(
-                    on_release=lambda x: self.dialog.dismiss() if self.dialog else None,
-                    children=[MDButtonText(text="Cancel")],
-                ),
-                MDButton(
-                    style="filled",
-                    on_release=lambda x: self.confirm_add_ingredient(
-                        name_field.text, quantity_field.text, unit_field.text, essential_checkbox.active
-                    ),
-                    children=[MDButtonText(text="Add")],
-                ),
-            ],
-        )
-        self.dialog.open()
+        cancel_btn = MDButton(style="outlined", on_release=self.close_ingredient_dialog)
+        cancel_btn.add_widget(MDButtonText(text="Annuler"))
+
+        add_btn = MDButton(style="filled", on_release=self.add_ingredient_from_dialog)
+        add_btn.add_widget(MDButtonText(text="Ajouter"))
+
+        button_layout.add_widget(cancel_btn)
+        button_layout.add_widget(add_btn)
+
+        # Add all to content
+        content.add_widget(title)
+        content.add_widget(name_label)
+        content.add_widget(self.name_field)
+        content.add_widget(quantity_label)
+        content.add_widget(self.quantity_field)
+        content.add_widget(unit_label)
+        content.add_widget(self.unit_button)
+        content.add_widget(essential_layout)
+        content.add_widget(button_layout)
+
+        dialog_card.add_widget(content)
+
+        # Add to screen with overlay
+        self.dialog_overlay = MDFloatLayout()
+        self.dialog_overlay.md_bg_color = (0, 0, 0, 0.5)  # Semi-transparent background
+        self.dialog_overlay.add_widget(dialog_card)
+
+        self.add_widget(self.dialog_overlay)
+
+    def close_ingredient_dialog(self, *args):
+        """Close the ingredient dialog"""
+        if hasattr(self, "dialog_overlay"):
+            self.remove_widget(self.dialog_overlay)
+            delattr(self, "dialog_overlay")
+
+    def add_ingredient_from_dialog(self, *args):
+        """Add ingredient from dialog form"""
+        name = self.name_field.text.strip()
+        quantity = self.quantity_field.text.strip()
+        unit = self.selected_unit  # Use selected unit instead of text field
+        essential = self.essential_checkbox.active
+
+        if not name:
+            show_snackbar("Veuillez entrer le nom de l'ingrédient")
+            return
+
+        self.confirm_add_ingredient(name, quantity, unit, essential)
+        self.close_ingredient_dialog()
 
     def confirm_add_ingredient(self, name, quantity, unit, essential):
         """Add ingredient to list"""
@@ -391,30 +550,10 @@ class AddRecipeScreen(MDScreen):
             self.dialog.dismiss()
 
     def add_step_dialog(self):
-        """Show dialog to add preparation step"""
-        content = MDBoxLayout(orientation="vertical", spacing=dp(10), adaptive_height=True)
-
-        step_field = MDTextField(hint_text="Describe this preparation step...", multiline=True, max_text_length=500)
-
-        content.add_widget(step_field)
-
-        self.dialog = MDDialog(
-            title=f"Add Step {len(self.steps) + 1}",
-            type="custom",
-            content_cls=content,
-            buttons=[
-                MDButton(
-                    on_release=lambda x: self.dialog.dismiss() if self.dialog else None,
-                    children=[MDButtonText(text="Cancel")],
-                ),
-                MDButton(
-                    style="filled",
-                    on_release=lambda x: self.confirm_add_step(step_field.text),
-                    children=[MDButtonText(text="Add")],
-                ),
-            ],
-        )
-        self.dialog.open()
+        """Show dialog to add step - TODO: Update to KivyMD 2.0"""
+        show_snackbar("Dialogue étapes en cours de migration vers KivyMD 2.0")
+        # Temporary placeholder
+        pass
 
     def confirm_add_step(self, description):
         """Add step to list"""
@@ -476,44 +615,10 @@ class AddRecipeScreen(MDScreen):
             self.refresh_steps_list()
 
     def show_photo_options(self):
-        """Show photo capture/selection options"""
-        if not self.photo_manager:
-            show_snackbar("Photo features not available")
-            return
-
-        content = MDBoxLayout(orientation="vertical", spacing=dp(15), adaptive_height=True)
-
-        camera_btn = MDButton(
-            style="filled",
-            size_hint_y=None,
-            height=dp(40),
-            on_release=lambda x: self.take_photo(),
-            children=[MDButtonText(text="Take Photo")],
-        )
-
-        gallery_btn = MDButton(
-            style="tonal",
-            size_hint_y=None,
-            height=dp(40),
-            on_release=lambda x: self.select_from_gallery(),
-            children=[MDButtonText(text="Choose from Gallery")],
-        )
-
-        content.add_widget(camera_btn)
-        content.add_widget(gallery_btn)
-
-        self.dialog = MDDialog(
-            title="Add Recipe Photo",
-            type="custom",
-            content_cls=content,
-            buttons=[
-                MDButton(
-                    on_release=lambda x: self.dialog.dismiss() if self.dialog else None,
-                    children=[MDButtonText(text="Cancel")],
-                )
-            ],
-        )
-        self.dialog.open()
+        """Show photo capture/selection options - TODO: Update to KivyMD 2.0"""
+        show_snackbar("Dialogue photos en cours de migration vers KivyMD 2.0")
+        # Temporary placeholder
+        pass
 
     def take_photo(self):
         """Take a photo using camera"""
