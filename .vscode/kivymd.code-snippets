@@ -1,0 +1,201 @@
+{
+    // --- STRUCTURE DE BASE ---
+    "KivyMD - MDApp": {
+        "prefix": "mdapp",
+        "body": [
+            "from kivymd.app import MDApp",
+            "from kivymd.uix.screen import MDScreen",
+            "",
+            "class MainScreen(MDScreen):",
+            "    pass",
+            "",
+            "class MyApp(MDApp):",
+            "    def build(self):",
+            "        return MainScreen()",
+            "",
+            "MyApp().run()"
+        ],
+        "description": "Structure de base d'une app KivyMD"
+    },
+    "KivyMD - MDScreen": {
+        "prefix": "mdscreen",
+        "body": [
+            "<MDScreen>",
+            "    MDTopAppBar:",
+            "        title: 'Titre'",
+            "        elevation: 0",
+            "",
+            "    MDLabel:",
+            "        text: 'Contenu principal'",
+            "        halign: 'center'",
+            "</MDScreen>"
+        ],
+        "description": "Écran avec AppBar et label"
+    },
+    // --- APP BAR ET DRAWER ---
+    "KivyMD - MDTopAppBar": {
+        "prefix": "mdtopappbar",
+        "body": [
+            "MDTopAppBar:",
+            "    title: 'Ma barre supérieure'",
+            "    elevation: 2",
+            "    left_action_items: [['menu', lambda x: nav_drawer.set_state('open')]]"
+        ],
+        "description": "Barre supérieure"
+    },
+    "KivyMD - MDNavigationDrawer": {
+        "prefix": "mddrawer",
+        "body": [
+            "MDNavigationLayout:",
+            "    ScreenManager:",
+            "        MDScreen:",
+            "            MDTopAppBar:",
+            "                title: 'Mon App'",
+            "                left_action_items: [['menu', lambda x: nav_drawer.set_state('open')]]",
+            "",
+            "            MDLabel:",
+            "                text: 'Bienvenue'",
+            "                halign: 'center'",
+            "",
+            "    MDNavigationDrawer:",
+            "        id: nav_drawer",
+            "        MDNavigationDrawerMenu:",
+            "            MDNavigationDrawerItem:",
+            "                text: 'Accueil'",
+            "                icon: 'home'"
+        ],
+        "description": "Drawer avec menu"
+    },
+    // --- BOUTONS ---
+    "KivyMD - MDButton": {
+        "prefix": "mdbutton",
+        "body": [
+            "MDButton:",
+            "    text: 'Cliquer'",
+            "    pos_hint: {'center_x': 0.5}",
+            "    on_release: app.on_button_click()"
+        ],
+        "description": "Bouton Material 3"
+    },
+    "KivyMD - MDFloatingActionButton": {
+        "prefix": "mdfab",
+        "body": [
+            "MDFloatingActionButton:",
+            "    icon: 'plus'",
+            "    pos_hint: {'center_x': 0.9, 'center_y': 0.1}",
+            "    on_release: app.on_fab_click()"
+        ],
+        "description": "Floating Action Button"
+    },
+    // --- INPUTS ---
+    "KivyMD - MDTextField": {
+        "prefix": "mdtextfield",
+        "body": [
+            "MDTextField:",
+            "    hint_text: 'Entrez votre nom'",
+            "    helper_text: 'Nom requis'",
+            "    helper_text_mode: 'on_error'",
+            "    required: True",
+            "    pos_hint: {'center_x': 0.5}",
+            "    size_hint_x: None",
+            "    width: '280dp'"
+        ],
+        "description": "Champ de texte MD3"
+    },
+    // --- LABELS ET ICONES ---
+    "KivyMD - MDLabel": {
+        "prefix": "mdlabel",
+        "body": [
+            "MDLabel:",
+            "    text: 'Texte ici'",
+            "    halign: 'center'"
+        ],
+        "description": "Label centré"
+    },
+    "KivyMD - MDIcon": {
+        "prefix": "mdicon",
+        "body": [
+            "MDIcon:",
+            "    icon: 'android'",
+            "    halign: 'center'"
+        ],
+        "description": "Icône centrée"
+    },
+    // --- CARDS ---
+    "KivyMD - MD3Card": {
+        "prefix": "md3card",
+        "body": [
+            "MD3Card:",
+            "    orientation: 'vertical'",
+            "    padding: '12dp'",
+            "    size_hint: None, None",
+            "    size: '280dp', '120dp'",
+            "",
+            "    MDLabel:",
+            "        text: 'Titre de la carte'",
+            "        theme_text_color: 'Primary'",
+            "",
+            "    MDLabel:",
+            "        text: 'Sous-titre ou description'",
+            "        theme_text_color: 'Secondary'"
+        ],
+        "description": "Carte stylée MD3"
+    },
+    // --- DIALOGUES ---
+    "KivyMD - MDDialog": {
+        "prefix": "mddialog",
+        "body": [
+            "from kivymd.uix.dialog import MDDialog",
+            "",
+            "self.dialog = MDDialog(",
+            "    title='Titre du dialogue',",
+            "    text='Message à afficher ici.',",
+            "    buttons=[",
+            "        MDButton(text='ANNULER', on_release=self.close_dialog),",
+            "        MDButton(text='OK', on_release=self.confirm_action),",
+            "    ]",
+            ")",
+            "self.dialog.open()"
+        ],
+        "description": "Dialogue standard"
+    },
+    // --- SNACKBARS ---
+    "KivyMD - MDSnackbar": {
+        "prefix": "mdsnackbar",
+        "body": [
+            "from kivymd.uix.snackbar import Snackbar",
+            "",
+            "Snackbar(text='Action terminée').open()"
+        ],
+        "description": "Snackbar simple"
+    },
+    // --- BOTTOM BAR ---
+    "KivyMD - MDBottomAppBar": {
+        "prefix": "mdbottombar",
+        "body": [
+            "MDBottomAppBar:",
+            "    MDTopAppBar:",
+            "        type: 'bottom'",
+            "        icon: 'menu'",
+            "        on_action_button: app.on_bottom_action()"
+        ],
+        "description": "Bottom app bar (MD3)"
+    },
+    // --- SNIPPETS POUR LA BASE DE CODE ---
+    "KivyMD - Import KivyMD": {
+        "prefix": "import_kivymd",
+        "body": [
+            "from kivymd.app import MDApp",
+            "from kivymd.uix.screen import MDScreen"
+        ],
+        "description": "Import de base pour KivyMD"
+    },
+    "KivyMD - Import Kivy": {
+        "prefix": "import_kivy",
+        "body": [
+            "from kivy.lang import Builder",
+            "from kivy.uix.screenmanager import ScreenManager, Screen"
+        ],
+        "description": "Import de base pour Kivy"
+    }
+}
