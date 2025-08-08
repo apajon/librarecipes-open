@@ -23,8 +23,12 @@ from screens.recipe_detail_screen import RecipeDetailScreen  # noqa: E402
 from screens.recipe_list_screen import RecipeListScreen  # noqa: E402
 from screens.search_screen import SearchScreen  # noqa: E402
 
-from src.db import engine  # noqa: E402
-from src.model import Base  # noqa: E402
+# Import database layer based on platform
+if platform == "android":
+    import src.db_android as db_android  # noqa: E402
+else:
+    from src.db import engine  # noqa: E402
+    from src.model import Base  # noqa: E402
 
 # Set window size for desktop testing
 if platform not in ("android", "ios"):
@@ -66,13 +70,18 @@ class LibraRecipesApp(MDApp):
     def init_database(self):
         """Initialize the database and create tables"""
         try:
-            # Create data directory if it doesn't exist
-            data_dir = Path(__file__).parent.parent / "data"
-            data_dir.mkdir(exist_ok=True)
+            if platform == "android":
+                # Use Android-compatible database layer
+                db_android.init_database()
+                print("Android database initialized successfully")
+            else:
+                # Create data directory if it doesn't exist
+                data_dir = Path(__file__).parent.parent / "data"
+                data_dir.mkdir(exist_ok=True)
 
-            # Create all tables
-            Base.metadata.create_all(engine)
-            print("Database initialized successfully")
+                # Create all tables
+                Base.metadata.create_all(engine)
+                print("Desktop database initialized successfully")
         except Exception as e:
             print(f"Database initialization error: {e}")
 

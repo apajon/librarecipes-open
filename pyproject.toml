@@ -6,7 +6,7 @@ authors = [
     {name = "Adrien PAJON",email = "adrien.pajon@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.12,<4.0"
+requires-python = ">=3.11,<4.0"
 dependencies = [
     "streamlit (>=1.46.1,<2.0.0)",
     "sqlalchemy (>=2.0.41,<3.0.0)",
@@ -38,6 +38,8 @@ sqlalchemy = "^2.0.42"
 pillow = "^11.3.0"
 plyer = "^2.1.0"
 kivymd = {git = "https://github.com/kivymd/KivyMD.git", rev = "master"}
+setuptools = "^80.9.0"
+cython = "^3.1.2"
 
 
 

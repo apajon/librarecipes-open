@@ -2,54 +2,36 @@
 # LibraRecipes Android Build Script
 # This script builds the Android APK for LibraRecipes mobile app
 
+set -euo pipefail
+
 echo "🍴 LibraRecipes Android Build Script"
 echo "======================================"
 
 # Check if buildozer is installed
 if ! command -v buildozer &> /dev/null; then
     echo "❌ Buildozer not found. Installing..."
-    pip install buildozer
+    pip install --user buildozer
+    export PATH="$HOME/.local/bin:$PATH"
 fi
 
-# Navigate to app directory
-cd /app
-
-echo "📱 Building LibraRecipes Android APK..."
-echo "This process may take 10-30 minutes on first build."
-echo ""
+# Move to repo root (this script sits at project root)
+cd "$(dirname "$0")"
 
 # Clean previous builds
 echo "🧹 Cleaning previous builds..."
-rm -rf .buildozer/
-rm -rf bin/
-
-# Initialize buildozer (creates .buildozer directory)
-echo "⚙️ Initializing build environment..."
-buildozer init
+rm -rf .buildozer/ bin/
 
 # Build the APK in debug mode
 echo "🔨 Building debug APK..."
 buildozer android debug
 
-# Check if build was successful
-if [ -f "bin/librarecipes-*-debug.apk" ]; then
+# Report
+APK_PATH=$(ls bin/*-debug.apk 2>/dev/null || true)
+if [[ -n "${APK_PATH}" ]]; then
     echo "✅ BUILD SUCCESSFUL!"
-    echo ""
-    echo "📁 APK Location: $(ls bin/librarecipes-*-debug.apk)"
-    echo "📱 File size: $(du -h bin/librarecipes-*-debug.apk | cut -f1)"
-    echo ""
-    echo "🚀 To install on device:"
-    echo "   adb install bin/librarecipes-*-debug.apk"
-    echo ""
-    echo "📤 Or use:"
-    echo "   buildozer android deploy"
-    echo ""
+    echo "📁 APK: ${APK_PATH}"
+    du -h ${APK_PATH} | awk '{print "📱 Size:", $1}'
 else
-    echo "❌ Build failed. Check logs above for errors."
-    echo "💡 Common issues:"
-    echo "   - Missing Android SDK/NDK"
-    echo "   - Insufficient disk space"
-    echo "   - Missing dependencies"
+    echo "❌ BUILD FAILED"
+    exit 1
 fi
-
-echo "🏁 Build process complete!"

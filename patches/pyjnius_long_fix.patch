@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: LibraRecipes Fix Bot <noreply@librarecipes>
+Date: Fri, 8 Aug 2025 12:00:00 +0000
+Subject: [PATCH] pyjnius: replace 'long' checks with 'int' for Python3
+
+---
+ jnius/jnius_utils.pxi | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/jnius/jnius_utils.pxi b/jnius/jnius_utils.pxi
+index 1111111..2222222 100644
+--- a/jnius/jnius_utils.pxi
++++ b/jnius/jnius_utils.pxi
+@@ -320,9 +320,9 @@ cdef int resolve_type_score(object arg, char r):
+         score += 10
+         continue
+
+     if r == 'S' or r == 'I':
+-        if isinstance(arg, int) or (
+-                (isinstance(arg, long) and arg < 2147483648)):
+-            return 0
++        if isinstance(arg, int):
++            # Python3 n'a plus 'long', int couvre tous les entiers
++            return 0
+
+     if r == 'J':
+         if isinstance(arg, int):
+--
+2.39.3
