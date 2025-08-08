@@ -82,7 +82,19 @@ def get_recette_by_id(session: Session, recette_id: str) -> Recette | None:
 
 
 def list_recettes(session: Session) -> list[Recette]:
-    return session.query(Recette).order_by(Recette.date_ajout.desc()).all()
+    return (
+        session.query(Recette)
+        .options(
+            joinedload(Recette.categories),
+            joinedload(Recette.tags),
+            joinedload(Recette.ingredients),
+            joinedload(Recette.etapes),
+            joinedload(Recette.photos),
+            joinedload(Recette.source)
+        )
+        .order_by(Recette.date_ajout.desc())
+        .all()
+    )
 
 
 def delete_recette(session: Session, recette_id: str) -> bool:

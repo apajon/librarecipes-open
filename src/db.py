@@ -1,9 +1,23 @@
+import os
 from contextlib import contextmanager
+from pathlib import Path
 
+from kivy.utils import platform
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = "sqlite:///data/recettes.db"
+# Determine database path based on platform
+if platform == "android":
+    from android.storage import app_storage_path
+
+    db_path = os.path.join(app_storage_path(), "recettes.db")
+else:
+    # For desktop/development
+    db_path = "data/recettes.db"
+    # Ensure directory exists
+    Path("data").mkdir(exist_ok=True)
+
+DATABASE_URL = f"sqlite:///{db_path}"
 
 # Création de l'engine SQLite
 engine = create_engine(

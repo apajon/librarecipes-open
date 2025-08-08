@@ -1,10 +1,8 @@
 import uuid
 from datetime import datetime
-from typing import Any
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.orm.relationships import _RelationshipDeclared
 
 Base = declarative_base()
 
@@ -119,7 +117,7 @@ class Convive(Base):
     nom = Column(String, unique=True, nullable=False)
     groupe = Column(String)  # famille, amis...
 
-    feedbacks: _RelationshipDeclared[Any] = relationship(
+    feedbacks = relationship(
         "FeedbackExecution", back_populates="convive", cascade="all, delete-orphan"
     )
 
