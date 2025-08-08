@@ -2,8 +2,8 @@
 
 import streamlit as st
 
-from app.utils.constants import BUTTON_LABELS, ICONS, MESSAGES
-from app.utils.navigation_helpers import navigate_to_detail_page, navigate_to_modify_page
+from streamlit_app.utils.constants import BUTTON_LABELS, ICONS, MESSAGES
+from streamlit_app.utils.navigation_helpers import navigate_to_detail_page, navigate_to_modify_page
 
 
 def _display_basic_info(recette):

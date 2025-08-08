@@ -1,17 +1,17 @@
 import streamlit as st
 from streamlit_tags import st_tags
 
-from app.utils.etapes_manager import EtapesManager
-from app.utils.ingredients_manager import IngredientsManager
-from app.utils.recipe_validator import prepare_recipe_data, validate_recipe_data
-
-# Import des utilitaires
-from app.utils.session_manager import clear_recette_session_state, init_recette_session_state
-from app.utils.ui_components import create_recipe_info_form, create_source_form
-from app.utils.ui_helpers import show_add_recipe_help, show_banner
 from src.crud.metadata import get_all_categories, get_all_tags
 from src.crud.recettes import create_recette
 from src.db import get_db_session
+from streamlit_app.utils.etapes_manager import EtapesManager
+from streamlit_app.utils.ingredients_manager import IngredientsManager
+from streamlit_app.utils.recipe_validator import prepare_recipe_data, validate_recipe_data
+
+# Import des utilitaires
+from streamlit_app.utils.session_manager import clear_recette_session_state, init_recette_session_state
+from streamlit_app.utils.ui_components import create_recipe_info_form, create_source_form
+from streamlit_app.utils.ui_helpers import show_add_recipe_help, show_banner
 
 
 def add_recette_page():

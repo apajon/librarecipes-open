@@ -1,13 +1,17 @@
 import streamlit as st
 
-from app.pages_functions.photos_recette import photo_viewer
-from app.utils.navigation import navigate_to_photos_manage, navigate_to_recipe_modify, show_recipe_not_found_help
-
-# Import des utilitaires
-from app.utils.session_manager import get_recette_id_from_state
-from app.utils.ui_components import create_recipe_navigation_buttons, show_recipe_metrics
 from src.crud.recettes import delete_recette, get_recette_by_id
 from src.db import get_db_session
+from streamlit_app.pages_functions.photos_recette import photo_viewer
+from streamlit_app.utils.navigation import (
+    navigate_to_photos_manage,
+    navigate_to_recipe_modify,
+    show_recipe_not_found_help,
+)
+
+# Import des utilitaires
+from streamlit_app.utils.session_manager import get_recette_id_from_state
+from streamlit_app.utils.ui_components import create_recipe_navigation_buttons, show_recipe_metrics
 
 
 def card_recette_page():

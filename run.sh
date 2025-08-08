@@ -5,7 +5,7 @@ script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "Root directory: $root_dir"
 echo "Script directory: $script_dir"
 cd "$script_dir"
-PYTHONPATH=. streamlit run app/Home.py
+PYTHONPATH=. streamlit run streamlit_app/Home.py
 if [ $? -ne 0 ]; then
     echo "Failed to start the Streamlit app."
     exit 1

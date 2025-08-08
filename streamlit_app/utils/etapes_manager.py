@@ -6,7 +6,7 @@ from typing import List
 
 import streamlit as st
 
-from app.utils.ui_components import create_etape_form, display_etapes_list
+from streamlit_app.utils.ui_components import create_etape_form, display_etapes_list
 
 
 class EtapesManager:

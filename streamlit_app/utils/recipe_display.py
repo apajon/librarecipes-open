@@ -1,6 +1,6 @@
 """Utilitaires pour l'affichage des recettes"""
 
-from app.utils.constants import SOURCE_TYPES
+from streamlit_app.utils.constants import SOURCE_TYPES
 
 
 def format_recette_display_name(recette):

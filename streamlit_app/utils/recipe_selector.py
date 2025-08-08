@@ -2,12 +2,12 @@
 
 import streamlit as st
 
-from app.utils.constants import MESSAGES
-from app.utils.navigation_helpers import clear_selected_recipe, get_selected_recipe_id, set_selected_recipe
-from app.utils.recipe_display import format_recette_display_name
-from app.utils.sidebar_summary import display_recette_summary
 from src.crud.recettes import get_recette_by_id, list_recettes
 from src.db import get_db_session
+from streamlit_app.utils.constants import MESSAGES
+from streamlit_app.utils.navigation_helpers import clear_selected_recipe, get_selected_recipe_id, set_selected_recipe
+from streamlit_app.utils.recipe_display import format_recette_display_name
+from streamlit_app.utils.sidebar_summary import display_recette_summary
 
 
 def _create_recipe_options(recettes):

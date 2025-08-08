@@ -1,9 +1,9 @@
 import streamlit as st
 
-from app.utils.statistics import display_home_statistics
+from streamlit_app.utils.statistics import display_home_statistics
 
 # Import des utilitaires
-from app.utils.ui_helpers import show_banner
+from streamlit_app.utils.ui_helpers import show_banner
 
 
 def home_page():

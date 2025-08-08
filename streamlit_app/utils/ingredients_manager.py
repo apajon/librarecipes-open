@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 import streamlit as st
 
-from app.utils.ui_components import create_ingredient_form, display_ingredient_list
+from streamlit_app.utils.ui_components import create_ingredient_form, display_ingredient_list
 
 
 class IngredientsManager:

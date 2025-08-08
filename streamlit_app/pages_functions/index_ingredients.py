@@ -3,9 +3,9 @@ from collections import defaultdict
 import streamlit as st
 from sqlalchemy.orm import joinedload
 
-from app.utils.recipe_display import format_recette_display_name
 from src.db import get_db_session
 from src.model import Ingredient, Recette
+from streamlit_app.utils.recipe_display import format_recette_display_name
 
 
 def index_ingredients_page():

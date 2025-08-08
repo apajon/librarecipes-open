@@ -2,7 +2,7 @@
 
 import streamlit as st
 
-from app.utils.recipe_selector import render_recipe_selector
+from streamlit_app.utils.recipe_selector import render_recipe_selector
 
 
 def setup_sidebar():

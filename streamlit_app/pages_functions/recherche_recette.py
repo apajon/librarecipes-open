@@ -1,13 +1,13 @@
 import streamlit as st
 
-from app.utils.navigation import navigate_to_recipe_detail
-from app.utils.recipe_display import format_recette_display_name
-
-# Import des utilitaires
-from app.utils.ui_helpers import show_banner
 from src.crud.metadata import get_all_categories, get_all_ingredients, get_all_tags
 from src.crud.recherche import IngredientsMode, rechercher_recettes
 from src.db import get_db_session
+from streamlit_app.utils.navigation import navigate_to_recipe_detail
+from streamlit_app.utils.recipe_display import format_recette_display_name
+
+# Import des utilitaires
+from streamlit_app.utils.ui_helpers import show_banner
 
 
 def recherche_recette_page():

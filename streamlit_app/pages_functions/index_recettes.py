@@ -3,11 +3,12 @@ from collections import defaultdict
 import streamlit as st
 from sqlalchemy.orm import joinedload
 
-# Import des utilitaires
-from app.utils.navigation import navigate_to_recipe_detail
-from app.utils.recipe_display import format_recette_display_name
 from src.db import get_db_session
 from src.model import Recette
+
+# Import des utilitaires
+from streamlit_app.utils.navigation import navigate_to_recipe_detail
+from streamlit_app.utils.recipe_display import format_recette_display_name
 
 
 def index_recettes_page():

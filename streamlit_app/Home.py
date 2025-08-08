@@ -4,9 +4,9 @@ Point d'entrée de l'application avec navigation et sidebar
 """
 
 # Configuration et modules principaux
-from app.config.app import run_app, setup_navigation, setup_page_config
-from app.config.pages import create_page_objects, get_pages_config, setup_session_state_pages
-from app.utils.sidebar import setup_sidebar
+from streamlit_app.config.app import run_app, setup_navigation, setup_page_config
+from streamlit_app.config.pages import create_page_objects, get_pages_config, setup_session_state_pages
+from streamlit_app.utils.sidebar import setup_sidebar
 
 
 def main():
