@@ -97,6 +97,35 @@ def list_recettes(session: Session) -> list[Recette]:
     )
 
 
+def lister_recettes(session: Session, skip: int = 0, limit: int = 100) -> list[Recette]:
+    """Liste les recettes avec pagination."""
+    return (
+        session.query(Recette)
+        .options(
+            joinedload(Recette.categories),
+            joinedload(Recette.tags),
+            joinedload(Recette.ingredients),
+            joinedload(Recette.etapes),
+            joinedload(Recette.photos),
+            joinedload(Recette.source)
+        )
+        .order_by(Recette.date_ajout.desc())
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
+
+
+def charger_recette(session: Session, recette_id: str) -> Recette | None:
+    """Charge une recette par son ID avec toutes ses relations."""
+    return get_recette_by_id(session, recette_id)
+
+
+def supprimer_recette(session: Session, recette_id: str) -> bool:
+    """Supprime une recette par son ID."""
+    return delete_recette(session, recette_id)
+
+
 def delete_recette(session: Session, recette_id: str) -> bool:
     recette = get_recette_by_id(session, recette_id)
     if not recette:
