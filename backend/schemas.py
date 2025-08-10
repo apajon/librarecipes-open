@@ -27,6 +27,17 @@ class IngredientResponse(BaseModel):
     indispensable: bool = True
     alternatives: Optional[str] = None
 
+    @classmethod
+    def from_orm(cls, ingredient):
+        """Create from SQLAlchemy model."""
+        return cls(
+            nom=ingredient.nom,
+            quantite=ingredient.quantite,
+            unite=ingredient.unite,
+            indispensable=ingredient.indispensable,
+            alternatives=ingredient.alternatives
+        )
+
     class Config:
         from_attributes = True
 
@@ -41,6 +52,14 @@ class EtapeResponse(BaseModel):
     """Schema for step response."""
     description: str
     ordre: int
+
+    @classmethod
+    def from_orm(cls, etape):
+        """Create from SQLAlchemy model."""
+        return cls(
+            description=etape.description,
+            ordre=etape.ordre
+        )
 
     class Config:
         from_attributes = True
@@ -59,6 +78,15 @@ class PhotoResponse(BaseModel):
     categorie: Optional[str] = None
     description: Optional[str] = None
 
+    @classmethod
+    def from_orm(cls, photo):
+        """Create from SQLAlchemy model."""
+        return cls(
+            chemin=photo.chemin,
+            categorie=photo.categorie,
+            description=photo.description
+        )
+
     class Config:
         from_attributes = True
 
@@ -73,6 +101,14 @@ class SourceResponse(BaseModel):
     """Schema for source response."""
     type: str
     valeur: Optional[str] = None
+
+    @classmethod
+    def from_orm(cls, source):
+        """Create from SQLAlchemy model."""
+        return cls(
+            type=source.type,
+            valeur=source.url or source.book_title
+        )
 
     class Config:
         from_attributes = True
@@ -117,6 +153,20 @@ class RecetteListResponse(BaseModel):
     categories: List[str] = Field(default_factory=list)
     tags: List[str] = Field(default_factory=list)
 
+    @classmethod
+    def from_orm(cls, recipe):
+        """Create from SQLAlchemy model."""
+        return cls(
+            id=recipe.id,
+            nom=recipe.nom,
+            preparation=recipe.preparation,
+            cuisson=recipe.cuisson,
+            portions=recipe.portions,
+            date_ajout=recipe.date_ajout,
+            categories=[cat.nom for cat in recipe.categories],
+            tags=[tag.nom for tag in recipe.tags]
+        )
+
     class Config:
         from_attributes = True
 
@@ -135,6 +185,24 @@ class RecetteResponse(BaseModel):
     tags: List[str] = Field(default_factory=list)
     photos: List[PhotoResponse] = Field(default_factory=list)
     source: Optional[SourceResponse] = None
+
+    @classmethod
+    def from_orm(cls, recipe):
+        """Create from SQLAlchemy model."""
+        return cls(
+            id=recipe.id,
+            nom=recipe.nom,
+            preparation=recipe.preparation,
+            cuisson=recipe.cuisson,
+            portions=recipe.portions,
+            date_ajout=recipe.date_ajout,
+            ingredients=[IngredientResponse.from_orm(ing) for ing in recipe.ingredients],
+            etapes=[EtapeResponse.from_orm(etape) for etape in recipe.etapes],
+            categories=[cat.nom for cat in recipe.categories],
+            tags=[tag.nom for tag in recipe.tags],
+            photos=[PhotoResponse.from_orm(photo) for photo in recipe.photos],
+            source=SourceResponse.from_orm(recipe.source) if recipe.source else None
+        )
 
     class Config:
         from_attributes = True
