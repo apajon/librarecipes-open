@@ -10,7 +10,10 @@ requires-python = ">=3.12,<4.0.0"
 dependencies = [
     "streamlit (>=1.46.1,<2.0.0)",
     "sqlalchemy (>=2.0.41,<3.0.0)",
-    "streamlit-tags (>=1.2.8,<2.0.0)"
+    "streamlit-tags (>=1.2.8,<2.0.0)",
+    "fastapi (>=0.115.0,<1.0.0)",
+    "uvicorn[standard] (>=0.25.0,<1.0.0)",
+    "pydantic (>=2.5.0,<3.0.0)"
 ]
 
 
@@ -29,6 +32,7 @@ pytest = "^8.4.1"
 pytest-stub = "^1.1.0"
 autopep8 = "^2.3.2"
 bump2version = "^1.0.1"
+httpx = "^0.28.0"
 
 
 [tool.poetry.group.mobile_app.dependencies]
