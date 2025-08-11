@@ -162,6 +162,7 @@ PYTHONPATH=. poetry run python -m backend.main
 cd android_app
 
 # Build and run
+gradle wrapper
 ./gradlew build
 ./gradlew installDebug
 ```
