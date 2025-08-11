@@ -21,6 +21,15 @@ jobs:
           pip install poetry
           poetry config virtualenvs.create false  # pour installer dans l'env global du runner
 
+      - name: Install system dependencies for Kivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            python3-tk \
+            tk-dev \
+            libtcl8.6 \
+            libtk8.6
+
       - name: Install dependencies
         run: |
           poetry install
