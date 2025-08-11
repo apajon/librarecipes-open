@@ -112,7 +112,7 @@ async def update_recipe(
 ):
     """Update a recipe."""
     try:
-        recipe = crud_recettes.update_recette(db, recipe_id, recipe_data.model_dump())
+        recipe = crud_recettes.update_recette(db, recipe_id, recipe_data.model_dump(exclude_none=True))
         if not recipe:
             raise HTTPException(status_code=404, detail="Recipe not found")
         return RecetteResponse.from_orm(recipe)

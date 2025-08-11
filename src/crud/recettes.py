@@ -148,44 +148,49 @@ def update_recette(session: Session, recette_id: str, data: dict) -> Recette | N
     recette.cuisson = data.get("cuisson", recette.cuisson)
     recette.portions = data.get("portions", recette.portions)
 
-    # Ingrédients : suppression complète + recréation
-    recette.ingredients.clear()
-    session.flush()
-    for ing in data.get("ingredients", []):
-        recette.ingredients.append(
-            Ingredient(
-                id=str(uuid.uuid4()),
-                nom=ing["nom"],
-                quantite=ing.get("quantite"),
-                unite=ing.get("unite"),
-                indispensable=ing.get("indispensable", True),
-                alternatives=ing.get("alternatives"),
+    # Ingrédients : suppression complète + recréation (only if provided and not None)
+    if "ingredients" in data and data["ingredients"] is not None:
+        recette.ingredients.clear()
+        session.flush()
+        for ing in data.get("ingredients", []):
+            recette.ingredients.append(
+                Ingredient(
+                    id=str(uuid.uuid4()),
+                    nom=ing["nom"],
+                    quantite=ing.get("quantite"),
+                    unite=ing.get("unite"),
+                    indispensable=ing.get("indispensable", True),
+                    alternatives=ing.get("alternatives"),
+                )
             )
-        )
 
-    # Étapes
-    recette.etapes.clear()
-    session.flush()
-    for i, etape in enumerate(data.get("etapes", [])):
-        recette.etapes.append(Etape(id=str(uuid.uuid4()), ordre=i + 1, description=etape))
+    # Étapes (only if provided and not None)
+    if "etapes" in data and data["etapes"] is not None:
+        recette.etapes.clear()
+        session.flush()
+        for i, etape in enumerate(data.get("etapes", [])):
+            recette.etapes.append(Etape(id=str(uuid.uuid4()), ordre=i + 1, description=etape))
 
-    # Catégories
-    recette.categories.clear()
-    session.flush()
-    for cat in data.get("categories", []):
-        recette.categories.append(Categorie(id=str(uuid.uuid4()), nom=cat))
+    # Catégories (only if provided and not None)
+    if "categories" in data and data["categories"] is not None:
+        recette.categories.clear()
+        session.flush()
+        for cat in data.get("categories", []):
+            recette.categories.append(Categorie(id=str(uuid.uuid4()), nom=cat))
 
-    # Tags
-    recette.tags.clear()
-    session.flush()
-    for tag in data.get("tags", []):
-        recette.tags.append(Tag(id=str(uuid.uuid4()), nom=tag))
+    # Tags (only if provided and not None)
+    if "tags" in data and data["tags"] is not None:
+        recette.tags.clear()
+        session.flush()
+        for tag in data.get("tags", []):
+            recette.tags.append(Tag(id=str(uuid.uuid4()), nom=tag))
 
-    # Photos
-    recette.photos.clear()
-    session.flush()
-    for photo in data.get("photos", []):
-        recette.photos.append(Photo(id=str(uuid.uuid4()), chemin=photo["chemin"], categorie=photo.get("categorie")))
+    # Photos (only if provided and not None)
+    if "photos" in data and data["photos"] is not None:
+        recette.photos.clear()
+        session.flush()
+        for photo in data.get("photos", []):
+            recette.photos.append(Photo(id=str(uuid.uuid4()), chemin=photo["chemin"], categorie=photo.get("categorie")))
 
     # Source
     if recette.source:
