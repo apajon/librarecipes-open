@@ -1,6 +1,12 @@
 package com.apajon.librarecipes.data.api
 
-import com.apajon.librarecipes.data.model.*
+import com.apajon.librarecipes.data.model.RecipeListItem
+import com.apajon.librarecipes.data.model.RecipeDetailResponse
+import com.apajon.librarecipes.data.model.RecipeCreateRequest
+import com.apajon.librarecipes.data.model.SearchFilters
+import com.apajon.librarecipes.data.model.IngredientMetadata
+import com.apajon.librarecipes.data.model.CategoryMetadata
+import com.apajon.librarecipes.data.model.TagMetadata
 import retrofit2.http.*
 
 /**

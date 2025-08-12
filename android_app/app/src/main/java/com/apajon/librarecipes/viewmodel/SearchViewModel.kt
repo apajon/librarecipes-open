@@ -2,7 +2,8 @@ package com.apajon.librarecipes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apajon.librarecipes.data.model.*
+import com.apajon.librarecipes.data.model.RecipeListItem
+import com.apajon.librarecipes.data.model.SearchFilters
 import com.apajon.librarecipes.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
