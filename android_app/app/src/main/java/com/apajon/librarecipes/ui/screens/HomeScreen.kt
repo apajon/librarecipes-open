@@ -49,7 +49,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Default.Restaurant,
+                            Icons.Default.Star,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
@@ -86,7 +86,7 @@ fun HomeScreen(
                 ActionCard(
                     title = "Voir mes recettes",
                     description = "Parcourir toutes vos recettes enregistrées",
-                    icon = Icons.Default.Book,
+                    icon = Icons.Default.List,
                     onClick = { navController.navigate("recipes") }
                 )
             }
