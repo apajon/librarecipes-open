@@ -22,12 +22,8 @@ class RecipeRepository @Inject constructor(
      */
     fun getRecipes(): Flow<List<RecipeListItem>> = flow {
         try {
-            val response = apiService.getRecipes()
-            if (response.isSuccessful) {
-                emit(response.body() ?: emptyList())
-            } else {
-                emit(emptyList())
-            }
+            val recipes = apiService.getRecipes()
+            emit(recipes)
         } catch (e: Exception) {
             emit(emptyList())
         }
@@ -50,18 +46,14 @@ class RecipeRepository @Inject constructor(
         categories: List<String>? = null
     ): Flow<List<RecipeListItem>> = flow {
         try {
-            val response = apiService.searchRecipes(
+            val recipes = apiService.searchRecipes(
                 nom = nom,
                 ingredients = ingredients?.joinToString(","),
                 ingredientsMode = ingredientsMode,
                 tags = tags?.joinToString(","),
                 categories = categories?.joinToString(",")
             )
-            if (response.isSuccessful) {
-                emit(response.body() ?: emptyList())
-            } else {
-                emit(emptyList())
-            }
+            emit(recipes)
         } catch (e: Exception) {
             emit(emptyList())
         }

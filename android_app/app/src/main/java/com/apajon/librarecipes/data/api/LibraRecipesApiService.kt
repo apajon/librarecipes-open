@@ -1,7 +1,6 @@
 package com.apajon.librarecipes.data.api
 
 import com.apajon.librarecipes.data.model.RecipeListItem
-import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -16,7 +15,7 @@ interface LibraRecipesApiService {
      * @return List of recipe summaries
      */
     @GET("recettes/")
-    suspend fun getRecipes(): Response<List<RecipeListItem>>
+    suspend fun getRecipes(): List<RecipeListItem>
     
     /**
      * Search recipes with filters.
@@ -34,5 +33,5 @@ interface LibraRecipesApiService {
         @Query("ingredients_mode") ingredientsMode: String? = null,
         @Query("tags") tags: String? = null,
         @Query("categories") categories: String? = null
-    ): Response<List<RecipeListItem>>
+    ): List<RecipeListItem>
 }
