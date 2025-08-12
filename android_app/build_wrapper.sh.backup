@@ -66,19 +66,6 @@ has_cached_dependencies() {
 run_build() {
     local build_args=("$@")
     
-    # Check for special commands that shouldn't be passed to gradle
-    for arg in "$@"; do
-        if [ "$arg" = "fix-aar" ] || [ "$arg" = "fix-kapt" ]; then
-            echo "❌ Error: '$arg' is a build wrapper command, not a gradle task"
-            echo ""
-            echo "Please run: ./build_wrapper.sh $arg"
-            echo ""
-            echo "If you're seeing this error, there might be an issue with script execution."
-            echo "Try running the command again or check BUILD_TROUBLESHOOTING.md"
-            exit 1
-        fi
-    done
-    
     echo "🔍 Detecting environment..."
     
     if ! is_offline_environment; then
@@ -320,33 +307,6 @@ main() {
             exit $?
             ;;
         *)
-            # Check for special commands that might not have been handled
-            if [ "$1" = "fix-aar" ]; then
-                echo "❌ Error: fix-aar command not properly handled"
-                echo "This might be due to a script execution issue."
-                echo "Please ensure you're using the latest version of the script."
-                echo ""
-                echo "Try running the fix manually:"
-                echo "1. ./gradlew clean"
-                echo "2. rm -rf ~/.gradle/caches/transforms-*"
-                echo "3. rm -rf ~/.gradle/caches/*/transforms/"
-                echo "4. rm -rf ~/.gradle/caches/*/metadata-*/"
-                echo "5. ./gradlew build --refresh-dependencies"
-                exit 1
-            elif [ "$1" = "fix-kapt" ]; then
-                echo "❌ Error: fix-kapt command not properly handled"
-                echo "This might be due to a script execution issue."
-                echo "Please ensure you're using the latest version of the script."
-                echo ""
-                echo "Try running the fix manually:"
-                echo "1. ./gradlew clean"
-                echo "2. rm -rf ~/.gradle/caches/transforms-*"
-                echo "3. rm -rf ~/.gradle/caches/build-cache-*"
-                echo "4. rm -rf ~/.gradle/caches/*/kotlin-dsl/"
-                echo "5. ./gradlew build --no-build-cache --refresh-dependencies"
-                exit 1
-            fi
-            
             # Run regular build with all arguments
             run_build "$@"
             ;;
