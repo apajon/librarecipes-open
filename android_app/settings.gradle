@@ -8,8 +8,16 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        // Primary repositories
+        maven { url "https://maven.google.com" }
         google()
         mavenCentral()
+        
+        // Fallback repositories
+        gradlePluginPortal()
+        
+        // Local repository as last resort
+        mavenLocal()
     }
 }
 

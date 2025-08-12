@@ -19,18 +19,3 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        // Primary repositories
-        maven { url "https://maven.google.com" }
-        google()
-        mavenCentral()
-        
-        // Fallback repositories
-        gradlePluginPortal()
-        
-        // Local repository as last resort
-        mavenLocal()
-    }
-}
-
