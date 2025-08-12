@@ -71,7 +71,38 @@ run_build() {
     if ! is_offline_environment; then
         echo "🌐 Online environment detected"
         echo "📦 Running build with dependency refresh..."
-        ./gradlew "${build_args[@]}" --refresh-dependencies
+        
+        # Try build with dependency refresh
+        if ./gradlew "${build_args[@]}" --refresh-dependencies; then
+            echo "✅ Build completed successfully!"
+        else
+            local exit_code=$?
+            echo "❌ Build failed with exit code $exit_code"
+            
+            # Check for KAPT-specific errors
+            if grep -q "kaptGenerateStubs.*FAILED" ~/.gradle/daemon/*/daemon-*.out.log 2>/dev/null ||
+               grep -q "Could not load module" ~/.gradle/daemon/*/daemon-*.out.log 2>/dev/null; then
+                echo ""
+                echo "🚨 KAPT (Kotlin Annotation Processing) Error Detected!"
+                echo "This is typically caused by:"
+                echo "1. Version compatibility issues between Android Gradle Plugin and Kotlin"
+                echo "2. Missing annotation processing dependencies"
+                echo "3. Corrupted Gradle cache"
+                echo ""
+                echo "🔧 Suggested fixes:"
+                echo "1. Clean build and clear cache:"
+                echo "   ./gradlew clean"
+                echo "   rm -rf ~/.gradle/caches/"
+                echo "   ./build_wrapper.sh"
+                echo ""
+                echo "2. Try building without KAPT cache:"
+                echo "   ./gradlew clean build --no-build-cache"
+                echo ""
+                echo "3. Check BUILD_TROUBLESHOOTING.md for detailed solutions"
+            fi
+            
+            return $exit_code
+        fi
     else
         echo "📴 Offline environment detected"
         
@@ -140,6 +171,7 @@ main() {
             echo "  $0 check             # Check connectivity and diagnostics"
             echo "  $0 cache-info        # Show cache information"
             echo "  $0 force-offline     # Force offline build (bypass detection)"
+            echo "  $0 fix-kapt          # Clean build to fix KAPT issues"
             echo ""
             echo "For troubleshooting connectivity issues:"
             echo "  ./check_connectivity.sh"
@@ -186,16 +218,47 @@ main() {
             echo "📴 Offline mode (forced)"
             echo "📦 Running offline build..."
             shift  # Remove 'force-offline' from arguments
-            if [ $# -eq 0 ]; then
-                set -- "build"
-            fi
             ./gradlew "$@" --offline
             exit $?
             ;;
+        "fix-kapt")
+            echo "🔧 KAPT Error Fix Procedure"
+            echo "========================="
+            echo ""
+            echo "This will clean the project and clear KAPT caches to resolve module issues."
+            echo ""
+            read -p "Continue? (y/N): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "1. 🧹 Cleaning project..."
+                ./gradlew clean
+                
+                echo "2. 🗑️  Clearing KAPT cache..."
+                rm -rf ~/.gradle/caches/transforms-*
+                rm -rf build/generated/source/kapt/
+                rm -rf app/build/generated/source/kapt/
+                
+                echo "3. 🔄 Rebuilding without build cache..."
+                if ! is_offline_environment; then
+                    echo "📦 Online build with dependency refresh..."
+                    ./gradlew build --no-build-cache --refresh-dependencies
+                else
+                    echo "📦 Offline build..."
+                    ./gradlew build --no-build-cache --offline
+                fi
+                
+                echo "✅ KAPT fix procedure completed!"
+            else
+                echo "❌ Cancelled"
+                exit 1
+            fi
+            exit $?
+            ;;
+        *)
+            # Run regular build with all arguments
+            run_build "$@"
+            ;;
     esac
-    
-    # Run the build
-    run_build "$@"
     
     echo ""
     echo "✅ Build completed successfully!"

@@ -35,6 +35,9 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += [
+            "-Xopt-in=kotlin.RequiresOptIn"
+        ]
     }
     buildFeatures {
         compose = true
@@ -51,11 +54,14 @@ android {
 
 kapt {
     correctErrorTypes = true
-    useBuildCache = true
-    javacOptions {
-        // These options can help with annotation processing issues
-        option("-Adagger.fastInit=enabled")
-        option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
+    useBuildCache = false  // Disable KAPT build cache to avoid module resolution issues
+    includeCompileClasspath = false
+    showProcessorStats = true
+    arguments {
+        arg("dagger.fastInit", "enabled")
+        arg("dagger.hilt.android.internal.disableAndroidSuperclassValidation", "true")
+        arg("dagger.formatGeneratedSource", "disabled")
+        arg("dagger.gradle.incremental", "disabled")  // Disable incremental processing to avoid module issues
     }
 }
 
