@@ -93,7 +93,7 @@ fun RecipeBasicInfoCard(
                         if (current > 1) onPortionsChange((current - 1).toString())
                     }
                 ) {
-                    Icon(Icons.Default.Remove, contentDescription = "Diminuer")
+                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Diminuer")
                 }
                 
                 OutlinedTextField(
