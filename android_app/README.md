@@ -37,9 +37,65 @@ The app connects to the FastAPI backend at:
 
 ## Building
 
+### Quick Start
+```bash
+# Use the intelligent build wrapper (recommended)
+./build_wrapper.sh
+
+# Or traditional Gradle commands
+./gradlew build
+```
+
+### Build Environment Requirements
 1. Ensure Android SDK is installed
-2. Open in Android Studio
-3. Build and run on device/emulator
+2. Java 17 or higher
+3. Internet connectivity for dependency download (first build)
+
+### Troubleshooting Build Issues
+
+If you encounter build errors like:
+```
+> Task :app:kaptGenerateStubsDebugKotlin FAILED
+e: Could not load module <Error module>
+```
+
+This is typically a network connectivity issue. Use our troubleshooting tools:
+
+```bash
+# Check connectivity and get solutions
+./check_connectivity.sh
+
+# Try intelligent build wrapper
+./build_wrapper.sh
+
+# For detailed troubleshooting
+cat BUILD_TROUBLESHOOTING.md
+```
+
+### Build Variants
+```bash
+# Debug build
+./gradlew assembleDebug
+
+# Release build  
+./gradlew assembleRelease
+
+# Run tests
+./gradlew test
+
+# Clean build
+./gradlew clean build
+```
+
+### Offline Building
+If you're in a restricted network environment:
+```bash
+# Use offline mode (requires cached dependencies)
+./gradlew build --offline
+
+# Or use the wrapper which handles this automatically
+./build_wrapper.sh
+```
 
 ## Project Structure
 
