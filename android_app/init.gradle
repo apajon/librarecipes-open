@@ -1,0 +1,45 @@
+// init.gradle - Gradle initialization script for offline/restricted environments
+// Place this file in ~/.gradle/init.d/ or use with --init-script
+
+allprojects {
+    repositories {
+        // Add Maven Local as highest priority for offline scenarios
+        mavenLocal()
+        
+        // Check if offline mode is enabled
+        if (gradle.startParameter.isOffline()) {
+            println "📴 Offline mode detected - using local repositories only"
+        } else {
+            // Online repositories with enhanced configuration
+            maven {
+                name = "GoogleMaven"
+                url = "https://maven.google.com"
+                mavenContent {
+                    // Optimize by only looking for Google artifacts here
+                    includeGroupByRegex "com\\.google\\..*"
+                    includeGroupByRegex "com\\.android\\..*"
+                    includeGroupByRegex "androidx\\..*"
+                }
+            }
+            
+            google()
+            mavenCentral()
+            gradlePluginPortal()
+        }
+    }
+}
+
+gradle.projectsEvaluated {
+    println "🔧 Gradle repositories configured for LibraRecipes Android"
+    println "   Offline mode: ${gradle.startParameter.isOffline()}"
+    
+    allprojects { project ->
+        project.repositories.each { repo ->
+            if (repo.hasProperty('url')) {
+                println "   📦 Repository: ${repo.name} -> ${repo.url}"
+            } else {
+                println "   📦 Repository: ${repo.name}"
+            }
+        }
+    }
+}
