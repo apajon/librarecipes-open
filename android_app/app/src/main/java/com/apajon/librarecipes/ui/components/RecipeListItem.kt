@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,7 +49,7 @@ fun RecipeListItem(
             ) {
                 if (recipe.preparation != null || recipe.cuisson != null) {
                     Icon(
-                        Icons.Default.AccessTime,
+                        Icons.Default.Info,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -66,7 +66,7 @@ fun RecipeListItem(
                 if (recipe.portions != null) {
                     Spacer(modifier = Modifier.width(16.dp))
                     Icon(
-                        Icons.Default.Group,
+                        Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant

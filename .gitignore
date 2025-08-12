@@ -211,3 +211,15 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 .vscode/tasks.json
+
+# Android
+android_app/local.properties
+android_app/.gradle/
+android_app/app/build/
+android_app/build/
+android_app/captures/
+android_app/.externalNativeBuild/
+android_app/.cxx/
+android_app/*.iml
+android_app/.idea/
+android_app/keystore.properties

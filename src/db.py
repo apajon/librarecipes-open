@@ -2,14 +2,19 @@ import os
 from contextlib import contextmanager
 from pathlib import Path
 
-from kivy.utils import platform
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # Determine database path based on platform
-if platform == "android":
-    from android.storage import app_storage_path
+try:
+    from kivy.utils import platform
+    is_android = platform == "android"
+except ImportError:
+    # kivy not available, assume desktop/development environment
+    is_android = False
 
+if is_android:
+    from android.storage import app_storage_path
     db_path = os.path.join(app_storage_path(), "recettes.db")
 else:
     # For desktop/development

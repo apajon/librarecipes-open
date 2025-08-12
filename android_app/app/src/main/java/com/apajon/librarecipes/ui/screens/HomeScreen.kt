@@ -3,6 +3,7 @@ package com.apajon.librarecipes.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,7 +50,7 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Default.Restaurant,
+                            Icons.Default.Star,
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
@@ -86,7 +87,7 @@ fun HomeScreen(
                 ActionCard(
                     title = "Voir mes recettes",
                     description = "Parcourir toutes vos recettes enregistrées",
-                    icon = Icons.Default.Book,
+                    icon = Icons.AutoMirrored.Filled.List,
                     onClick = { navController.navigate("recipes") }
                 )
             }
