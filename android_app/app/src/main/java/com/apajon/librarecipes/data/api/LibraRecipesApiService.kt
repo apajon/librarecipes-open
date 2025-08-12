@@ -1,8 +1,7 @@
 package com.apajon.librarecipes.data.api
 
-import com.apajon.librarecipes.data.model.RecipeListItem
-import retrofit2.http.GET
-import retrofit2.http.Query
+import com.apajon.librarecipes.data.model.*
+import retrofit2.http.*
 
 /**
  * Retrofit API service interface for LibraRecipes backend.
@@ -14,24 +13,56 @@ interface LibraRecipesApiService {
      * Get all recipes (list view).
      * @return List of recipe summaries
      */
-    @GET("recettes/")
-    suspend fun getRecipes(): List<RecipeListItem>
+    @GET("recipes")
+    suspend fun getRecipes(
+        @Query("skip") skip: Int = 0,
+        @Query("limit") limit: Int = 100
+    ): List<RecipeListItem>
+    
+    /**
+     * Get specific recipe by ID.
+     * @param recipeId Recipe ID
+     * @return Complete recipe details
+     */
+    @GET("recipes/{recipe_id}")
+    suspend fun getRecipe(@Path("recipe_id") recipeId: String): RecipeDetailResponse
+    
+    /**
+     * Create a new recipe.
+     * @param recipe Recipe data to create
+     * @return Created recipe details
+     */
+    @POST("recipes")
+    suspend fun createRecipe(@Body recipe: RecipeCreateRequest): RecipeDetailResponse
     
     /**
      * Search recipes with filters.
-     * @param nom Recipe name filter
-     * @param ingredients Comma-separated list of ingredients
-     * @param ingredientsMode Search mode: "ANY" or "ALL"
-     * @param tags Comma-separated list of tags
-     * @param categories Comma-separated list of categories
+     * @param searchFilters Search criteria
      * @return Filtered list of recipes
      */
-    @GET("recettes/recherche")
-    suspend fun searchRecipes(
-        @Query("nom") nom: String? = null,
-        @Query("ingredients") ingredients: String? = null,
-        @Query("ingredients_mode") ingredientsMode: String? = null,
-        @Query("tags") tags: String? = null,
-        @Query("categories") categories: String? = null
-    ): List<RecipeListItem>
+    @POST("recipes/search")
+    suspend fun searchRecipes(@Body searchFilters: SearchFilters): List<RecipeListItem>
+    
+    // Metadata endpoints for form data
+    
+    /**
+     * Get all available ingredients.
+     * @return List of ingredient names
+     */
+    @GET("metadata/ingredients")
+    suspend fun getIngredients(): List<IngredientMetadata>
+    
+    /**
+     * Get all available categories.
+     * @return List of category names
+     */
+    @GET("metadata/categories")
+    suspend fun getCategories(): List<CategoryMetadata>
+    
+    /**
+     * Get all available tags.
+     * @return List of tag names
+     */
+    @GET("metadata/tags")
+    suspend fun getTags(): List<TagMetadata>
 }
