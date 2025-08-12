@@ -171,7 +171,8 @@ main() {
             echo "  $0 check             # Check connectivity and diagnostics"
             echo "  $0 cache-info        # Show cache information"
             echo "  $0 force-offline     # Force offline build (bypass detection)"
-            echo "  $0 fix-kapt          # Clean build to fix KAPT issues"
+            echo "  $0 fix-kapt          # Fix KAPT annotation processing issues"
+            echo "  $0 fix-aar           # Fix AAR metadata issues (lighter fix)"
             echo ""
             echo "For troubleshooting connectivity issues:"
             echo "  ./check_connectivity.sh"
@@ -221,11 +222,11 @@ main() {
             ./gradlew "$@" --offline
             exit $?
             ;;
-        "fix-kapt")
-            echo "🔧 KAPT Error Fix Procedure"
-            echo "========================="
+        "fix-aar")
+            echo "🔧 AAR Metadata Error Fix"
+            echo "========================"
             echo ""
-            echo "This will clean the project and clear KAPT caches to resolve module issues."
+            echo "This will fix AAR metadata issues by clearing transform caches properly."
             echo ""
             read -p "Continue? (y/N): " -n 1 -r
             echo ""
@@ -233,18 +234,69 @@ main() {
                 echo "1. 🧹 Cleaning project..."
                 ./gradlew clean
                 
-                echo "2. 🗑️  Clearing KAPT cache..."
+                echo "2. 🗑️  Clearing transform and metadata caches..."
+                # Clear transforms and related caches that can cause AAR metadata issues
                 rm -rf ~/.gradle/caches/transforms-*
+                rm -rf ~/.gradle/caches/*/transforms/
+                rm -rf ~/.gradle/caches/*/metadata-*/
+                rm -rf ~/.gradle/caches/*/dependencies-accessors/
+                
+                echo "3. 🔄 Rebuilding with clean transforms..."
+                if ! is_offline_environment; then
+                    echo "📦 Online build with dependency refresh..."
+                    ./gradlew build --refresh-dependencies
+                else
+                    echo "📦 Offline build..."
+                    if has_cached_dependencies; then
+                        ./gradlew build --offline
+                    else
+                        echo "❌ Cannot proceed in offline mode without cached dependencies"
+                        exit 1
+                    fi
+                fi
+                
+                echo "✅ AAR metadata fix completed!"
+            else
+                echo "❌ Cancelled"
+                exit 1
+            fi
+            exit $?
+            ;;
+        "fix-kapt")
+            echo "🔧 KAPT Error Fix Procedure"
+            echo "========================="
+            echo ""
+            echo "This will clean the project and clear Gradle caches to resolve module issues."
+            echo ""
+            read -p "Continue? (y/N): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo "1. 🧹 Cleaning project..."
+                ./gradlew clean
+                
+                echo "2. 🗑️  Clearing Gradle caches..."
+                # Clear transforms and build cache completely to avoid inconsistencies
+                rm -rf ~/.gradle/caches/transforms-*
+                rm -rf ~/.gradle/caches/build-cache-*
+                rm -rf ~/.gradle/caches/*/kotlin-dsl/
                 rm -rf build/generated/source/kapt/
                 rm -rf app/build/generated/source/kapt/
                 
-                echo "3. 🔄 Rebuilding without build cache..."
+                echo "3. 🔄 Rebuilding with clean cache state..."
                 if ! is_offline_environment; then
                     echo "📦 Online build with dependency refresh..."
-                    ./gradlew build --no-build-cache --refresh-dependencies
+                    # Use --recompile-scripts to ensure clean state
+                    ./gradlew build --no-build-cache --refresh-dependencies --recompile-scripts
                 else
                     echo "📦 Offline build..."
-                    ./gradlew build --no-build-cache --offline
+                    # In offline mode, we need to be more careful
+                    if has_cached_dependencies; then
+                        ./gradlew build --no-build-cache --offline --recompile-scripts
+                    else
+                        echo "❌ Cannot proceed in offline mode without cached dependencies"
+                        echo "   Please run this command with internet access first"
+                        exit 1
+                    fi
                 fi
                 
                 echo "✅ KAPT fix procedure completed!"

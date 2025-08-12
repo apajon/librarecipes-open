@@ -130,7 +130,43 @@ If behind a corporate firewall:
    systemProp.https.proxyPassword=password
    ```
 
-### 2. Repository Configuration Issues
+### 2. AAR Metadata Check Failures
+
+**Symptoms:**
+```
+> Task :app:checkDebugAarMetadata FAILED
+> /home/user/.gradle/caches/transforms-3/.../material-1.11.0/META-INF/com/android/build/gradle/aar-metadata.properties (No such file or directory)
+```
+
+**Root Cause:** This occurs when Gradle's transform cache gets corrupted or partially cleared, causing inconsistency between cached dependency resolution and transformed artifacts.
+
+**Solutions:**
+
+#### Quick Fix (Automated)
+```bash
+# Use the specialized AAR fix command
+./build_wrapper.sh fix-aar
+```
+
+#### Manual Fix
+```bash
+# Clean project and transform caches
+./gradlew clean
+rm -rf ~/.gradle/caches/transforms-*
+rm -rf ~/.gradle/caches/*/transforms/
+rm -rf ~/.gradle/caches/*/metadata-*/
+
+# Rebuild
+./build_wrapper.sh
+```
+
+#### Complete Cache Reset (if AAR fix doesn't work)
+```bash
+# Use the comprehensive KAPT fix which also handles AAR issues
+./build_wrapper.sh fix-kapt
+```
+
+### 3. Repository Configuration Issues
 
 **Symptoms:**
 - Timeouts downloading from repositories
@@ -140,7 +176,7 @@ If behind a corporate firewall:
 - Primary: Google Maven, Maven Central
 - Fallbacks: Gradle Plugin Portal, Maven Local
 
-### 3. Gradle Daemon Issues
+### 4. Gradle Daemon Issues
 
 **Symptoms:**
 - Inconsistent build failures
@@ -156,7 +192,7 @@ If behind a corporate firewall:
 ./gradlew --status
 ```
 
-### 4. Clean Build
+### 5. Clean Build
 ```bash
 # Full clean rebuild
 ./gradlew clean build --refresh-dependencies
