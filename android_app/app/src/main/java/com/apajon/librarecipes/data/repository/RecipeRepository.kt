@@ -2,6 +2,8 @@ package com.apajon.librarecipes.data.repository
 
 import com.apajon.librarecipes.data.api.LibraRecipesApiService
 import com.apajon.librarecipes.data.model.RecipeListItem
+import com.apajon.librarecipes.data.model.RecipeCreate
+import com.apajon.librarecipes.data.model.RecipeResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -26,6 +28,20 @@ class RecipeRepository @Inject constructor(
             emit(recipes)
         } catch (e: Exception) {
             emit(emptyList())
+        }
+    }
+    
+    /**
+     * Create a new recipe.
+     * @param recipe Recipe data to create
+     * @return Result with created recipe or error
+     */
+    suspend fun createRecipe(recipe: RecipeCreate): Result<RecipeResponse> {
+        return try {
+            val response = apiService.createRecipe(recipe)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
     

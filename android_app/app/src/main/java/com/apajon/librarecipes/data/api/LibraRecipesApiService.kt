@@ -1,7 +1,11 @@
 package com.apajon.librarecipes.data.api
 
 import com.apajon.librarecipes.data.model.RecipeListItem
+import com.apajon.librarecipes.data.model.RecipeCreate
+import com.apajon.librarecipes.data.model.RecipeResponse
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Query
 
 /**
@@ -16,6 +20,14 @@ interface LibraRecipesApiService {
      */
     @GET("recettes/")
     suspend fun getRecipes(): List<RecipeListItem>
+    
+    /**
+     * Create a new recipe.
+     * @param recipe Recipe data to create
+     * @return Created recipe with ID and metadata
+     */
+    @POST("recipes")
+    suspend fun createRecipe(@Body recipe: RecipeCreate): RecipeResponse
     
     /**
      * Search recipes with filters.
