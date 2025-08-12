@@ -86,7 +86,7 @@ fun HomeScreen(
                 ActionCard(
                     title = "Voir mes recettes",
                     description = "Parcourir toutes vos recettes enregistrées",
-                    icon = Icons.Default.List,
+                    icon = Icons.AutoMirrored.Filled.List,
                     onClick = { navController.navigate("recipes") }
                 )
             }
