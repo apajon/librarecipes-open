@@ -9,25 +9,47 @@
 > Task :app:kaptGenerateStubsDebugKotlin FAILED
 e: Could not load module <Error module>
 ```
+OR
+```
+> Task :app:kaptGenerateStubsReleaseKotlin FAILED  
+e: Could not load module <Error module>
+```
 
-**Root Cause:** Network connectivity issues preventing Gradle from downloading dependencies.
+**Root Cause:** Missing dependencies needed for Kotlin Annotation Processing (KAPT), particularly:
+- Android Gradle Plugin
+- Hilt Compiler (needed for dependency injection annotation processing)
+- Other annotation processors
+
+**Quick Diagnosis:**
+```bash
+# Check what dependencies are cached
+./build_wrapper.sh cache-info
+
+# This will show if key KAPT dependencies are missing
+```
 
 **Solutions:**
 
-#### Option A: Check Network Connectivity
+#### Option A: Check Network Connectivity First
 ```bash
 # Run the connectivity checker
 ./check_connectivity.sh
 
+# If internet access is available, refresh dependencies:
+./build_wrapper.sh
+
 # If no internet access detected, see Option B or C
 ```
 
-#### Option B: Use Offline Mode (if dependencies are cached)
+#### Option B: Use Offline Mode (if sufficient dependencies are cached)
 ```bash
-# Try building with cached dependencies
-./gradlew build --offline
+# Check cache status first
+./build_wrapper.sh cache-info
 
-# If this fails, dependencies need to be downloaded first
+# If Android Gradle Plugin and Hilt Compiler show ✅, try:
+./build_wrapper.sh force-offline
+
+# If key dependencies show ❌, you need Option C
 ```
 
 #### Option C: Pre-download Dependencies
@@ -35,7 +57,10 @@ If you have access to a machine with internet:
 
 1. On connected machine:
    ```bash
-   ./gradlew build  # Downloads all dependencies
+   # Download all dependencies including KAPT processors
+   ./gradlew build --refresh-dependencies
+   
+   # Create cache archive
    tar -czf gradle-cache.tar.gz ~/.gradle/caches/
    ```
 
@@ -43,8 +68,14 @@ If you have access to a machine with internet:
 
 3. On offline machine:
    ```bash
+   # Extract cache
    tar -xzf gradle-cache.tar.gz -C ~/
-   ./gradlew build --offline
+   
+   # Verify cache
+   ./build_wrapper.sh cache-info
+   
+   # Build offline
+   ./build_wrapper.sh force-offline
    ```
 
 #### Option D: Corporate Proxy Setup

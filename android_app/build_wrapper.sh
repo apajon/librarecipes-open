@@ -14,18 +14,52 @@ echo "====================================="
 # Function to check if we're in an offline environment
 is_offline_environment() {
     # Quick check for internet connectivity
-    ping -c 1 -W 2 google.com >/dev/null 2>&1
-    return $?
+    # Return 0 if offline, 1 if online
+    if ping -c 1 -W 2 google.com >/dev/null 2>&1; then
+        return 1  # Online
+    else
+        return 0  # Offline
+    fi
 }
 
 # Function to check if Gradle cache has dependencies
 has_cached_dependencies() {
     local cache_dir="$HOME/.gradle/caches"
-    if [ -d "$cache_dir" ] && [ "$(find "$cache_dir" -name "*.jar" -o -name "*.pom" | wc -l)" -gt 10 ]; then
-        return 0
-    else
+    
+    # Basic cache directory check
+    if [ ! -d "$cache_dir" ]; then
         return 1
     fi
+    
+    # Check for general cached files
+    local cached_files=$(find "$cache_dir" -name "*.jar" -o -name "*.pom" | wc -l)
+    if [ "$cached_files" -lt 10 ]; then
+        return 1
+    fi
+    
+    # Check for crucial buildscript dependencies
+    local modules_dir="$cache_dir/modules-2/files-2.1"
+    if [ -d "$modules_dir" ]; then
+        # Check for Android Gradle Plugin
+        if [ ! -d "$modules_dir/com.android.tools.build/gradle" ]; then
+            echo "⚠️  Android Gradle Plugin not cached"
+            return 1
+        fi
+        
+        # Check for Kotlin Gradle Plugin
+        if [ ! -d "$modules_dir/org.jetbrains.kotlin/kotlin-gradle-plugin" ]; then
+            echo "⚠️  Kotlin Gradle Plugin not cached"
+            return 1
+        fi
+        
+        # Check for Hilt Plugin
+        if [ ! -d "$modules_dir/com.google.dagger/hilt-android-gradle-plugin" ]; then
+            echo "⚠️  Hilt Gradle Plugin not cached"
+            return 1
+        fi
+    fi
+    
+    return 0
 }
 
 # Function to run build with appropriate flags
@@ -50,10 +84,28 @@ run_build() {
             echo ""
             echo "🚨 Cannot build in offline mode without cached dependencies!"
             echo ""
+            echo "Missing dependencies detected:"
+            
+            # Run the dependency check again to show what's missing
+            has_cached_dependencies
+            
+            echo ""
             echo "Solutions:"
-            echo "1. Run this build on a machine with internet access first"
-            echo "2. Copy the Gradle cache from a machine that has built this project"
-            echo "3. Contact your system administrator about network access"
+            echo "1. 🌐 Run this build on a machine with internet access first:"
+            echo "   ./gradlew build --refresh-dependencies"
+            echo ""
+            echo "2. 📦 Copy the complete Gradle cache from a machine that has built this project:"
+            echo "   # On connected machine:"
+            echo "   tar -czf gradle-cache.tar.gz ~/.gradle/caches"
+            echo "   # On this machine:"
+            echo "   tar -xzf gradle-cache.tar.gz -C ~/"
+            echo ""
+            echo "3. 🔧 Try a minimal build to check what's available:"
+            echo "   ./gradlew tasks --offline"
+            echo ""
+            echo "4. 🏢 Use a corporate proxy if available (see BUILD_TROUBLESHOOTING.md)"
+            echo ""
+            echo "5. 📞 Contact your system administrator about network access"
             echo ""
             echo "For detailed troubleshooting, see: BUILD_TROUBLESHOOTING.md"
             echo "Or run: ./check_connectivity.sh"
@@ -84,6 +136,11 @@ main() {
             echo "  $0 assembleDebug     # Build debug APK"
             echo "  $0 test              # Run tests"
             echo ""
+            echo "Special commands:"
+            echo "  $0 check             # Check connectivity and diagnostics"
+            echo "  $0 cache-info        # Show cache information"
+            echo "  $0 force-offline     # Force offline build (bypass detection)"
+            echo ""
             echo "For troubleshooting connectivity issues:"
             echo "  ./check_connectivity.sh"
             echo ""
@@ -95,6 +152,44 @@ main() {
         "check")
             echo "🔍 Running connectivity check..."
             ./check_connectivity.sh
+            exit $?
+            ;;
+        "cache-info")
+            echo "📦 Gradle Cache Information"
+            echo "========================="
+            echo ""
+            cache_dir="$HOME/.gradle/caches"
+            if [ -d "$cache_dir" ]; then
+                echo "Cache directory: $cache_dir"
+                echo "Cache size: $(du -sh "$cache_dir" 2>/dev/null | cut -f1)"
+                echo "Total files: $(find "$cache_dir" -type f | wc -l)"
+                echo "JAR/POM files: $(find "$cache_dir" -name "*.jar" -o -name "*.pom" | wc -l)"
+                echo ""
+                echo "Key buildscript dependencies:"
+                modules_dir="$cache_dir/modules-2/files-2.1"
+                if [ -d "$modules_dir" ]; then
+                    [ -d "$modules_dir/com.android.tools.build/gradle" ] && echo "✅ Android Gradle Plugin" || echo "❌ Android Gradle Plugin"
+                    [ -d "$modules_dir/org.jetbrains.kotlin/kotlin-gradle-plugin" ] && echo "✅ Kotlin Gradle Plugin" || echo "❌ Kotlin Gradle Plugin"
+                    [ -d "$modules_dir/com.google.dagger/hilt-android-gradle-plugin" ] && echo "✅ Hilt Gradle Plugin" || echo "❌ Hilt Gradle Plugin"
+                    [ -d "$modules_dir/com.google.dagger/hilt-compiler" ] && echo "✅ Hilt Compiler (KAPT)" || echo "❌ Hilt Compiler (KAPT)"
+                else
+                    echo "❌ No modules cache found"
+                fi
+            else
+                echo "❌ No Gradle cache found"
+            fi
+            echo ""
+            exit 0
+            ;;
+        "force-offline")
+            echo "🔍 Forcing offline mode..."
+            echo "📴 Offline mode (forced)"
+            echo "📦 Running offline build..."
+            shift  # Remove 'force-offline' from arguments
+            if [ $# -eq 0 ]; then
+                set -- "build"
+            fi
+            ./gradlew "$@" --offline
             exit $?
             ;;
     esac
