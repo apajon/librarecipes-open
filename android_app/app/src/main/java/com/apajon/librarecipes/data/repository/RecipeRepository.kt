@@ -1,12 +1,13 @@
 package com.apajon.librarecipes.data.repository
 
-import com.apajon.librarecipes.data.api.LibraRecipesApiService
+import com.apajon.librarecipes.data.local.AppDatabase
+import com.apajon.librarecipes.data.local.EntityMapper
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
-import com.apajon.librarecipes.data.model.SearchFilters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,47 +21,88 @@ sealed class RecipeResult {
 
 /**
  * Repository for recipe data operations.
- * Handles data fetching from the API and provides data to ViewModels.
+ * Handles data operations using local Room database.
  */
 @Singleton
 class RecipeRepository @Inject constructor(
-    private val apiService: LibraRecipesApiService
+    private val database: AppDatabase
 ) {
     
     /**
-     * Get all recipes from the API.
+     * Get all recipes from the local database.
      * @return Flow of recipe list with error information
      */
     fun getRecipes(): Flow<RecipeResult> = flow {
         try {
-            val recipes = apiService.getRecipes()
-            emit(RecipeResult.Success(recipes))
+            database.recipeDao().getAllRecipes().map { recipes ->
+                val recipeListItems = recipes.map { recipe ->
+                    EntityMapper.recipeEntityToListItem(recipe)
+                }
+                RecipeResult.Success(recipeListItems)
+            }.collect { result ->
+                emit(result)
+            }
         } catch (e: Exception) {
             // Log the error for debugging
             android.util.Log.e("RecipeRepository", "Error fetching recipes", e)
-            emit(RecipeResult.Error("Erreur de connexion au serveur. Vérifiez que le serveur backend est en cours d'exécution."))
+            emit(RecipeResult.Error("Erreur lors de la récupération des recettes depuis la base de données locale."))
         }
     }
     
     /**
-     * Create a new recipe.
+     * Create a new recipe in the local database.
      * @param recipe Recipe data to create
      * @return Result with created recipe or error
      */
     suspend fun createRecipe(recipe: RecipeCreate): Result<RecipeResponse> {
         return try {
-            val response = apiService.createRecipe(recipe)
+            val recipeWithEntities = EntityMapper.recipeCreateToEntities(recipe)
+            
+            // Insert recipe
+            database.recipeDao().insertRecipe(recipeWithEntities.recipe)
+            
+            // Insert related entities
+            database.ingredientDao().insertIngredients(recipeWithEntities.ingredients)
+            database.etapeDao().insertEtapes(recipeWithEntities.etapes)
+            database.categorieDao().insertCategories(recipeWithEntities.categories)
+            database.tagDao().insertTags(recipeWithEntities.tags)
+            recipeWithEntities.source?.let { source ->
+                database.sourceDao().insertSource(source)
+            }
+            
+            // Return response
+            val response = RecipeResponse(
+                id = recipeWithEntities.recipe.id,
+                nom = recipeWithEntities.recipe.nom,
+                preparation = recipeWithEntities.recipe.preparation,
+                cuisson = recipeWithEntities.recipe.cuisson,
+                portions = recipeWithEntities.recipe.portions,
+                dateAjout = EntityMapper.dateFormat.format(recipeWithEntities.recipe.dateAjout),
+                derniereExecution = null,
+                source = recipeWithEntities.source?.let { source ->
+                    com.apajon.librarecipes.data.model.SourceResponse(
+                        type = source.type,
+                        valeur = when (source.type) {
+                            "url" -> source.url
+                            "book" -> source.bookTitle
+                            else -> null
+                        }
+                    )
+                }
+            )
+            
             Result.success(response)
         } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error creating recipe", e)
             Result.failure(e)
         }
     }
     
     /**
-     * Search recipes with filters.
+     * Search recipes with filters in the local database.
      * @param nom Recipe name filter
      * @param ingredients List of ingredients to search for
-     * @param ingredientsMode Search mode: "ANY" or "ALL"
+     * @param ingredientsMode Search mode: "ANY" or "ALL" (not fully implemented)
      * @param tags List of tags to filter by
      * @param categories List of categories to filter by
      * @return Flow of filtered recipe list with error information
@@ -73,18 +115,19 @@ class RecipeRepository @Inject constructor(
         categories: List<String>? = null
     ): Flow<RecipeResult> = flow {
         try {
-            val searchFilters = SearchFilters(
+            val recipes = database.recipeDao().searchRecipes(
                 nom = nom,
                 ingredients = ingredients,
-                ingredientsMode = ingredientsMode,
-                tags = tags,
-                categories = categories
+                categories = categories,
+                tags = tags
             )
-            val recipes = apiService.searchRecipes(searchFilters)
-            emit(RecipeResult.Success(recipes))
+            val recipeListItems = recipes.map { recipe ->
+                EntityMapper.recipeEntityToListItem(recipe)
+            }
+            emit(RecipeResult.Success(recipeListItems))
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error searching recipes", e)
-            emit(RecipeResult.Error("Erreur lors de la recherche. Vérifiez que le serveur backend est en cours d'exécution."))
+            emit(RecipeResult.Error("Erreur lors de la recherche dans la base de données locale."))
         }
     }
 }
