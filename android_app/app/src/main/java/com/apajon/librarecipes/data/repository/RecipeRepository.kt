@@ -4,6 +4,7 @@ import com.apajon.librarecipes.data.api.LibraRecipesApiService
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
+import com.apajon.librarecipes.data.model.SearchFilters
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -62,13 +63,14 @@ class RecipeRepository @Inject constructor(
         categories: List<String>? = null
     ): Flow<List<RecipeListItem>> = flow {
         try {
-            val recipes = apiService.searchRecipes(
+            val searchFilters = SearchFilters(
                 nom = nom,
-                ingredients = ingredients?.joinToString(","),
+                ingredients = ingredients,
                 ingredientsMode = ingredientsMode,
-                tags = tags?.joinToString(","),
-                categories = categories?.joinToString(",")
+                tags = tags,
+                categories = categories
             )
+            val recipes = apiService.searchRecipes(searchFilters)
             emit(recipes)
         } catch (e: Exception) {
             emit(emptyList())

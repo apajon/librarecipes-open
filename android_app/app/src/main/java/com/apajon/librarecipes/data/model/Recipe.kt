@@ -123,3 +123,14 @@ object MeasurementUnits {
         "tranche"
     )
 }
+
+/**
+ * Search filters for recipe search API.
+ */
+data class SearchFilters(
+    val nom: String? = null,
+    val ingredients: List<String>? = null,
+    val ingredientsMode: String = "ANY",
+    val tags: List<String>? = null,
+    val categories: List<String>? = null
+)
