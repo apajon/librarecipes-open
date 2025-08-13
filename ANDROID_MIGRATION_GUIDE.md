@@ -165,6 +165,12 @@ cd android_app
 gradle wrapper
 ./gradlew build
 ./gradlew installDebug
+
+# APK debug build in app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleDebug
+
+# APK release unsigned build in app/build/outputs/apk/release/app-release-unsigned.apk
+./gradlew assembleRelease
 ```
 
 ## Testing
