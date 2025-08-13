@@ -1,5 +1,7 @@
 package com.apajon.librarecipes.data.model
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * Data classes for recipe creation and API responses.
  */
@@ -130,6 +132,7 @@ object MeasurementUnits {
 data class SearchFilters(
     val nom: String? = null,
     val ingredients: List<String>? = null,
+    @SerializedName("ingredients_mode")
     val ingredientsMode: String = "ANY",
     val tags: List<String>? = null,
     val categories: List<String>? = null
