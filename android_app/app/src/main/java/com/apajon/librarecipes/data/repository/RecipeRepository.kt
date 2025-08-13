@@ -11,6 +11,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * Sealed class representing the result of a recipe operation.
+ */
+sealed class RecipeResult {
+    data class Success(val recipes: List<RecipeListItem>) : RecipeResult()
+    data class Error(val message: String) : RecipeResult()
+}
+
+/**
  * Repository for recipe data operations.
  * Handles data fetching from the API and provides data to ViewModels.
  */
@@ -21,14 +29,16 @@ class RecipeRepository @Inject constructor(
     
     /**
      * Get all recipes from the API.
-     * @return Flow of recipe list
+     * @return Flow of recipe list with error information
      */
-    fun getRecipes(): Flow<List<RecipeListItem>> = flow {
+    fun getRecipes(): Flow<RecipeResult> = flow {
         try {
             val recipes = apiService.getRecipes()
-            emit(recipes)
+            emit(RecipeResult.Success(recipes))
         } catch (e: Exception) {
-            emit(emptyList())
+            // Log the error for debugging
+            android.util.Log.e("RecipeRepository", "Error fetching recipes", e)
+            emit(RecipeResult.Error("Erreur de connexion au serveur. Vérifiez que le serveur backend est en cours d'exécution."))
         }
     }
     
@@ -53,7 +63,7 @@ class RecipeRepository @Inject constructor(
      * @param ingredientsMode Search mode: "ANY" or "ALL"
      * @param tags List of tags to filter by
      * @param categories List of categories to filter by
-     * @return Flow of filtered recipe list
+     * @return Flow of filtered recipe list with error information
      */
     fun searchRecipes(
         nom: String? = null,
@@ -61,7 +71,7 @@ class RecipeRepository @Inject constructor(
         ingredientsMode: String = "ANY",
         tags: List<String>? = null,
         categories: List<String>? = null
-    ): Flow<List<RecipeListItem>> = flow {
+    ): Flow<RecipeResult> = flow {
         try {
             val searchFilters = SearchFilters(
                 nom = nom,
@@ -71,9 +81,10 @@ class RecipeRepository @Inject constructor(
                 categories = categories
             )
             val recipes = apiService.searchRecipes(searchFilters)
-            emit(recipes)
+            emit(RecipeResult.Success(recipes))
         } catch (e: Exception) {
-            emit(emptyList())
+            android.util.Log.e("RecipeRepository", "Error searching recipes", e)
+            emit(RecipeResult.Error("Erreur lors de la recherche. Vérifiez que le serveur backend est en cours d'exécution."))
         }
     }
 }

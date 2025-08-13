@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.repository.RecipeRepository
+import com.apajon.librarecipes.data.repository.RecipeResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,12 +26,24 @@ class RecipeListViewModel @Inject constructor(
     
     fun loadRecipes() {
         viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            repository.getRecipes().collect { recipes ->
-                _uiState.value = _uiState.value.copy(
-                    recipes = recipes,
-                    isLoading = false
-                )
+            _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
+            repository.getRecipes().collect { result ->
+                when (result) {
+                    is RecipeResult.Success -> {
+                        _uiState.value = _uiState.value.copy(
+                            recipes = result.recipes,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                    is RecipeResult.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            recipes = emptyList(),
+                            isLoading = false,
+                            errorMessage = result.message
+                        )
+                    }
+                }
             }
         }
     }

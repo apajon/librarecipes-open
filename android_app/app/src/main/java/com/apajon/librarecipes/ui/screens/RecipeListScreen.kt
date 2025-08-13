@@ -59,6 +59,29 @@ fun RecipeListScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+                uiState.errorMessage != null -> {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Erreur de connexion",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = uiState.errorMessage!!,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = { viewModel.refreshRecipes() }) {
+                            Text("Réessayer")
+                        }
+                    }
+                }
                 uiState.recipes.isEmpty() -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),
