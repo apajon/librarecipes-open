@@ -3,6 +3,7 @@ package com.apajon.librarecipes.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -36,6 +37,8 @@ fun EditRecipeScreen(
     var showAddStepDialog by remember { mutableStateOf(false) }
     var editingIngredientIndex by remember { mutableIntStateOf(-1) }
     var editingStepIndex by remember { mutableIntStateOf(-1) }
+    
+    val listState = rememberLazyListState()
 
     // Initialize the form based on mode
     LaunchedEffect(recipeId) {
@@ -43,6 +46,21 @@ fun EditRecipeScreen(
             viewModel.loadRecipeForEdit(recipeId)
         } else {
             viewModel.initializeForCreate()
+        }
+    }
+    
+    // Handle section-specific editing - scroll to the appropriate section
+    LaunchedEffect(editSection) {
+        if (editSection != null && !isLoading) {
+            val sectionIndex = when (editSection) {
+                "ingredients" -> 1 // Basic info (0) + Ingredients section (1)
+                "steps" -> formState.ingredients.size + 2 // Basic info + Ingredients section + ingredients list + Steps section
+                "categories" -> 0 // Basic info includes categories and tags
+                else -> 0
+            }
+            if (sectionIndex >= 0) {
+                listState.animateScrollToItem(sectionIndex)
+            }
         }
     }
 
@@ -67,7 +85,19 @@ fun EditRecipeScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        if (viewModel.isEditMode()) "Modifier Recette" else "Nouvelle Recette"
+                        when {
+                            editSection != null -> {
+                                val sectionName = when (editSection) {
+                                    "ingredients" -> "Ingrédients"
+                                    "steps" -> "Étapes"
+                                    "categories" -> "Catégories & Tags"
+                                    else -> "Modifier Recette"
+                                }
+                                "Modifier: $sectionName"
+                            }
+                            viewModel.isEditMode() -> "Modifier Recette"
+                            else -> "Nouvelle Recette"
+                        }
                     ) 
                 },
                 navigationIcon = {
@@ -109,6 +139,7 @@ fun EditRecipeScreen(
             }
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)

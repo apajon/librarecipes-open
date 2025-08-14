@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -146,7 +147,8 @@ fun RecipeDetailScreen(
                     RecipeDetailContent(
                         recipe = uiState.recipe!!,
                         onEdit = { navController.navigate("edit_recipe/$recipeId") },
-                        onDelete = { showDeleteDialog = true }
+                        onDelete = { showDeleteDialog = true },
+                        onEditSection = { section -> navController.navigate("edit_recipe/$recipeId/section/$section") }
                     )
                 }
             }
@@ -858,7 +860,8 @@ fun SearchScreen(
 fun RecipeDetailContent(
     recipe: RecipeDetail,
     onEdit: () -> Unit = {},
-    onDelete: () -> Unit = {}
+    onDelete: () -> Unit = {},
+    onEditSection: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -876,7 +879,9 @@ fun RecipeDetailContent(
         if (recipe.ingredients.isNotEmpty()) {
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditSection("ingredients") },
                     shape = MaterialTheme.shapes.medium,
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
@@ -884,11 +889,22 @@ fun RecipeDetailContent(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            text = "Ingrédients (${recipe.ingredients.size})",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Ingrédients (${recipe.ingredients.size})",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Modifier les ingrédients",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         
                         recipe.ingredients.forEach { ingredient ->
                             IngredientDisplayItem(ingredient = ingredient)
@@ -902,7 +918,9 @@ fun RecipeDetailContent(
         if (recipe.etapes.isNotEmpty()) {
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditSection("steps") },
                     shape = MaterialTheme.shapes.medium,
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
@@ -910,11 +928,22 @@ fun RecipeDetailContent(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text(
-                            text = "Étapes de préparation (${recipe.etapes.size})",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Étapes de préparation (${recipe.etapes.size})",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Modifier les étapes",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
                         
                         recipe.etapes.forEach { etape ->
                             EtapeDisplayItem(etape = etape)
@@ -928,7 +957,9 @@ fun RecipeDetailContent(
         if (recipe.categories.isNotEmpty() || recipe.tags.isNotEmpty()) {
             item {
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onEditSection("categories") },
                     shape = MaterialTheme.shapes.medium,
                     elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
@@ -936,6 +967,23 @@ fun RecipeDetailContent(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Catégories & Tags",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Icon(
+                                Icons.Default.Edit,
+                                contentDescription = "Modifier les catégories et tags",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        
                         if (recipe.categories.isNotEmpty()) {
                             Text(
                                 text = "Catégories",

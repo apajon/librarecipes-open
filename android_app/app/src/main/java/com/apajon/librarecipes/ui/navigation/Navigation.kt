@@ -43,6 +43,15 @@ fun LibraRecipesNavigation(
                 navController = navController
             )
         }
+        composable("edit_recipe/{recipeId}/section/{section}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: ""
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            EditRecipeScreen(
+                recipeId = recipeId,
+                editSection = section,
+                navController = navController
+            )
+        }
         composable("create_new_recipe") {
             EditRecipeScreen(
                 recipeId = null,
