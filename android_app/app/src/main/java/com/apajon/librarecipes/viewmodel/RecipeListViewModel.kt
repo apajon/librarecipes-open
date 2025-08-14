@@ -51,6 +51,21 @@ class RecipeListViewModel @Inject constructor(
     fun refreshRecipes() {
         loadRecipes()
     }
+    
+    fun deleteRecipe(recipeId: String) {
+        viewModelScope.launch {
+            repository.deleteRecipe(recipeId)
+                .onSuccess {
+                    // Refresh the list after successful deletion
+                    loadRecipes()
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Erreur lors de la suppression: ${error.message}"
+                    )
+                }
+        }
+    }
 }
 
 data class RecipeListUiState(

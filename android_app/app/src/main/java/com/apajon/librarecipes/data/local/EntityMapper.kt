@@ -17,6 +17,13 @@ object EntityMapper {
      */
     fun recipeCreateToEntities(recipeCreate: RecipeCreate): RecipeWithEntities {
         val recipeId = UUID.randomUUID().toString()
+        return recipeCreateToEntities(recipeCreate, recipeId)
+    }
+    
+    /**
+     * Convert RecipeCreate (from UI) to database entities with existing recipe ID.
+     */
+    fun recipeCreateToEntities(recipeCreate: RecipeCreate, recipeId: String): RecipeWithEntities {
         
         val recipe = RecipeEntity(
             id = recipeId,
@@ -156,6 +163,40 @@ object EntityMapper {
                         "book" -> source.bookTitle
                         else -> null
                     }
+                )
+            }
+        )
+    }
+    
+    /**
+     * Convert RecipeDetail to RecipeCreate for editing purposes.
+     */
+    fun recipeDetailToCreate(recipeDetail: RecipeDetail): RecipeCreate {
+        return RecipeCreate(
+            nom = recipeDetail.nom,
+            preparation = recipeDetail.preparation,
+            cuisson = recipeDetail.cuisson,
+            portions = recipeDetail.portions,
+            ingredients = recipeDetail.ingredients.map { ingredient ->
+                IngredientCreate(
+                    nom = ingredient.nom,
+                    quantite = ingredient.quantite,
+                    unite = ingredient.unite ?: "",
+                    indispensable = ingredient.indispensable,
+                    alternatives = ingredient.alternatives ?: ""
+                )
+            },
+            etapes = recipeDetail.etapes.sortedBy { it.numero }.map { it.description },
+            categories = recipeDetail.categories,
+            tags = recipeDetail.tags,
+            source = recipeDetail.source?.let { source ->
+                SourceCreate(
+                    type = source.type,
+                    valeur = when (source.type) {
+                        "url" -> source.url
+                        "book" -> source.bookTitle
+                        else -> null
+                    } ?: ""
                 )
             }
         )

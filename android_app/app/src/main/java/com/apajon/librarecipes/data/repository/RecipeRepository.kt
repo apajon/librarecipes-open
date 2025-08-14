@@ -151,4 +151,85 @@ class RecipeRepository @Inject constructor(
             emit(RecipeResult.Error("Erreur lors de la recherche dans la base de données locale."))
         }
     }
+    
+    /**
+     * Delete a recipe from the local database.
+     * @param recipeId ID of the recipe to delete
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteRecipe(recipeId: String): Result<Unit> {
+        return try {
+            // First delete related entities (foreign key constraints)
+            database.ingredientDao().deleteByRecipeId(recipeId)
+            database.etapeDao().deleteByRecipeId(recipeId)
+            database.categorieDao().deleteByRecipeId(recipeId)
+            database.tagDao().deleteByRecipeId(recipeId)
+            database.sourceDao().deleteByRecipeId(recipeId)
+            
+            // Then delete the recipe itself
+            database.recipeDao().deleteRecipeById(recipeId)
+            
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error deleting recipe", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Update an existing recipe in the local database.
+     * @param recipeId ID of the recipe to update
+     * @param recipe Updated recipe data
+     * @return Result with updated recipe or error
+     */
+    suspend fun updateRecipe(recipeId: String, recipe: RecipeCreate): Result<RecipeResponse> {
+        return try {
+            val recipeWithEntities = EntityMapper.recipeCreateToEntities(recipe, recipeId)
+            
+            // Delete existing related entities
+            database.ingredientDao().deleteByRecipeId(recipeId)
+            database.etapeDao().deleteByRecipeId(recipeId)
+            database.categorieDao().deleteByRecipeId(recipeId)
+            database.tagDao().deleteByRecipeId(recipeId)
+            database.sourceDao().deleteByRecipeId(recipeId)
+            
+            // Update recipe main record
+            database.recipeDao().updateRecipe(recipeWithEntities.recipe)
+            
+            // Insert updated related entities
+            database.ingredientDao().insertIngredients(recipeWithEntities.ingredients)
+            database.etapeDao().insertEtapes(recipeWithEntities.etapes)
+            database.categorieDao().insertCategories(recipeWithEntities.categories)
+            database.tagDao().insertTags(recipeWithEntities.tags)
+            recipeWithEntities.source?.let { source ->
+                database.sourceDao().insertSource(source)
+            }
+            
+            // Return response
+            val response = RecipeResponse(
+                id = recipeWithEntities.recipe.id,
+                nom = recipeWithEntities.recipe.nom,
+                preparation = recipeWithEntities.recipe.preparation,
+                cuisson = recipeWithEntities.recipe.cuisson,
+                portions = recipeWithEntities.recipe.portions,
+                dateAjout = EntityMapper.dateFormat.format(recipeWithEntities.recipe.dateAjout),
+                derniereExecution = null,
+                source = recipeWithEntities.source?.let { source ->
+                    com.apajon.librarecipes.data.model.SourceResponse(
+                        type = source.type,
+                        valeur = when (source.type) {
+                            "url" -> source.url
+                            "book" -> source.bookTitle
+                            else -> null
+                        }
+                    )
+                }
+            )
+            
+            Result.success(response)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error updating recipe", e)
+            Result.failure(e)
+        }
+    }
 }

@@ -173,4 +173,32 @@ class SearchViewModel @Inject constructor(
             }
         }
     }
+    
+    /**
+     * Delete a recipe and refresh search results.
+     */
+    fun deleteRecipe(recipeId: String) {
+        viewModelScope.launch {
+            recipeRepository.deleteRecipe(recipeId)
+                .onSuccess {
+                    // Refresh search results after successful deletion
+                    if (_uiState.value.hasSearched) {
+                        if (_uiState.value.searchQuery.isBlank() &&
+                            _uiState.value.selectedIngredients.isEmpty() &&
+                            _uiState.value.selectedCategories.isEmpty() &&
+                            _uiState.value.selectedTags.isEmpty()
+                        ) {
+                            loadAllRecipes()
+                        } else {
+                            performSearch()
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        errorMessage = "Erreur lors de la suppression: ${error.message}"
+                    )
+                }
+        }
+    }
 }

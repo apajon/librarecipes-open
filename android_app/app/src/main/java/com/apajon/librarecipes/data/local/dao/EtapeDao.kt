@@ -24,4 +24,7 @@ interface EtapeDao {
     
     @Query("DELETE FROM etapes WHERE recetteId = :recipeId")
     suspend fun deleteEtapesForRecipe(recipeId: String)
+    
+    @Query("DELETE FROM etapes WHERE recetteId = :recipeId")
+    suspend fun deleteByRecipeId(recipeId: String)
 }

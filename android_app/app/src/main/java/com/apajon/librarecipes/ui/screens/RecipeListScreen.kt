@@ -24,6 +24,7 @@ fun RecipeListScreen(
     viewModel: RecipeListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var recipeToDelete by remember { mutableStateOf<String?>(null) }
     
     Scaffold(
         topBar = {
@@ -112,6 +113,12 @@ fun RecipeListScreen(
                                 recipe = recipe,
                                 onClick = { 
                                     navController.navigate("recipe/${recipe.id}")
+                                },
+                                onEdit = {
+                                    navController.navigate("edit_recipe/${recipe.id}")
+                                },
+                                onDelete = {
+                                    recipeToDelete = recipe.id
                                 }
                             )
                         }
@@ -119,5 +126,34 @@ fun RecipeListScreen(
                 }
             }
         }
+    }
+    
+    // Delete confirmation dialog
+    recipeToDelete?.let { recipeId ->
+        AlertDialog(
+            onDismissRequest = { recipeToDelete = null },
+            title = { Text("Supprimer la recette") },
+            text = { 
+                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        viewModel.deleteRecipe(recipeId)
+                        recipeToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Supprimer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { recipeToDelete = null }) {
+                    Text("Annuler")
+                }
+            }
+        )
     }
 }

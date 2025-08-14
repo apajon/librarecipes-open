@@ -17,7 +17,10 @@ import javax.inject.Inject
 data class RecipeDetailUiState(
     val isLoading: Boolean = false,
     val recipe: RecipeDetail? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val isDeleting: Boolean = false,
+    val deleteSuccess: Boolean = false,
+    val deleteError: String? = null
 )
 
 /**
@@ -62,5 +65,44 @@ class RecipeDetailViewModel @Inject constructor(
      */
     fun retry(recipeId: String) {
         loadRecipeDetails(recipeId)
+    }
+    
+    /**
+     * Delete the current recipe.
+     * @param recipeId ID of the recipe to delete
+     */
+    fun deleteRecipe(recipeId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isDeleting = true, deleteError = null)
+            
+            recipeRepository.deleteRecipe(recipeId)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isDeleting = false,
+                        deleteSuccess = true,
+                        deleteError = null
+                    )
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isDeleting = false,
+                        deleteError = error.message ?: "Erreur lors de la suppression de la recette"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Clear delete success state.
+     */
+    fun clearDeleteSuccess() {
+        _uiState.value = _uiState.value.copy(deleteSuccess = false)
+    }
+    
+    /**
+     * Clear delete error state.
+     */
+    fun clearDeleteError() {
+        _uiState.value = _uiState.value.copy(deleteError = null)
     }
 }

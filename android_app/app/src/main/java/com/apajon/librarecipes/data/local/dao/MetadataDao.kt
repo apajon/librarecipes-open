@@ -18,6 +18,9 @@ interface CategorieDao {
     
     @Query("DELETE FROM categories WHERE recetteId = :recipeId")
     suspend fun deleteCategoriesForRecipe(recipeId: String)
+    
+    @Query("DELETE FROM categories WHERE recetteId = :recipeId")
+    suspend fun deleteByRecipeId(recipeId: String)
 }
 
 @Dao
@@ -27,6 +30,9 @@ interface TagDao {
     
     @Query("DELETE FROM tags WHERE recetteId = :recipeId")
     suspend fun deleteTagsForRecipe(recipeId: String)
+    
+    @Query("DELETE FROM tags WHERE recetteId = :recipeId")
+    suspend fun deleteByRecipeId(recipeId: String)
 }
 
 @Dao
@@ -36,4 +42,7 @@ interface SourceDao {
     
     @Query("DELETE FROM sources WHERE recetteId = :recipeId")
     suspend fun deleteSourceForRecipe(recipeId: String)
+    
+    @Query("DELETE FROM sources WHERE recetteId = :recipeId")
+    suspend fun deleteByRecipeId(recipeId: String)
 }

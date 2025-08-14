@@ -10,6 +10,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
@@ -39,10 +41,19 @@ fun RecipeDetailScreen(
     viewModel: RecipeDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
     
     // Load recipe details when the screen is first displayed
     LaunchedEffect(recipeId) {
         viewModel.loadRecipeDetails(recipeId)
+    }
+    
+    // Handle delete success
+    LaunchedEffect(uiState.deleteSuccess) {
+        if (uiState.deleteSuccess) {
+            viewModel.clearDeleteSuccess()
+            navController.navigateUp()
+        }
     }
     
     Scaffold(
@@ -60,10 +71,38 @@ fun RecipeDetailScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 },
+                actions = {
+                    // Edit button
+                    IconButton(
+                        onClick = { 
+                            navController.navigate("edit_recipe/$recipeId")
+                        },
+                        enabled = uiState.recipe != null
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Modifier",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    
+                    // Delete button
+                    IconButton(
+                        onClick = { showDeleteDialog = true },
+                        enabled = uiState.recipe != null && !uiState.isDeleting
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Supprimer",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
@@ -104,7 +143,69 @@ fun RecipeDetailScreen(
                     }
                 }
                 uiState.recipe != null -> {
-                    RecipeDetailContent(recipe = uiState.recipe!!)
+                    RecipeDetailContent(
+                        recipe = uiState.recipe!!,
+                        onEdit = { navController.navigate("edit_recipe/$recipeId") },
+                        onDelete = { showDeleteDialog = true }
+                    )
+                }
+            }
+        }
+    }
+    
+    // Delete confirmation dialog
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Supprimer la recette") },
+            text = { 
+                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        viewModel.deleteRecipe(recipeId)
+                        showDeleteDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Supprimer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
+    
+    // Delete error display
+    uiState.deleteError?.let { error ->
+        LaunchedEffect(error) {
+            // Show error snackbar - you might want to implement a proper snackbar here
+            viewModel.clearDeleteError()
+        }
+    }
+    
+    // Loading overlay for delete operation
+    if (uiState.isDeleting) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Card(
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Suppression en cours...")
                 }
             }
         }
@@ -441,6 +542,7 @@ fun SearchScreen(
     var ingredientsText by remember { mutableStateOf("") }
     var categoriesText by remember { mutableStateOf("") }
     var tagsText by remember { mutableStateOf("") }
+    var recipeToDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -710,15 +812,54 @@ fun SearchScreen(
                     recipe = recipe,
                     onClick = {
                         navController.navigate("recipe/${recipe.id}")
+                    },
+                    onEdit = {
+                        navController.navigate("edit_recipe/${recipe.id}")
+                    },
+                    onDelete = {
+                        recipeToDelete = recipe.id
                     }
                 )
             }
         }
     }
+    
+    // Delete confirmation dialog
+    recipeToDelete?.let { recipeId ->
+        AlertDialog(
+            onDismissRequest = { recipeToDelete = null },
+            title = { Text("Supprimer la recette") },
+            text = { 
+                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = { 
+                        viewModel.deleteRecipe(recipeId)
+                        recipeToDelete = null
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Supprimer")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { recipeToDelete = null }) {
+                    Text("Annuler")
+                }
+            }
+        )
+    }
 }
 
 @Composable
-fun RecipeDetailContent(recipe: RecipeDetail) {
+fun RecipeDetailContent(
+    recipe: RecipeDetail,
+    onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {}
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -916,6 +1057,35 @@ fun RecipeDetailContent(recipe: RecipeDetail) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                }
+            }
+        }
+        
+        // Action buttons
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Button(
+                    onClick = onEdit,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Modifier")
+                }
+                
+                Button(
+                    onClick = onDelete,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Supprimer")
                 }
             }
         }
