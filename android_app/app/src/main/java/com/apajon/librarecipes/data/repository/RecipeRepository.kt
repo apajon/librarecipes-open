@@ -5,6 +5,7 @@ import com.apajon.librarecipes.data.local.EntityMapper
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
+import com.apajon.librarecipes.data.model.RecipeDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -98,6 +99,26 @@ class RecipeRepository @Inject constructor(
         }
     }
     
+    /**
+     * Get recipe details by ID from the local database.
+     * @param recipeId ID of the recipe to fetch
+     * @return Result with recipe details or error
+     */
+    suspend fun getRecipeDetails(recipeId: String): Result<RecipeDetail> {
+        return try {
+            val recipeWithDetails = database.recipeDao().getRecipeWithDetails(recipeId)
+            if (recipeWithDetails != null) {
+                val recipeDetail = EntityMapper.recipeWithDetailsToDetail(recipeWithDetails)
+                Result.success(recipeDetail)
+            } else {
+                Result.failure(Exception("Recette non trouvée"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error fetching recipe details", e)
+            Result.failure(e)
+        }
+    }
+
     /**
      * Search recipes with filters in the local database.
      * @param nom Recipe name filter

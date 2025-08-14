@@ -97,6 +97,46 @@ object EntityMapper {
     }
     
     /**
+     * Convert RecipeWithDetails to RecipeDetail (for detailed display).
+     */
+    fun recipeWithDetailsToDetail(recipeWithDetails: RecipeWithDetails): RecipeDetail {
+        return RecipeDetail(
+            id = recipeWithDetails.recipe.id,
+            nom = recipeWithDetails.recipe.nom,
+            preparation = recipeWithDetails.recipe.preparation,
+            cuisson = recipeWithDetails.recipe.cuisson,
+            portions = recipeWithDetails.recipe.portions,
+            dateAjout = dateFormat.format(recipeWithDetails.recipe.dateAjout),
+            ingredients = recipeWithDetails.ingredients.map { ingredient ->
+                IngredientDetail(
+                    nom = ingredient.nom,
+                    quantite = ingredient.quantite?.toFloatOrNull(),
+                    unite = ingredient.unite,
+                    indispensable = ingredient.indispensable,
+                    alternatives = ingredient.alternatives
+                )
+            },
+            etapes = recipeWithDetails.etapes.sortedBy { it.ordre }.map { etape ->
+                EtapeDetail(
+                    numero = etape.ordre,
+                    description = etape.description
+                )
+            },
+            categories = recipeWithDetails.categories.map { it.nom },
+            tags = recipeWithDetails.tags.map { it.nom },
+            source = recipeWithDetails.source?.let { source ->
+                SourceDetail(
+                    type = source.type,
+                    url = source.url,
+                    bookTitle = source.bookTitle,
+                    bookAuthors = source.bookAuthors,
+                    bookPage = source.bookPage
+                )
+            }
+        )
+    }
+
+    /**
      * Convert RecipeWithDetails to RecipeResponse.
      */
     fun recipeWithDetailsToResponse(recipeWithDetails: RecipeWithDetails): RecipeResponse {

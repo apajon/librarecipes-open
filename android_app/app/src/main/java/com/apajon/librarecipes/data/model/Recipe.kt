@@ -137,3 +137,50 @@ data class SearchFilters(
     val tags: List<String>? = null,
     val categories: List<String>? = null
 )
+
+/**
+ * Detailed recipe model for UI display.
+ */
+data class RecipeDetail(
+    val id: String,
+    val nom: String,
+    val preparation: Int? = null,
+    val cuisson: Int? = null,
+    val portions: Int? = null,
+    val dateAjout: String,
+    val ingredients: List<IngredientDetail>,
+    val etapes: List<EtapeDetail>,
+    val categories: List<String>,
+    val tags: List<String>,
+    val source: SourceDetail? = null
+)
+
+/**
+ * Ingredient detail model for UI display.
+ */
+data class IngredientDetail(
+    val nom: String,
+    val quantite: Float? = null,
+    val unite: String? = null,
+    val indispensable: Boolean = true,
+    val alternatives: String? = null
+)
+
+/**
+ * Step detail model for UI display.
+ */
+data class EtapeDetail(
+    val numero: Int,
+    val description: String
+)
+
+/**
+ * Source detail model for UI display.
+ */
+data class SourceDetail(
+    val type: String,
+    val url: String? = null,
+    val bookTitle: String? = null,
+    val bookAuthors: String? = null,
+    val bookPage: String? = null
+)
