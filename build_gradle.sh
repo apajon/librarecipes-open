@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+
+# Empêcher l'exécution via 'source' pour éviter de fermer le shell appelant
+if [[ "${BASH_SOURCE[0]}" != "$0" ]]; then
+  echo "Ce script est conçu pour être exécuté, pas sourcé. Utilisez: ./build_gradle.sh ou bash build_gradle.sh"
+  return 0 2>/dev/null || exit 0
+fi
+
 set -euo pipefail
 
 # Répertoires
@@ -98,7 +105,7 @@ case "$action" in
   7) action="assembleDebug" ;;
   8) action="assembleRelease" ;;
   9) action="total-refresh-build" ;;
-  10|10) action="total-refresh-debug" ;;
+  10) action="total-refresh-debug" ;;
   *) : ;;
 esac
 
@@ -224,7 +231,7 @@ case "$action" in
     ;;
   *)
     echo "Action inconnue: $action"; echo; usage; popd >/dev/null; cd "$root_dir" >/dev/null || true; exit 2 ;;
-fi
+  esac
 
 # Retour au dossier d'origine
 popd >/dev/null
