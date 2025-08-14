@@ -4,10 +4,17 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -427,8 +434,14 @@ fun CreateRecipeScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    viewModel: com.apajon.librarecipes.viewmodel.SearchViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    var ingredientsText by remember { mutableStateOf("") }
+    var categoriesText by remember { mutableStateOf("") }
+    var tagsText by remember { mutableStateOf("") }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -438,32 +451,266 @@ fun SearchScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
                     }
                 },
+                actions = {
+                    // Clear search button
+                    if (uiState.hasSearched) {
+                        IconButton(onClick = { 
+                            viewModel.clearSearch()
+                            ingredientsText = ""
+                            categoriesText = ""
+                            tagsText = ""
+                        }) {
+                            Icon(Icons.Default.Clear, contentDescription = "Effacer recherche")
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         }
     ) { paddingValues ->
-        Box(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Rechercher des recettes",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "À implémenter : recherche avancée",
-                    style = MaterialTheme.typography.bodyMedium
+            // Search filters card
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        Text(
+                            text = "Filtres de recherche",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        // Recipe name search
+                        OutlinedTextField(
+                            value = uiState.searchQuery,
+                            onValueChange = viewModel::updateSearchQuery,
+                            label = { Text("Nom de la recette") },
+                            placeholder = { Text("Ex: Carbonara, Tiramisu...") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Search, contentDescription = null)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+
+                        // Ingredients search
+                        OutlinedTextField(
+                            value = ingredientsText,
+                            onValueChange = { newValue ->
+                                ingredientsText = newValue
+                                viewModel.updateIngredients(newValue)
+                            },
+                            label = { Text("Ingrédients") },
+                            placeholder = { Text("Ex: tomate, basilic, mozzarella (séparés par des virgules)") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Info, contentDescription = null)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            supportingText = {
+                                Text("Entrez les ingrédients séparés par des virgules")
+                            }
+                        )
+
+                        // Categories search
+                        OutlinedTextField(
+                            value = categoriesText,
+                            onValueChange = { newValue ->
+                                categoriesText = newValue
+                                viewModel.updateCategories(newValue)
+                            },
+                            label = { Text("Catégories") },
+                            placeholder = { Text("Ex: plat principal, dessert, entrée") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Face, contentDescription = null)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            supportingText = {
+                                Text("Entrez les catégories séparées par des virgules")
+                            }
+                        )
+
+                        // Tags search
+                        OutlinedTextField(
+                            value = tagsText,
+                            onValueChange = { newValue ->
+                                tagsText = newValue
+                                viewModel.updateTags(newValue)
+                            },
+                            label = { Text("Tags") },
+                            placeholder = { Text("Ex: rapide, végétarien, italien") },
+                            leadingIcon = {
+                                Icon(Icons.Default.Star, contentDescription = null)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            supportingText = {
+                                Text("Entrez les tags séparés par des virgules")
+                            }
+                        )
+
+                        // Search buttons
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Button(
+                                onClick = { viewModel.performSearch() },
+                                modifier = Modifier.weight(1f),
+                                enabled = !uiState.isLoading
+                            ) {
+                                if (uiState.isLoading) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        color = MaterialTheme.colorScheme.onPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                }
+                                Text("🔍 Rechercher")
+                            }
+                            
+                            OutlinedButton(
+                                onClick = { viewModel.loadAllRecipes() },
+                                modifier = Modifier.weight(1f),
+                                enabled = !uiState.isLoading
+                            ) {
+                                Text("📋 Toutes les recettes")
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Search results section
+            if (uiState.hasSearched) {
+                item {
+                    Text(
+                        text = if (uiState.searchResults.isNotEmpty()) {
+                            "Résultats (${uiState.searchResults.size})"
+                        } else if (uiState.isLoading) {
+                            "Recherche en cours..."
+                        } else if (uiState.errorMessage != null) {
+                            "Erreur de recherche"
+                        } else {
+                            "Aucun résultat trouvé"
+                        },
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
+                // Error message
+                uiState.errorMessage?.let { error ->
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.errorContainer
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = error,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(onClick = { viewModel.clearError() }) {
+                                    Text("OK")
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Loading indicator
+                if (uiState.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
+
+                // Empty state
+                if (!uiState.isLoading && uiState.errorMessage == null && uiState.searchResults.isEmpty()) {
+                    item {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(24.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    Icons.Default.Search,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(48.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "Aucune recette trouvée",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Essayez de modifier vos critères de recherche ou cliquez sur \"Toutes les recettes\" pour voir toutes les recettes disponibles.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Search results list
+            items(uiState.searchResults.size) { index ->
+                val recipe = uiState.searchResults[index]
+                com.apajon.librarecipes.ui.components.RecipeListItem(
+                    recipe = recipe,
+                    onClick = {
+                        navController.navigate("recipe/${recipe.id}")
+                    }
                 )
             }
         }
