@@ -56,19 +56,19 @@ class EditRecipeViewModel @Inject constructor(
                             IngredientFormItem(
                                 nom = ingredient.nom,
                                 quantite = ingredient.quantite?.toString() ?: "",
-                                unite = ingredient.unite,
+                                unite = ingredient.unite ?: "",
                                 indispensable = ingredient.indispensable,
-                                alternatives = ingredient.alternatives
+                                alternatives = ingredient.alternatives ?: ""
                             )
                         },
                         steps = recipeCreate.etapes,
                         sourceType = when (recipeCreate.source?.type) {
-                            "url" -> SourceType.WEB
+                            "url" -> SourceType.URL
                             "book" -> SourceType.BOOK
                             else -> SourceType.HOMEMADE
                         },
-                        sourceUrl = if (recipeCreate.source?.type == "url") recipeCreate.source.valeur else "",
-                        sourceBookTitle = if (recipeCreate.source?.type == "book") recipeCreate.source.valeur else "",
+                        sourceUrl = if (recipeCreate.source?.type == "url") recipeCreate.source.valeur ?: "" else "",
+                        sourceBookTitle = if (recipeCreate.source?.type == "book") recipeCreate.source.valeur ?: "" else "",
                         sourceBookAuthors = "",
                         sourceBookPage = ""
                     )
@@ -257,12 +257,12 @@ class EditRecipeViewModel @Inject constructor(
                     source = if (state.sourceType != SourceType.HOMEMADE) {
                         SourceCreate(
                             type = when (state.sourceType) {
-                                SourceType.WEB -> "url"
+                                SourceType.URL -> "url"
                                 SourceType.BOOK -> "book"
                                 else -> "homemade"
                             },
                             valeur = when (state.sourceType) {
-                                SourceType.WEB -> state.sourceUrl
+                                SourceType.URL -> state.sourceUrl
                                 SourceType.BOOK -> state.sourceBookTitle
                                 else -> ""
                             }
