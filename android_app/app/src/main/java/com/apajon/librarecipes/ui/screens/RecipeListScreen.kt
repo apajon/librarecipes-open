@@ -163,45 +163,63 @@ fun RecipeListScreen(
                     }
                 }
                 FilterMode.CONVIVES -> {
-                    // Convives period filter buttons
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(ConvivesPeriod.values()) { period ->
-                            FilterChip(
-                                onClick = { viewModel.setConvivesPeriod(period) },
-                                label = { Text(period.displayName) },
-                                selected = uiState.selectedConvivesPeriod == period,
-                                modifier = Modifier.height(40.dp)
-                            )
+                    // Convives filter buttons (like alphabetical)
+                    if (uiState.availableConvives.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // "All" button
+                            item {
+                                FilterChip(
+                                    onClick = { viewModel.filterByConvives(null) },
+                                    label = { Text("Tous") },
+                                    selected = uiState.selectedConvives == null,
+                                    modifier = Modifier.height(40.dp)
+                                )
+                            }
+                            
+                            // Convives buttons
+                            items(uiState.availableConvives) { convives ->
+                                FilterChip(
+                                    onClick = { viewModel.filterByConvives(convives) },
+                                    label = { Text("$convives") },
+                                    selected = uiState.selectedConvives == convives,
+                                    modifier = Modifier.height(40.dp)
+                                )
+                            }
                         }
                     }
                 }
                 FilterMode.INGREDIENT -> {
-                    // Ingredient filter input
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = uiState.selectedIngredient ?: "",
-                            onValueChange = { viewModel.setSelectedIngredient(it.takeIf { it.isNotBlank() }) },
-                            label = { Text("Rechercher un ingrédient") },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true
-                        )
-                        if (!uiState.selectedIngredient.isNullOrBlank()) {
-                            Button(
-                                onClick = { viewModel.setSelectedIngredient(null) },
-                                modifier = Modifier.height(56.dp)
-                            ) {
-                                Text("Effacer")
+                    // Ingredient filter buttons (like alphabetical)
+                    if (uiState.availableIngredients.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // "All" button
+                            item {
+                                FilterChip(
+                                    onClick = { viewModel.filterByIngredient(null) },
+                                    label = { Text("Tous") },
+                                    selected = uiState.selectedIngredient == null,
+                                    modifier = Modifier.height(40.dp)
+                                )
+                            }
+                            
+                            // Ingredient buttons
+                            items(uiState.availableIngredients) { ingredient ->
+                                FilterChip(
+                                    onClick = { viewModel.filterByIngredient(ingredient) },
+                                    label = { Text(ingredient) },
+                                    selected = uiState.selectedIngredient == ingredient,
+                                    modifier = Modifier.height(40.dp)
+                                )
                             }
                         }
                     }
@@ -300,14 +318,14 @@ fun RecipeListScreen(
                                     }
                                 }
                                 FilterMode.CONVIVES -> {
-                                    if (uiState.selectedConvivesPeriod != ConvivesPeriod.ALL) {
+                                    if (uiState.selectedConvives != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour le nombre de convives sélectionné",
+                                            text = "Aucune recette trouvée pour ${uiState.selectedConvives} convive${if (uiState.selectedConvives!! > 1) "s" else ""}",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Button(onClick = { viewModel.setConvivesPeriod(ConvivesPeriod.ALL) }) {
+                                        Button(onClick = { viewModel.filterByConvives(null) }) {
                                             Text("Voir toutes les recettes")
                                         }
                                     } else {
@@ -332,8 +350,8 @@ fun RecipeListScreen(
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Button(onClick = { viewModel.setSelectedIngredient(null) }) {
-                                            Text("Effacer le filtre")
+                                        Button(onClick = { viewModel.filterByIngredient(null) }) {
+                                            Text("Voir toutes les recettes")
                                         }
                                     } else {
                                         Text(

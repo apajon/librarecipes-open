@@ -62,6 +62,7 @@ class RecipeListViewModel @Inject constructor(
     private val _filterMode = MutableStateFlow(FilterMode.ALPHABETICAL)
     private val _selectedDatePeriod = MutableStateFlow(DatePeriod.ALL)
     private val _selectedConvivesPeriod = MutableStateFlow(ConvivesPeriod.ALL)
+    private val _selectedConvives = MutableStateFlow<Int?>(null)
     private val _selectedIngredient = MutableStateFlow<String?>(null)
     
     val uiState: StateFlow<RecipeListUiState> = combine(
@@ -71,17 +72,20 @@ class RecipeListViewModel @Inject constructor(
         combine(_selectedLetter, _filterMode, _selectedDatePeriod, _selectedConvivesPeriod) { selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod ->
             Quad(selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod)
         },
-        _selectedIngredient
-    ) { firstGroup, secondGroup, selectedIngredient ->
+        combine(_selectedConvives, _selectedIngredient) { selectedConvives, selectedIngredient ->
+            Pair(selectedConvives, selectedIngredient)
+        }
+    ) { firstGroup, secondGroup, thirdGroup ->
         val (recipes, isLoading, errorMessage, sortAscending) = firstGroup
         val (selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod) = secondGroup
+        val (selectedConvives, selectedIngredient) = thirdGroup
         
         val processedRecipes = when (filterMode) {
             FilterMode.ALPHABETICAL -> processRecipesAlphabetically(recipes, sortAscending, selectedLetter)
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
             FilterMode.EXECUTION -> processRecipesByExecution(recipes, sortAscending, selectedDatePeriod)
-            FilterMode.CONVIVES -> processRecipesByConvives(recipes, sortAscending, selectedConvivesPeriod)
-            FilterMode.INGREDIENT -> processRecipesByIngredient(recipes, sortAscending, selectedIngredient)
+            FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
+            FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient)
         }
         RecipeListUiState(
             recipeSections = processedRecipes,
@@ -93,6 +97,8 @@ class RecipeListViewModel @Inject constructor(
             filterMode = filterMode,
             selectedDatePeriod = selectedDatePeriod,
             selectedConvivesPeriod = selectedConvivesPeriod,
+            selectedConvives = selectedConvives,
+            availableConvives = getAvailableConvives(recipes),
             selectedIngredient = selectedIngredient,
             availableIngredients = getAvailableIngredients(recipes)
         )
@@ -156,12 +162,14 @@ class RecipeListViewModel @Inject constructor(
             FilterMode.CONVIVES -> {
                 _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
+                _selectedConvives.value = null
                 _selectedIngredient.value = null
             }
             FilterMode.INGREDIENT -> {
                 _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
+                _selectedConvives.value = null
             }
         }
     }
@@ -174,7 +182,11 @@ class RecipeListViewModel @Inject constructor(
         _selectedConvivesPeriod.value = period
     }
     
-    fun setSelectedIngredient(ingredient: String?) {
+    fun filterByConvives(convives: Int?) {
+        _selectedConvives.value = convives
+    }
+    
+    fun filterByIngredient(ingredient: String?) {
         _selectedIngredient.value = ingredient
     }
     
@@ -331,10 +343,28 @@ class RecipeListViewModel @Inject constructor(
             .sorted()
     }
     
+    private fun getAvailableConvives(recipes: List<RecipeListItem>): List<Int> {
+        return recipes
+            .mapNotNull { recipe -> recipe.portions }
+            .distinct()
+            .sorted()
+    }
+    
     private fun getAvailableIngredients(recipes: List<RecipeListItem>): List<String> {
-        // This is a simplified implementation - in reality we'd need to query the database
-        // for ingredients. For now, return an empty list.
-        return emptyList()
+        // For now, we'll extract ingredients from recipe names as a simple implementation
+        // In a real app, this would query the ingredients database
+        val commonIngredients = listOf(
+            "tomate", "oignon", "ail", "carotte", "pomme de terre", "courgette",
+            "aubergine", "poivron", "champignon", "épinard", "bœuf", "porc", 
+            "agneau", "poulet", "poisson", "saumon", "crevette", "œuf", "fromage",
+            "pâtes", "riz", "quinoa", "lentille", "haricot", "pois chiche"
+        )
+        
+        return commonIngredients.filter { ingredient ->
+            recipes.any { recipe -> 
+                recipe.nom.contains(ingredient, ignoreCase = true)
+            }
+        }.sorted()
     }
     
     private fun processRecipesByExecution(
@@ -348,53 +378,17 @@ class RecipeListViewModel @Inject constructor(
         return processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
     }
     
-    private fun processRecipesByConvives(
+    private fun processRecipesByConvivesAlphabetical(
         recipes: List<RecipeListItem>,
         sortAscending: Boolean,
-        selectedConvivesPeriod: ConvivesPeriod
+        selectedConvives: Int?
     ): List<RecipeSection> {
-        // Filter by convives range
-        val filteredRecipes = if (selectedConvivesPeriod == ConvivesPeriod.ALL) {
-            recipes
-        } else {
+        val filteredRecipes = if (selectedConvives != null) {
             recipes.filter { recipe ->
-                val portions = recipe.portions ?: 1
-                when {
-                    selectedConvivesPeriod.minConvives != null && selectedConvivesPeriod.maxConvives != null -> {
-                        portions >= selectedConvivesPeriod.minConvives && portions <= selectedConvivesPeriod.maxConvives
-                    }
-                    selectedConvivesPeriod.minConvives != null && selectedConvivesPeriod.maxConvives == null -> {
-                        portions >= selectedConvivesPeriod.minConvives
-                    }
-                    else -> true
-                }
+                recipe.portions == selectedConvives
             }
-        }
-        
-        // Sort by portions
-        val sortedRecipes = if (sortAscending) {
-            filteredRecipes.sortedBy { it.portions ?: 1 }
         } else {
-            filteredRecipes.sortedByDescending { it.portions ?: 1 }
-        }
-        
-        // Group by convives ranges
-        return groupRecipesByConvivesRanges(sortedRecipes)
-    }
-    
-    private fun processRecipesByIngredient(
-        recipes: List<RecipeListItem>,
-        sortAscending: Boolean,
-        selectedIngredient: String?
-    ): List<RecipeSection> {
-        // For now, filter by recipe name containing the ingredient
-        // TODO: Implement actual ingredient-based filtering when ingredient data is available
-        val filteredRecipes = if (selectedIngredient.isNullOrBlank()) {
             recipes
-        } else {
-            recipes.filter { recipe ->
-                recipe.nom.contains(selectedIngredient, ignoreCase = true)
-            }
         }
         
         val sortedRecipes = if (sortAscending) {
@@ -403,60 +397,49 @@ class RecipeListViewModel @Inject constructor(
             filteredRecipes.sortedByDescending { it.nom }
         }
         
-        return if (selectedIngredient.isNullOrBlank()) {
-            // Group alphabetically when no ingredient is selected
-            sortedRecipes
-                .groupBy { recipe ->
-                    recipe.nom.firstOrNull()?.uppercase() ?: "#"
-                }
-                .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
-                .map { (letter, recipesList) ->
-                    RecipeSection(
-                        letter = letter,
-                        recipes = recipesList
-                    )
-                }
-        } else {
-            // Single section when filtering by ingredient
-            listOf(
-                RecipeSection(
-                    letter = "Contient: $selectedIngredient",
-                    recipes = sortedRecipes
-                )
-            )
-        }
-    }
-    
-    private fun groupRecipesByConvivesRanges(recipes: List<RecipeListItem>): List<RecipeSection> {
-        val sections = mutableMapOf<String, MutableList<RecipeListItem>>()
-        
-        for (recipe in recipes) {
-            val portions = recipe.portions ?: 1
-            val section = when {
-                portions == 1 -> "Solo (1 personne)"
-                portions == 2 -> "Couple (2 personnes)"
-                portions in 3..4 -> "Famille (3-4 personnes)"
-                portions >= 5 -> "Groupe (5+ personnes)"
-                else -> "Non spécifié"
+        return sortedRecipes
+            .groupBy { recipe ->
+                recipe.nom.firstOrNull()?.uppercase() ?: "#"
             }
-            
-            sections.getOrPut(section) { mutableListOf() }.add(recipe)
-        }
-        
-        // Define the order of sections
-        val sectionOrder = listOf(
-            "Solo (1 personne)", "Couple (2 personnes)", "Famille (3-4 personnes)",
-            "Groupe (5+ personnes)", "Non spécifié"
-        )
-        
-        return sectionOrder.mapNotNull { sectionName ->
-            sections[sectionName]?.let { recipesList ->
+            .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
+            .map { (letter, recipesList) ->
                 RecipeSection(
-                    letter = sectionName,
+                    letter = letter,
                     recipes = recipesList
                 )
             }
+    }
+    
+    private fun processRecipesByIngredientAlphabetical(
+        recipes: List<RecipeListItem>,
+        sortAscending: Boolean,
+        selectedIngredient: String?
+    ): List<RecipeSection> {
+        val filteredRecipes = if (selectedIngredient != null) {
+            recipes.filter { recipe ->
+                recipe.nom.contains(selectedIngredient, ignoreCase = true)
+            }
+        } else {
+            recipes
         }
+        
+        val sortedRecipes = if (sortAscending) {
+            filteredRecipes.sortedBy { it.nom }
+        } else {
+            filteredRecipes.sortedByDescending { it.nom }
+        }
+        
+        return sortedRecipes
+            .groupBy { recipe ->
+                recipe.nom.firstOrNull()?.uppercase() ?: "#"
+            }
+            .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
+            .map { (letter, recipesList) ->
+                RecipeSection(
+                    letter = letter,
+                    recipes = recipesList
+                )
+            }
     }
 }
 
@@ -475,6 +458,8 @@ data class RecipeListUiState(
     val filterMode: FilterMode = FilterMode.ALPHABETICAL,
     val selectedDatePeriod: DatePeriod = DatePeriod.ALL,
     val selectedConvivesPeriod: ConvivesPeriod = ConvivesPeriod.ALL,
+    val selectedConvives: Int? = null,
+    val availableConvives: List<Int> = emptyList(),
     val selectedIngredient: String? = null,
     val availableIngredients: List<String> = emptyList()
 )
