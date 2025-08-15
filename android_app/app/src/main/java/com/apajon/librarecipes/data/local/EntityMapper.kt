@@ -201,6 +201,42 @@ object EntityMapper {
             }
         )
     }
+    
+    /**
+     * Convert ExecutionEntity to ExecutionDetail.
+     */
+    fun executionEntityToDetail(execution: ExecutionEntity, feedbacks: List<FeedbackExecutionEntity> = emptyList(), convives: List<ConviveEntity> = emptyList()): ExecutionDetail {
+        val feedbackDetails = feedbacks.map { feedback ->
+            val convive = convives.find { it.id == feedback.conviveId }
+            FeedbackDetail(
+                id = feedback.id,
+                convive = ConviveDetail(
+                    id = convive?.id ?: "",
+                    nom = convive?.nom ?: "Inconnu",
+                    groupe = convive?.groupe
+                ),
+                statut = feedback.statut
+            )
+        }
+        
+        return ExecutionDetail(
+            id = execution.id,
+            dateExecution = execution.dateExecution,
+            nombreConvives = execution.nombreConvives,
+            feedbacks = feedbackDetails
+        )
+    }
+    
+    /**
+     * Convert ConviveEntity to ConviveDetail.
+     */
+    fun conviveEntityToDetail(convive: ConviveEntity): ConviveDetail {
+        return ConviveDetail(
+            id = convive.id,
+            nom = convive.nom,
+            groupe = convive.groupe
+        )
+    }
 }
 
 /**

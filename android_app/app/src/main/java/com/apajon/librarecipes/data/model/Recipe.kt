@@ -184,3 +184,41 @@ data class SourceDetail(
     val bookAuthors: String? = null,
     val bookPage: String? = null
 )
+
+/**
+ * Execution detail model for UI display.
+ */
+data class ExecutionDetail(
+    val id: String,
+    val dateExecution: String,
+    val nombreConvives: Int? = null,
+    val feedbacks: List<FeedbackDetail> = emptyList()
+)
+
+/**
+ * Convive detail model for UI display.
+ */
+data class ConviveDetail(
+    val id: String,
+    val nom: String,
+    val groupe: String? = null
+)
+
+/**
+ * Feedback detail model for UI display.
+ */
+data class FeedbackDetail(
+    val id: String,
+    val convive: ConviveDetail,
+    val statut: String
+)
+
+/**
+ * Execution form state for UI.
+ */
+data class ExecutionFormState(
+    val nombreConvives: String = "",
+    val dateExecution: String = "",
+    val isLoading: Boolean = false,
+    val error: String? = null
+)

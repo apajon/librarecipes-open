@@ -19,6 +19,7 @@ import com.apajon.librarecipes.ui.components.RecipeListItem
 import com.apajon.librarecipes.viewmodel.RecipeListViewModel
 import com.apajon.librarecipes.viewmodel.FilterMode
 import com.apajon.librarecipes.viewmodel.DatePeriod
+import com.apajon.librarecipes.viewmodel.ConvivesPeriod
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,7 +49,9 @@ fun RecipeListScreen(
                     ) {
                         val sortText = when (uiState.filterMode) {
                             FilterMode.ALPHABETICAL -> if (uiState.sortAscending) "A-Z" else "Z-A"
-                            FilterMode.DATE -> if (uiState.sortAscending) "Récent" else "Ancien"
+                            FilterMode.DATE, FilterMode.EXECUTION -> if (uiState.sortAscending) "Récent" else "Ancien"
+                            FilterMode.CONVIVES -> if (uiState.sortAscending) "1-N" else "N-1"
+                            FilterMode.INGREDIENT -> if (uiState.sortAscending) "A-Z" else "Z-A"
                         }
                         Text(sortText)
                     }
@@ -71,8 +74,14 @@ fun RecipeListScreen(
                 .padding(paddingValues)
         ) {
             // Filter mode tabs
-            TabRow(
-                selectedTabIndex = if (uiState.filterMode == FilterMode.ALPHABETICAL) 0 else 1,
+            ScrollableTabRow(
+                selectedTabIndex = when (uiState.filterMode) {
+                    FilterMode.ALPHABETICAL -> 0
+                    FilterMode.DATE -> 1
+                    FilterMode.EXECUTION -> 2
+                    FilterMode.CONVIVES -> 3
+                    FilterMode.INGREDIENT -> 4
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Tab(
@@ -84,6 +93,21 @@ fun RecipeListScreen(
                     selected = uiState.filterMode == FilterMode.DATE,
                     onClick = { viewModel.setFilterMode(FilterMode.DATE) },
                     text = { Text("Par date") }
+                )
+                Tab(
+                    selected = uiState.filterMode == FilterMode.EXECUTION,
+                    onClick = { viewModel.setFilterMode(FilterMode.EXECUTION) },
+                    text = { Text("Par exécution") }
+                )
+                Tab(
+                    selected = uiState.filterMode == FilterMode.CONVIVES,
+                    onClick = { viewModel.setFilterMode(FilterMode.CONVIVES) },
+                    text = { Text("Par convives") }
+                )
+                Tab(
+                    selected = uiState.filterMode == FilterMode.INGREDIENT,
+                    onClick = { viewModel.setFilterMode(FilterMode.INGREDIENT) },
+                    text = { Text("Par ingrédient") }
                 )
             }
             
@@ -120,7 +144,7 @@ fun RecipeListScreen(
                         }
                     }
                 }
-                FilterMode.DATE -> {
+                FilterMode.DATE, FilterMode.EXECUTION -> {
                     // Date period filter buttons
                     LazyRow(
                         modifier = Modifier
@@ -135,6 +159,50 @@ fun RecipeListScreen(
                                 selected = uiState.selectedDatePeriod == period,
                                 modifier = Modifier.height(40.dp)
                             )
+                        }
+                    }
+                }
+                FilterMode.CONVIVES -> {
+                    // Convives period filter buttons
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(ConvivesPeriod.values()) { period ->
+                            FilterChip(
+                                onClick = { viewModel.setConvivesPeriod(period) },
+                                label = { Text(period.displayName) },
+                                selected = uiState.selectedConvivesPeriod == period,
+                                modifier = Modifier.height(40.dp)
+                            )
+                        }
+                    }
+                }
+                FilterMode.INGREDIENT -> {
+                    // Ingredient filter input
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.selectedIngredient ?: "",
+                            onValueChange = { viewModel.setSelectedIngredient(it.takeIf { it.isNotBlank() }) },
+                            label = { Text("Rechercher un ingrédient") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        if (!uiState.selectedIngredient.isNullOrBlank()) {
+                            Button(
+                                onClick = { viewModel.setSelectedIngredient(null) },
+                                modifier = Modifier.height(56.dp)
+                            ) {
+                                Text("Effacer")
+                            }
                         }
                     }
                 }
@@ -206,7 +274,7 @@ fun RecipeListScreen(
                                         )
                                     }
                                 }
-                                FilterMode.DATE -> {
+                                FilterMode.DATE, FilterMode.EXECUTION -> {
                                     if (uiState.selectedDatePeriod != DatePeriod.ALL) {
                                         Text(
                                             text = "Aucune recette trouvée pour la période sélectionnée",
@@ -216,6 +284,56 @@ fun RecipeListScreen(
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.setDatePeriod(DatePeriod.ALL) }) {
                                             Text("Voir toutes les recettes")
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "Aucune recette trouvée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Ajoutez votre première recette !",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                FilterMode.CONVIVES -> {
+                                    if (uiState.selectedConvivesPeriod != ConvivesPeriod.ALL) {
+                                        Text(
+                                            text = "Aucune recette trouvée pour le nombre de convives sélectionné",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(onClick = { viewModel.setConvivesPeriod(ConvivesPeriod.ALL) }) {
+                                            Text("Voir toutes les recettes")
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "Aucune recette trouvée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Ajoutez votre première recette !",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                FilterMode.INGREDIENT -> {
+                                    if (!uiState.selectedIngredient.isNullOrBlank()) {
+                                        Text(
+                                            text = "Aucune recette trouvée contenant '${uiState.selectedIngredient}'",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(onClick = { viewModel.setSelectedIngredient(null) }) {
+                                            Text("Effacer le filtre")
                                         }
                                     } else {
                                         Text(
@@ -251,7 +369,9 @@ fun RecipeListScreen(
                                         colors = CardDefaults.cardColors(
                                             containerColor = when (uiState.filterMode) {
                                                 FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.primaryContainer
-                                                FilterMode.DATE -> MaterialTheme.colorScheme.secondaryContainer
+                                                FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.secondaryContainer
+                                                FilterMode.CONVIVES -> MaterialTheme.colorScheme.tertiaryContainer
+                                                FilterMode.INGREDIENT -> MaterialTheme.colorScheme.surfaceVariant
                                             }
                                         )
                                     ) {
@@ -268,7 +388,9 @@ fun RecipeListScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
-                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onTertiaryContainer
+                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSurfaceVariant
                                                 }
                                             )
                                             Text(
@@ -276,7 +398,9 @@ fun RecipeListScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
-                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onTertiaryContainer
+                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSurfaceVariant
                                                 }
                                             )
                                         }
