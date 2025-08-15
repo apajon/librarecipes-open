@@ -17,6 +17,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.apajon.librarecipes.ui.components.RecipeListItem
 import com.apajon.librarecipes.viewmodel.RecipeListViewModel
+import com.apajon.librarecipes.viewmodel.FilterMode
+import com.apajon.librarecipes.viewmodel.DatePeriod
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +46,11 @@ fun RecipeListScreen(
                             contentColor = MaterialTheme.colorScheme.onPrimary
                         )
                     ) {
-                        Text(if (uiState.sortAscending) "A-Z" else "Z-A")
+                        val sortText = when (uiState.filterMode) {
+                            FilterMode.ALPHABETICAL -> if (uiState.sortAscending) "A-Z" else "Z-A"
+                            FilterMode.DATE -> if (uiState.sortAscending) "Récent" else "Ancien"
+                        }
+                        Text(sortText)
                     }
                     IconButton(onClick = { viewModel.refreshRecipes() }) {
                         Icon(Icons.Default.Refresh, contentDescription = "Actualiser")
@@ -64,32 +70,72 @@ fun RecipeListScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Letter filter buttons
-            if (uiState.availableLetters.isNotEmpty()) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // "All" button
-                    item {
-                        FilterChip(
-                            onClick = { viewModel.filterByLetter(null) },
-                            label = { Text("Tout") },
-                            selected = uiState.selectedLetter == null,
-                            modifier = Modifier.height(40.dp)
-                        )
+            // Filter mode tabs
+            TabRow(
+                selectedTabIndex = if (uiState.filterMode == FilterMode.ALPHABETICAL) 0 else 1,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Tab(
+                    selected = uiState.filterMode == FilterMode.ALPHABETICAL,
+                    onClick = { viewModel.setFilterMode(FilterMode.ALPHABETICAL) },
+                    text = { Text("Alphabétique") }
+                )
+                Tab(
+                    selected = uiState.filterMode == FilterMode.DATE,
+                    onClick = { viewModel.setFilterMode(FilterMode.DATE) },
+                    text = { Text("Par date") }
+                )
+            }
+            
+            // Filter buttons based on mode
+            when (uiState.filterMode) {
+                FilterMode.ALPHABETICAL -> {
+                    // Letter filter buttons
+                    if (uiState.availableLetters.isNotEmpty()) {
+                        LazyRow(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // "All" button
+                            item {
+                                FilterChip(
+                                    onClick = { viewModel.filterByLetter(null) },
+                                    label = { Text("Tout") },
+                                    selected = uiState.selectedLetter == null,
+                                    modifier = Modifier.height(40.dp)
+                                )
+                            }
+                            
+                            // Letter buttons
+                            items(uiState.availableLetters) { letter ->
+                                FilterChip(
+                                    onClick = { viewModel.filterByLetter(letter) },
+                                    label = { Text(letter) },
+                                    selected = uiState.selectedLetter == letter,
+                                    modifier = Modifier.height(40.dp)
+                                )
+                            }
+                        }
                     }
-                    
-                    // Letter buttons
-                    items(uiState.availableLetters) { letter ->
-                        FilterChip(
-                            onClick = { viewModel.filterByLetter(letter) },
-                            label = { Text(letter) },
-                            selected = uiState.selectedLetter == letter,
-                            modifier = Modifier.height(40.dp)
-                        )
+                }
+                FilterMode.DATE -> {
+                    // Date period filter buttons
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(DatePeriod.values()) { period ->
+                            FilterChip(
+                                onClick = { viewModel.setDatePeriod(period) },
+                                label = { Text(period.displayName) },
+                                selected = uiState.selectedDatePeriod == period,
+                                modifier = Modifier.height(40.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -134,28 +180,57 @@ fun RecipeListScreen(
                             modifier = Modifier.align(Alignment.Center),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            if (uiState.selectedLetter != null) {
-                                Text(
-                                    text = "Aucune recette trouvée pour la lettre ${uiState.selectedLetter}",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Button(onClick = { viewModel.filterByLetter(null) }) {
-                                    Text("Voir toutes les recettes")
+                            when (uiState.filterMode) {
+                                FilterMode.ALPHABETICAL -> {
+                                    if (uiState.selectedLetter != null) {
+                                        Text(
+                                            text = "Aucune recette trouvée pour la lettre ${uiState.selectedLetter}",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(onClick = { viewModel.filterByLetter(null) }) {
+                                            Text("Voir toutes les recettes")
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "Aucune recette trouvée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Ajoutez votre première recette !",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
-                            } else {
-                                Text(
-                                    text = "Aucune recette trouvée",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Ajoutez votre première recette !",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
+                                FilterMode.DATE -> {
+                                    if (uiState.selectedDatePeriod != DatePeriod.ALL) {
+                                        Text(
+                                            text = "Aucune recette trouvée pour la période sélectionnée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(onClick = { viewModel.setDatePeriod(DatePeriod.ALL) }) {
+                                            Text("Voir toutes les recettes")
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "Aucune recette trouvée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Ajoutez votre première recette !",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -167,14 +242,17 @@ fun RecipeListScreen(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
                             uiState.recipeSections.forEach { section ->
-                                // Letter header
+                                // Section header (Letter for alphabetical, Date range for date mode)
                                 item(key = "header_${section.letter}") {
                                     Card(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(vertical = 8.dp),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                                            containerColor = when (uiState.filterMode) {
+                                                FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.primaryContainer
+                                                FilterMode.DATE -> MaterialTheme.colorScheme.secondaryContainer
+                                            }
                                         )
                                     ) {
                                         Row(
@@ -188,12 +266,18 @@ fun RecipeListScreen(
                                                 text = section.letter,
                                                 style = MaterialTheme.typography.headlineSmall,
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                                color = when (uiState.filterMode) {
+                                                    FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
+                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                }
                                             )
                                             Text(
                                                 text = "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
                                                 style = MaterialTheme.typography.bodyMedium,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                                color = when (uiState.filterMode) {
+                                                    FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
+                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                }
                                             )
                                         }
                                     }
