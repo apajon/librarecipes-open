@@ -56,7 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
                         recetteId TEXT NOT NULL,
                         dateExecution TEXT NOT NULL,
                         nombreConvives INTEGER,
-                        FOREIGN KEY(recetteId) REFERENCES recipes(id) ON DELETE CASCADE
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
                     )
                 """)
                 
