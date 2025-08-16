@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -23,16 +24,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.RecipeDetail
 import com.apajon.librarecipes.ui.components.*
 import com.apajon.librarecipes.viewmodel.CreateRecipeViewModel
 import com.apajon.librarecipes.viewmodel.RecipeDetailViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,6 +49,7 @@ fun RecipeDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showAddExecutionDialog by remember { mutableStateOf(false) }
     
     // Load recipe details when the screen is first displayed
     LaunchedEffect(recipeId) {
@@ -54,6 +61,14 @@ fun RecipeDetailScreen(
         if (uiState.deleteSuccess) {
             viewModel.clearDeleteSuccess()
             navController.navigateUp()
+        }
+    }
+    
+    // Handle add execution success
+    LaunchedEffect(uiState.addExecutionSuccess) {
+        if (uiState.addExecutionSuccess) {
+            viewModel.clearAddExecutionSuccess()
+            showAddExecutionDialog = false
         }
     }
     
@@ -146,9 +161,11 @@ fun RecipeDetailScreen(
                 uiState.recipe != null -> {
                     RecipeDetailContent(
                         recipe = uiState.recipe!!,
+                        executions = uiState.executions,
                         onEdit = { navController.navigate("edit_recipe/$recipeId") },
                         onDelete = { showDeleteDialog = true },
-                        onEditSection = { section -> navController.navigate("edit_recipe/$recipeId/section/$section") }
+                        onEditSection = { section -> navController.navigate("edit_recipe/$recipeId/section/$section") },
+                        onAddExecution = { showAddExecutionDialog = true }
                     )
                 }
             }
@@ -182,6 +199,24 @@ fun RecipeDetailScreen(
                 }
             }
         )
+    }
+    
+    // Add execution dialog
+    if (showAddExecutionDialog) {
+        AddExecutionDialog(
+            onDismiss = { showAddExecutionDialog = false },
+            onAddExecution = { nombreConvives ->
+                viewModel.addExecution(recipeId, nombreConvives)
+            },
+            isLoading = uiState.isAddingExecution
+        )
+    }
+    
+    // Add execution error display
+    uiState.addExecutionError?.let { error ->
+        LaunchedEffect(error) {
+            viewModel.clearAddExecutionError()
+        }
     }
     
     // Delete error display
@@ -859,9 +894,11 @@ fun SearchScreen(
 @Composable
 fun RecipeDetailContent(
     recipe: RecipeDetail,
+    executions: List<ExecutionEntity> = emptyList(),
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
-    onEditSection: (String) -> Unit = {}
+    onEditSection: (String) -> Unit = {},
+    onAddExecution: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -1109,7 +1146,7 @@ fun RecipeDetailContent(
             }
         }
         
-        // Execution section (placeholder for now)
+        // Execution section
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -1126,12 +1163,12 @@ fun RecipeDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Exécutions",
+                            text = "Exécutions (${executions.size})",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
                         IconButton(
-                            onClick = { /* TODO: Add execution */ }
+                            onClick = onAddExecution
                         ) {
                             Icon(
                                 Icons.Default.Add,
@@ -1141,13 +1178,17 @@ fun RecipeDetailContent(
                         }
                     }
                     
-                    Text(
-                        text = "Aucune exécution enregistrée",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    // TODO: Display list of executions when implemented
+                    if (executions.isEmpty()) {
+                        Text(
+                            text = "Aucune exécution enregistrée",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        executions.forEach { execution ->
+                            ExecutionDisplayItem(execution = execution)
+                        }
+                    }
                 }
             }
         }
@@ -1311,7 +1352,7 @@ fun IngredientDisplayItem(ingredient: com.apajon.librarecipes.data.model.Ingredi
         }
     }
     
-    Divider(
+    HorizontalDivider(
         modifier = Modifier.padding(vertical = 4.dp),
         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
     )
@@ -1351,4 +1392,115 @@ fun EtapeDisplayItem(etape: com.apajon.librarecipes.data.model.EtapeDetail) {
     }
     
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddExecutionDialog(
+    onDismiss: () -> Unit,
+    onAddExecution: (Int?) -> Unit,
+    isLoading: Boolean = false
+) {
+    var nombreConvivesText by remember { mutableStateOf("") }
+    
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Ajouter une exécution") },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text("Enregistrer que vous avez préparé cette recette.")
+                
+                OutlinedTextField(
+                    value = nombreConvivesText,
+                    onValueChange = { nombreConvivesText = it },
+                    label = { Text("Nombre de convives (optionnel)") },
+                    placeholder = { Text("Ex: 4") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val nombreConvives = nombreConvivesText.toIntOrNull()
+                    onAddExecution(nombreConvives)
+                },
+                enabled = !isLoading
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+                Text("Ajouter")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                enabled = !isLoading
+            ) {
+                Text("Annuler")
+            }
+        }
+    )
+}
+
+@Composable
+fun ExecutionDisplayItem(execution: ExecutionEntity) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = formatExecutionDate(execution.dateExecution),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                execution.nombreConvives?.let { convives ->
+                    Text(
+                        text = "$convives convive${if (convives > 1) "s" else ""}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Format execution date string for display
+ */
+private fun formatExecutionDate(dateString: String): String {
+    return try {
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.getDefault())
+        val date = inputFormat.parse(dateString)
+        if (date != null) {
+            outputFormat.format(date)
+        } else {
+            dateString
+        }
+    } catch (e: Exception) {
+        dateString // Fallback to original string if parsing fails
+    }
 }

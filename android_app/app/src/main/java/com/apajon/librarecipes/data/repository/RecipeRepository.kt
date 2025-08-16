@@ -2,6 +2,7 @@ package com.apajon.librarecipes.data.repository
 
 import com.apajon.librarecipes.data.local.AppDatabase
 import com.apajon.librarecipes.data.local.EntityMapper
+import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
@@ -9,6 +10,10 @@ import com.apajon.librarecipes.data.model.RecipeDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -229,6 +234,63 @@ class RecipeRepository @Inject constructor(
             Result.success(response)
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error updating recipe", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Add a new execution for a recipe.
+     * @param recipeId ID of the recipe
+     * @param nombreConvives Number of people served (optional)
+     * @return Result indicating success or failure
+     */
+    suspend fun addExecution(recipeId: String, nombreConvives: Int? = null): Result<String> {
+        return try {
+            val executionId = UUID.randomUUID().toString()
+            val currentDate = Date()
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val dateString = dateFormat.format(currentDate)
+            
+            val execution = ExecutionEntity(
+                id = executionId,
+                recetteId = recipeId,
+                dateExecution = dateString,
+                nombreConvives = nombreConvives
+            )
+            
+            database.executionDao().insertExecution(execution)
+            Result.success(executionId)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error adding execution", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get executions for a specific recipe.
+     * @param recipeId ID of the recipe
+     * @return Flow of executions
+     */
+    fun getExecutionsForRecipe(recipeId: String): Flow<List<ExecutionEntity>> {
+        return database.executionDao().getExecutionsForRecipe(recipeId)
+    }
+    
+    /**
+     * Delete an execution.
+     * @param executionId ID of the execution to delete
+     * @return Result indicating success or failure
+     */
+    suspend fun deleteExecution(executionId: String): Result<Unit> {
+        return try {
+            val execution = database.executionDao().getExecution(executionId)
+            if (execution != null) {
+                database.executionDao().deleteExecution(execution)
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Exécution non trouvée"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error deleting execution", e)
             Result.failure(e)
         }
     }
