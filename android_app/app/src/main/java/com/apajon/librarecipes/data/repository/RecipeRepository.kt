@@ -143,7 +143,6 @@ class RecipeRepository @Inject constructor(
     fun searchRecipes(
         nom: String? = null,
         ingredients: List<String>? = null,
-        ingredientsMode: String = "ANY",
         tags: List<String>? = null,
         categories: List<String>? = null
     ): Flow<RecipeResult> = flow {

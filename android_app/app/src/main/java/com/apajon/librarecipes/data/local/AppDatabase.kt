@@ -48,9 +48,9 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
         
         private val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Create executions table
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE executions (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
@@ -61,7 +61,7 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
                 
                 // Create convives table
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE convives (
                         id TEXT NOT NULL PRIMARY KEY,
                         nom TEXT NOT NULL,
@@ -70,7 +70,7 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
                 
                 // Create feedback_execution table
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE feedback_execution (
                         id TEXT NOT NULL PRIMARY KEY,
                         executionId TEXT NOT NULL,
@@ -82,20 +82,20 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
                 
                 // Create indices
-                database.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
-                database.execSQL("CREATE UNIQUE INDEX index_convives_nom ON convives(nom)")
-                database.execSQL("CREATE INDEX index_feedback_execution_executionId ON feedback_execution(executionId)")
-                database.execSQL("CREATE INDEX index_feedback_execution_conviveId ON feedback_execution(conviveId)")
+                db.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
+                db.execSQL("CREATE UNIQUE INDEX index_convives_nom ON convives(nom)")
+                db.execSQL("CREATE INDEX index_feedback_execution_executionId ON feedback_execution(executionId)")
+                db.execSQL("CREATE INDEX index_feedback_execution_conviveId ON feedback_execution(conviveId)")
             }
         }
         
         private val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
+            override fun migrate(db: SupportSQLiteDatabase) {
                 // Remove nombreConvives column from executions table
                 // SQLite doesn't support dropping columns directly, so we need to recreate the table
                 
                 // Create new executions table without nombreConvives
-                database.execSQL("""
+                db.execSQL("""
                     CREATE TABLE executions_new (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
@@ -105,19 +105,19 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
                 
                 // Copy data from old table to new table
-                database.execSQL("""
+                db.execSQL("""
                     INSERT INTO executions_new (id, recetteId, dateExecution)
                     SELECT id, recetteId, dateExecution FROM executions
                 """)
                 
                 // Drop old table
-                database.execSQL("DROP TABLE executions")
+                db.execSQL("DROP TABLE executions")
                 
                 // Rename new table
-                database.execSQL("ALTER TABLE executions_new RENAME TO executions")
+                db.execSQL("ALTER TABLE executions_new RENAME TO executions")
                 
                 // Recreate index
-                database.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
+                db.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
             }
         }
         
