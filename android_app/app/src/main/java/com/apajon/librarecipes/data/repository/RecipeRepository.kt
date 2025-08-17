@@ -14,6 +14,7 @@ import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
 import com.apajon.librarecipes.data.model.RecipeDetail
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
@@ -339,10 +340,8 @@ class RecipeRepository @Inject constructor(
      */
     suspend fun getConvivesWithSameName(nom: String): List<ConviveEntity> {
         return try {
-            database.conviveDao().getAllConvives().map { convives ->
-                convives.filter { it.nom.equals(nom, ignoreCase = true) }
-            }.collect { emptyList() } // This is a temporary solution
-            emptyList()
+            val allConvives = database.conviveDao().getAllConvives().first()
+            allConvives.filter { it.nom.equals(nom, ignoreCase = true) }
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error getting convives with same name", e)
             emptyList()

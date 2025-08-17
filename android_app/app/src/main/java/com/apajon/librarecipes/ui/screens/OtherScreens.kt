@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.ExecutionCreate
+import com.apajon.librarecipes.data.model.ExecutionWithDetails
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.RecipeDetail
 import com.apajon.librarecipes.ui.components.*
@@ -896,7 +897,7 @@ fun SearchScreen(
 @Composable
 fun RecipeDetailContent(
     recipe: RecipeDetail,
-    executions: List<ExecutionEntity> = emptyList(),
+    executions: List<ExecutionWithDetails> = emptyList(),
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
     onEditSection: (String) -> Unit = {},

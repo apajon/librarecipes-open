@@ -2,6 +2,7 @@ package com.apajon.librarecipes.data.local.entities
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
 
@@ -11,6 +12,7 @@ import java.util.UUID
  */
 @Entity(
     tableName = "photos",
+    indices = [Index(value = ["recetteId"])],
     foreignKeys = [
         ForeignKey(
             entity = RecipeEntity::class,

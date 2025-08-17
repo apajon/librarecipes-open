@@ -222,7 +222,7 @@ object EntityMapper {
         return ExecutionDetail(
             id = execution.id,
             dateExecution = execution.dateExecution,
-            nombreConvives = execution.nombreConvives,
+            nombreConvives = feedbacks.size, // Calculate from number of feedbacks
             feedbacks = feedbackDetails
         )
     }
