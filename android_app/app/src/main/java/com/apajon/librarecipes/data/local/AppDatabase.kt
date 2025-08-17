@@ -49,6 +49,99 @@ abstract class AppDatabase : RoomDatabase() {
         
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
+                // Create core tables if they don't exist
+                
+                // Create recettes table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS recettes (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        nom TEXT NOT NULL,
+                        preparation INTEGER,
+                        cuisson INTEGER,
+                        portions INTEGER,
+                        dateAjout INTEGER NOT NULL
+                    )
+                """)
+                
+                // Create ingredients table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS ingredients (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        nom TEXT NOT NULL,
+                        quantite TEXT,
+                        unite TEXT,
+                        indispensable INTEGER NOT NULL,
+                        alternatives TEXT,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create etapes table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS etapes (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        ordre INTEGER NOT NULL,
+                        description TEXT NOT NULL,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create categories table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS categories (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        nom TEXT NOT NULL,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create tags table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS tags (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        nom TEXT NOT NULL,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create sources table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS sources (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        url TEXT,
+                        bookTitle TEXT,
+                        bookAuthors TEXT,
+                        bookPage TEXT,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create photos table
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS photos (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        chemin TEXT NOT NULL,
+                        categorie TEXT,
+                        ordre INTEGER NOT NULL,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Create indices for foreign keys
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_ingredients_recetteId ON ingredients(recetteId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_etapes_recetteId ON etapes(recetteId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_categories_recetteId ON categories(recetteId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_tags_recetteId ON tags(recetteId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_sources_recetteId ON sources(recetteId)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS index_photos_recetteId ON photos(recetteId)")
+                
                 // Create executions table
                 db.execSQL("""
                     CREATE TABLE executions (
@@ -81,7 +174,7 @@ abstract class AppDatabase : RoomDatabase() {
                     )
                 """)
                 
-                // Create indices
+                // Create indices for execution tables
                 db.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
                 db.execSQL("CREATE UNIQUE INDEX index_convives_nom ON convives(nom)")
                 db.execSQL("CREATE INDEX index_feedback_execution_executionId ON feedback_execution(executionId)")
