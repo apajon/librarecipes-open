@@ -2,7 +2,10 @@ package com.apajon.librarecipes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
+import com.apajon.librarecipes.data.model.ExecutionCreate
+import com.apajon.librarecipes.data.model.ExecutionWithDetails
 import com.apajon.librarecipes.data.model.RecipeDetail
 import com.apajon.librarecipes.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,10 +25,12 @@ data class RecipeDetailUiState(
     val isDeleting: Boolean = false,
     val deleteSuccess: Boolean = false,
     val deleteError: String? = null,
-    val executions: List<ExecutionEntity> = emptyList(),
+    val executions: List<ExecutionWithDetails> = emptyList(),
     val isAddingExecution: Boolean = false,
     val addExecutionSuccess: Boolean = false,
-    val addExecutionError: String? = null
+    val addExecutionError: String? = null,
+    val availableConvives: List<ConviveEntity> = emptyList(),
+    val isLoadingConvives: Boolean = false
 )
 
 /**
@@ -56,6 +61,8 @@ class RecipeDetailViewModel @Inject constructor(
                     )
                     // Load executions for this recipe
                     loadExecutions(recipeId)
+                    // Load available convives
+                    loadAvailableConvives()
                 }
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
@@ -119,25 +126,39 @@ class RecipeDetailViewModel @Inject constructor(
      */
     private fun loadExecutions(recipeId: String) {
         viewModelScope.launch {
-            recipeRepository.getExecutionsForRecipe(recipeId).collect { executions ->
+            recipeRepository.getExecutionsWithDetailsForRecipe(recipeId).collect { executions ->
                 _uiState.value = _uiState.value.copy(executions = executions)
             }
         }
     }
     
     /**
-     * Add a new execution for the recipe.
-     * @param recipeId ID of the recipe
-     * @param nombreConvives Number of people served (optional)
+     * Load available convives from database.
      */
-    fun addExecution(recipeId: String, nombreConvives: Int? = null) {
+    fun loadAvailableConvives() {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoadingConvives = true)
+            recipeRepository.getAllConvives().collect { convives ->
+                _uiState.value = _uiState.value.copy(
+                    availableConvives = convives,
+                    isLoadingConvives = false
+                )
+            }
+        }
+    }
+    
+    /**
+     * Add a new execution for the recipe with convives and feedback.
+     * @param executionCreate Data for creating the execution
+     */
+    fun addExecution(executionCreate: ExecutionCreate) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(
                 isAddingExecution = true, 
                 addExecutionError = null
             )
             
-            recipeRepository.addExecution(recipeId, nombreConvives)
+            recipeRepository.addExecution(executionCreate)
                 .onSuccess {
                     _uiState.value = _uiState.value.copy(
                         isAddingExecution = false,

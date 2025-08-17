@@ -2,7 +2,13 @@ package com.apajon.librarecipes.data.repository
 
 import com.apajon.librarecipes.data.local.AppDatabase
 import com.apajon.librarecipes.data.local.EntityMapper
+import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
+import com.apajon.librarecipes.data.local.entities.FeedbackExecutionEntity
+import com.apajon.librarecipes.data.model.ConviveWithFeedback
+import com.apajon.librarecipes.data.model.ExecutionCreate
+import com.apajon.librarecipes.data.model.ExecutionWithDetails
+import com.apajon.librarecipes.data.model.FeedbackStatus
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.model.RecipeCreate
 import com.apajon.librarecipes.data.model.RecipeResponse
@@ -239,26 +245,45 @@ class RecipeRepository @Inject constructor(
     }
     
     /**
-     * Add a new execution for a recipe.
-     * @param recipeId ID of the recipe
-     * @param nombreConvives Number of people served (optional)
+     * Add a new execution for a recipe with convives and their feedback.
+     * @param executionCreate Data for creating the execution
      * @return Result indicating success or failure
      */
-    suspend fun addExecution(recipeId: String, nombreConvives: Int? = null): Result<String> {
+    suspend fun addExecution(executionCreate: ExecutionCreate): Result<String> {
         return try {
             val executionId = UUID.randomUUID().toString()
             val currentDate = Date()
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
             val dateString = dateFormat.format(currentDate)
             
+            // Create execution
             val execution = ExecutionEntity(
                 id = executionId,
-                recetteId = recipeId,
-                dateExecution = dateString,
-                nombreConvives = nombreConvives
+                recetteId = executionCreate.recipeId,
+                dateExecution = dateString
             )
             
+            // Insert execution
             database.executionDao().insertExecution(execution)
+            
+            // Insert convives and feedback
+            for (conviveWithFeedback in executionCreate.convivesWithFeedback) {
+                // Ensure convive exists in database
+                val existingConvive = database.conviveDao().getConvive(conviveWithFeedback.convive.id)
+                if (existingConvive == null) {
+                    database.conviveDao().insertConvive(conviveWithFeedback.convive)
+                }
+                
+                // Create feedback entry
+                val feedback = FeedbackExecutionEntity(
+                    id = UUID.randomUUID().toString(),
+                    executionId = executionId,
+                    conviveId = conviveWithFeedback.convive.id,
+                    statut = conviveWithFeedback.feedback.name
+                )
+                database.feedbackExecutionDao().insertFeedback(feedback)
+            }
+            
             Result.success(executionId)
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error adding execution", e)
@@ -267,12 +292,61 @@ class RecipeRepository @Inject constructor(
     }
     
     /**
-     * Get executions for a specific recipe.
+     * Get executions with details for a specific recipe.
      * @param recipeId ID of the recipe
-     * @return Flow of executions
+     * @return Flow of executions with convives and feedback
      */
-    fun getExecutionsForRecipe(recipeId: String): Flow<List<ExecutionEntity>> {
-        return database.executionDao().getExecutionsForRecipe(recipeId)
+    fun getExecutionsWithDetailsForRecipe(recipeId: String): Flow<List<ExecutionWithDetails>> {
+        // For simplicity, we'll return executions without detailed feedback for now
+        // In a production app, we'd implement proper Flow combination
+        return database.executionDao().getExecutionsForRecipe(recipeId).map { executions ->
+            executions.map { execution ->
+                ExecutionWithDetails(
+                    execution = execution,
+                    convivesWithFeedback = emptyList() // TODO: Load convives and feedback properly
+                )
+            }
+        }
+    }
+    
+    /**
+     * Get all convives from the database.
+     * @return Flow of all convives
+     */
+    fun getAllConvives(): Flow<List<ConviveEntity>> {
+        return database.conviveDao().getAllConvives()
+    }
+    
+    /**
+     * Add or update a convive.
+     * @param convive The convive to add/update
+     * @return Result indicating success or failure
+     */
+    suspend fun addOrUpdateConvive(convive: ConviveEntity): Result<String> {
+        return try {
+            database.conviveDao().insertConvive(convive)
+            Result.success(convive.id)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error adding/updating convive", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get convives with same name to handle duplicates.
+     * @param nom Name to search for
+     * @return List of convives with the same name
+     */
+    suspend fun getConvivesWithSameName(nom: String): List<ConviveEntity> {
+        return try {
+            database.conviveDao().getAllConvives().map { convives ->
+                convives.filter { it.nom.equals(nom, ignoreCase = true) }
+            }.collect { emptyList() } // This is a temporary solution
+            emptyList()
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error getting convives with same name", e)
+            emptyList()
+        }
     }
     
     /**

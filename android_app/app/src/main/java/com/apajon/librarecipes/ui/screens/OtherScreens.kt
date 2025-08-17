@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
+import com.apajon.librarecipes.data.model.ExecutionCreate
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.RecipeDetail
 import com.apajon.librarecipes.ui.components.*
@@ -203,12 +204,13 @@ fun RecipeDetailScreen(
     
     // Add execution dialog
     if (showAddExecutionDialog) {
-        AddExecutionDialog(
+        com.apajon.librarecipes.ui.components.AddExecutionDialog(
             onDismiss = { showAddExecutionDialog = false },
-            onAddExecution = { nombreConvives ->
-                viewModel.addExecution(recipeId, nombreConvives)
+            onAddExecution = { executionCreate ->
+                viewModel.addExecution(executionCreate.copy(recipeId = recipeId))
             },
-            isLoading = uiState.isAddingExecution
+            isLoading = uiState.isAddingExecution,
+            availableConvives = uiState.availableConvives
         )
     }
     
@@ -1186,7 +1188,7 @@ fun RecipeDetailContent(
                         )
                     } else {
                         executions.forEach { execution ->
-                            ExecutionDisplayItem(execution = execution)
+                            com.apajon.librarecipes.ui.components.ExecutionWithDetailsItem(executionWithDetails = execution)
                         }
                     }
                 }
@@ -1392,115 +1394,4 @@ fun EtapeDisplayItem(etape: com.apajon.librarecipes.data.model.EtapeDetail) {
     }
     
     Spacer(modifier = Modifier.height(8.dp))
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddExecutionDialog(
-    onDismiss: () -> Unit,
-    onAddExecution: (Int?) -> Unit,
-    isLoading: Boolean = false
-) {
-    var nombreConvivesText by remember { mutableStateOf("") }
-    
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Ajouter une exécution") },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Text("Enregistrer que vous avez préparé cette recette.")
-                
-                OutlinedTextField(
-                    value = nombreConvivesText,
-                    onValueChange = { nombreConvivesText = it },
-                    label = { Text("Nombre de convives (optionnel)") },
-                    placeholder = { Text("Ex: 4") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val nombreConvives = nombreConvivesText.toIntOrNull()
-                    onAddExecution(nombreConvives)
-                },
-                enabled = !isLoading
-            ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-                Text("Ajouter")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                enabled = !isLoading
-            ) {
-                Text("Annuler")
-            }
-        }
-    )
-}
-
-@Composable
-fun ExecutionDisplayItem(execution: ExecutionEntity) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = formatExecutionDate(execution.dateExecution),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                execution.nombreConvives?.let { convives ->
-                    Text(
-                        text = "$convives convive${if (convives > 1) "s" else ""}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Format execution date string for display
- */
-private fun formatExecutionDate(dateString: String): String {
-    return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd/MM/yyyy à HH:mm", Locale.getDefault())
-        val date = inputFormat.parse(dateString)
-        if (date != null) {
-            outputFormat.format(date)
-        } else {
-            dateString
-        }
-    } catch (e: Exception) {
-        dateString // Fallback to original string if parsing fails
-    }
 }

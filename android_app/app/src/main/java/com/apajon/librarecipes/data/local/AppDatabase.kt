@@ -27,7 +27,7 @@ import com.apajon.librarecipes.data.local.entities.*
         ConviveEntity::class,
         FeedbackExecutionEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -89,6 +89,38 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
         
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Remove nombreConvives column from executions table
+                // SQLite doesn't support dropping columns directly, so we need to recreate the table
+                
+                // Create new executions table without nombreConvives
+                database.execSQL("""
+                    CREATE TABLE executions_new (
+                        id TEXT NOT NULL PRIMARY KEY,
+                        recetteId TEXT NOT NULL,
+                        dateExecution TEXT NOT NULL,
+                        FOREIGN KEY(recetteId) REFERENCES recettes(id) ON DELETE CASCADE
+                    )
+                """)
+                
+                // Copy data from old table to new table
+                database.execSQL("""
+                    INSERT INTO executions_new (id, recetteId, dateExecution)
+                    SELECT id, recetteId, dateExecution FROM executions
+                """)
+                
+                // Drop old table
+                database.execSQL("DROP TABLE executions")
+                
+                // Rename new table
+                database.execSQL("ALTER TABLE executions_new RENAME TO executions")
+                
+                // Recreate index
+                database.execSQL("CREATE UNIQUE INDEX index_executions_recetteId_dateExecution ON executions(recetteId, dateExecution)")
+            }
+        }
+        
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -96,7 +128,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "librarecipes_database"
                 )
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
                 INSTANCE = instance
                 instance

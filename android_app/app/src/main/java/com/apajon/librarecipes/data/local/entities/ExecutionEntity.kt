@@ -23,6 +23,5 @@ data class ExecutionEntity(
     @PrimaryKey
     val id: String,
     val recetteId: String,
-    val dateExecution: String,
-    val nombreConvives: Int?
+    val dateExecution: String
 )
