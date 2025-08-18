@@ -167,7 +167,11 @@ fun RecipeDetailScreen(
                         onEdit = { navController.navigate("edit_recipe/$recipeId") },
                         onDelete = { showDeleteDialog = true },
                         onEditSection = { section -> navController.navigate("edit_recipe/$recipeId/section/$section") },
-                        onAddExecution = { showAddExecutionDialog = true }
+                        onAddExecution = { showAddExecutionDialog = true },
+                        onExecutionClick = { execution ->
+                            // TODO: Implement execution detail/edit dialog
+                            // For now, we'll just add a placeholder
+                        }
                     )
                 }
             }
@@ -901,7 +905,8 @@ fun RecipeDetailContent(
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
     onEditSection: (String) -> Unit = {},
-    onAddExecution: () -> Unit = {}
+    onAddExecution: () -> Unit = {},
+    onExecutionClick: (ExecutionWithDetails) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -1189,7 +1194,10 @@ fun RecipeDetailContent(
                         )
                     } else {
                         executions.forEach { execution ->
-                            com.apajon.librarecipes.ui.components.ExecutionWithDetailsItem(executionWithDetails = execution)
+                            com.apajon.librarecipes.ui.components.ExecutionWithDetailsItem(
+                                executionWithDetails = execution,
+                                onClick = { onExecutionClick(execution) }
+                            )
                         }
                     }
                 }

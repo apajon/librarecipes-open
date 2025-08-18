@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -36,6 +37,9 @@ fun AddExecutionDialog(
 ) {
     var selectedConvives by remember { mutableStateOf<List<ConviveWithFeedback>>(emptyList()) }
     var showAddConviveDialog by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf(Date()) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -44,11 +48,53 @@ fun AddExecutionDialog(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(max = 500.dp)
+                    .heightIn(max = 600.dp)
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Text("Enregistrer que vous avez préparé cette recette avec les convives.")
+                
+                // Date and Time selection
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Date et heure de l'exécution",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Date picker button
+                            OutlinedButton(
+                                onClick = { showDatePicker = true },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                                Text("📅 ${dateFormat.format(selectedDate)}")
+                            }
+                            
+                            // Time picker button  
+                            OutlinedButton(
+                                onClick = { showTimePicker = true },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                                Text("🕐 ${timeFormat.format(selectedDate)}")
+                            }
+                        }
+                    }
+                }
                 
                 // Convives section
                 Row(
@@ -101,7 +147,8 @@ fun AddExecutionDialog(
                 onClick = {
                     onAddExecution(ExecutionCreate(
                         recipeId = "", // Will be set by the caller
-                        convivesWithFeedback = selectedConvives
+                        convivesWithFeedback = selectedConvives,
+                        executionDate = selectedDate
                     ))
                 },
                 enabled = !isLoading && selectedConvives.isNotEmpty()
@@ -135,6 +182,76 @@ fun AddExecutionDialog(
             },
             availableConvives = availableConvives,
             alreadySelectedConvives = selectedConvives.map { it.convive.id }
+        )
+    }
+    
+    // Date picker dialog
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate.time
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val calendar = Calendar.getInstance()
+                            calendar.time = selectedDate
+                            val newCalendar = Calendar.getInstance()
+                            newCalendar.timeInMillis = millis
+                            // Keep the time part, update only the date part
+                            newCalendar.set(Calendar.HOUR_OF_DAY, calendar.get(Calendar.HOUR_OF_DAY))
+                            newCalendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE))
+                            selectedDate = newCalendar.time
+                        }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Annuler")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
+    
+    // Time picker dialog
+    if (showTimePicker) {
+        val timePickerState = rememberTimePickerState(
+            initialHour = Calendar.getInstance().apply { time = selectedDate }.get(Calendar.HOUR_OF_DAY),
+            initialMinute = Calendar.getInstance().apply { time = selectedDate }.get(Calendar.MINUTE)
+        )
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            title = { Text("Sélectionner l'heure") },
+            text = {
+                TimePicker(state = timePickerState)
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val calendar = Calendar.getInstance()
+                        calendar.time = selectedDate
+                        calendar.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                        calendar.set(Calendar.MINUTE, timePickerState.minute)
+                        selectedDate = calendar.time
+                        showTimePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text("Annuler")
+                }
+            }
         )
     }
 }
@@ -390,9 +507,14 @@ fun ConviveWithFeedbackItem(
 }
 
 @Composable
-fun ExecutionWithDetailsItem(executionWithDetails: ExecutionWithDetails) {
+fun ExecutionWithDetailsItem(
+    executionWithDetails: ExecutionWithDetails,
+    onClick: () -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant
         )

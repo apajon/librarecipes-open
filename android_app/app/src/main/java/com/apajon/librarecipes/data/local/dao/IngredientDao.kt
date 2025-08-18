@@ -16,6 +16,9 @@ interface IngredientDao {
     @Query("SELECT * FROM ingredients WHERE recetteId = :recipeId")
     suspend fun getIngredientsForRecipe(recipeId: String): List<IngredientEntity>
     
+    @Query("SELECT DISTINCT nom FROM ingredients ORDER BY nom ASC")
+    suspend fun getAllUniqueIngredientNames(): List<String>
+    
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertIngredients(ingredients: List<IngredientEntity>)
     

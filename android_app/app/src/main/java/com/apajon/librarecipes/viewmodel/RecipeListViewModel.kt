@@ -39,6 +39,19 @@ enum class DatePeriod(val displayName: String, val days: Int?) {
     THREE_YEARS("3 ans", 1095)
 }
 
+enum class ExecutionPeriod(val displayName: String, val days: Int?, val isNever: Boolean = false) {
+    ALL("Tout", null),
+    NEVER("Jamais", null, true),
+    ONE_WEEK("1 semaine", 7),
+    TWO_WEEKS("2 semaines", 14),
+    ONE_MONTH("1 mois", 30),
+    THREE_MONTHS("3 mois", 90),
+    SIX_MONTHS("6 mois", 180),
+    ONE_YEAR("1 an", 365),
+    TWO_YEARS("2 ans", 730),
+    THREE_YEARS("3 ans", 1095)
+}
+
 enum class ConvivesPeriod(val displayName: String, val minConvives: Int?, val maxConvives: Int?) {
     ALL("Tous", null, null),
     SOLO("Solo (1)", 1, 1),
@@ -61,29 +74,31 @@ class RecipeListViewModel @Inject constructor(
     private val _selectedLetter = MutableStateFlow<String?>(null)
     private val _filterMode = MutableStateFlow(FilterMode.ALPHABETICAL)
     private val _selectedDatePeriod = MutableStateFlow(DatePeriod.ALL)
+    private val _selectedExecutionPeriod = MutableStateFlow(ExecutionPeriod.ALL)
     private val _selectedConvivesPeriod = MutableStateFlow(ConvivesPeriod.ALL)
     private val _selectedConvives = MutableStateFlow<Int?>(null)
     private val _selectedIngredient = MutableStateFlow<String?>(null)
+    private val _availableIngredients = MutableStateFlow<List<String>>(emptyList())
     
     val uiState: StateFlow<RecipeListUiState> = combine(
         combine(_recipes, _isLoading, _errorMessage, _sortAscending) { recipes, isLoading, errorMessage, sortAscending ->
             Quad(recipes, isLoading, errorMessage, sortAscending)
         },
-        combine(_selectedLetter, _filterMode, _selectedDatePeriod, _selectedConvivesPeriod) { selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod ->
-            Quad(selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod)
+        combine(_selectedLetter, _filterMode, _selectedDatePeriod, _selectedExecutionPeriod) { selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod ->
+            Quad(selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod)
         },
-        combine(_selectedConvives, _selectedIngredient) { selectedConvives, selectedIngredient ->
-            Pair(selectedConvives, selectedIngredient)
+        combine(_selectedConvives, _selectedIngredient, _availableIngredients, _selectedConvivesPeriod) { selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod ->
+            Quad(selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod)
         }
     ) { firstGroup, secondGroup, thirdGroup ->
         val (recipes, isLoading, errorMessage, sortAscending) = firstGroup
-        val (selectedLetter, filterMode, selectedDatePeriod, selectedConvivesPeriod) = secondGroup
-        val (selectedConvives, selectedIngredient) = thirdGroup
+        val (selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod) = secondGroup
+        val (selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod) = thirdGroup
         
         val processedRecipes = when (filterMode) {
             FilterMode.ALPHABETICAL -> processRecipesAlphabetically(recipes, sortAscending, selectedLetter)
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
-            FilterMode.EXECUTION -> processRecipesByExecution(recipes, sortAscending, selectedDatePeriod)
+            FilterMode.EXECUTION -> processRecipesByExecution(recipes, sortAscending, selectedExecutionPeriod)
             FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
             FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient)
         }
@@ -96,11 +111,12 @@ class RecipeListViewModel @Inject constructor(
             availableLetters = getAvailableLetters(recipes),
             filterMode = filterMode,
             selectedDatePeriod = selectedDatePeriod,
+            selectedExecutionPeriod = selectedExecutionPeriod,
             selectedConvivesPeriod = selectedConvivesPeriod,
             selectedConvives = selectedConvives,
             availableConvives = getAvailableConvives(recipes),
             selectedIngredient = selectedIngredient,
-            availableIngredients = getAvailableIngredients(recipes)
+            availableIngredients = availableIngredients
         )
     }.stateIn(
         scope = viewModelScope,
@@ -110,6 +126,7 @@ class RecipeListViewModel @Inject constructor(
     
     init {
         loadRecipes()
+        loadAvailableIngredients()
     }
     
     fun loadRecipes() {
@@ -137,6 +154,14 @@ class RecipeListViewModel @Inject constructor(
         loadRecipes()
     }
     
+    private fun loadAvailableIngredients() {
+        viewModelScope.launch {
+            repository.getAllUniqueIngredients().collect { ingredients ->
+                _availableIngredients.value = ingredients
+            }
+        }
+    }
+    
     fun toggleSort() {
         _sortAscending.value = !_sortAscending.value
     }
@@ -151,23 +176,33 @@ class RecipeListViewModel @Inject constructor(
         when (mode) {
             FilterMode.ALPHABETICAL -> {
                 _selectedDatePeriod.value = DatePeriod.ALL
+                _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedIngredient.value = null
             }
-            FilterMode.DATE, FilterMode.EXECUTION -> {
+            FilterMode.DATE -> {
                 _selectedLetter.value = null
+                _selectedExecutionPeriod.value = ExecutionPeriod.ALL
+                _selectedConvivesPeriod.value = ConvivesPeriod.ALL
+                _selectedIngredient.value = null
+            }
+            FilterMode.EXECUTION -> {
+                _selectedLetter.value = null
+                _selectedDatePeriod.value = DatePeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedIngredient.value = null
             }
             FilterMode.CONVIVES -> {
                 _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
+                _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvives.value = null
                 _selectedIngredient.value = null
             }
             FilterMode.INGREDIENT -> {
                 _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
+                _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedConvives.value = null
             }
@@ -176,6 +211,10 @@ class RecipeListViewModel @Inject constructor(
     
     fun setDatePeriod(period: DatePeriod) {
         _selectedDatePeriod.value = period
+    }
+    
+    fun setExecutionPeriod(period: ExecutionPeriod) {
+        _selectedExecutionPeriod.value = period
     }
     
     fun setConvivesPeriod(period: ConvivesPeriod) {
@@ -370,12 +409,103 @@ class RecipeListViewModel @Inject constructor(
     private fun processRecipesByExecution(
         recipes: List<RecipeListItem>,
         sortAscending: Boolean,
-        selectedDatePeriod: DatePeriod
+        selectedExecutionPeriod: ExecutionPeriod
     ): List<RecipeSection> {
-        // This is similar to processRecipesByDate but would be based on execution dates
-        // For now, use the same implementation as date-based filtering
-        // TODO: Implement actual execution-based filtering when execution data is available
-        return processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
+        // Filter recipes based on execution period
+        val filteredRecipes = when {
+            selectedExecutionPeriod == ExecutionPeriod.ALL -> recipes
+            selectedExecutionPeriod.isNever -> {
+                // Filter recipes that have never been executed
+                // For now, we'll simulate this by showing all recipes
+                // TODO: Implement actual check for recipes without executions
+                recipes
+            }
+            else -> {
+                // Filter by execution date within period
+                val cutoffDate = Calendar.getInstance().apply {
+                    add(Calendar.DAY_OF_YEAR, -(selectedExecutionPeriod.days ?: 0))
+                }.time
+                
+                // For now, we'll use recipe creation date as a placeholder
+                // TODO: Replace with actual execution date filtering
+                recipes.filter { recipe ->
+                    try {
+                        val recipeDate = dateFormat.parse(recipe.dateAjout)
+                        recipeDate?.after(cutoffDate) == true
+                    } catch (e: Exception) {
+                        false
+                    }
+                }
+            }
+        }
+        
+        // Sort by execution date (using recipe date as placeholder)
+        val sortedRecipes = try {
+            if (sortAscending) {
+                filteredRecipes.sortedByDescending { recipe ->
+                    dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                }
+            } else {
+                filteredRecipes.sortedBy { recipe ->
+                    dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                }
+            }
+        } catch (e: Exception) {
+            filteredRecipes
+        }
+        
+        // Group by execution periods
+        return groupRecipesByExecutionRanges(sortedRecipes)
+    }
+    
+    private fun groupRecipesByExecutionRanges(recipes: List<RecipeListItem>): List<RecipeSection> {
+        val now = Calendar.getInstance()
+        val sections = mutableMapOf<String, MutableList<RecipeListItem>>()
+        
+        for (recipe in recipes) {
+            try {
+                // TODO: Replace with actual last execution date
+                val recipeDate = dateFormat.parse(recipe.dateAjout)
+                if (recipeDate != null) {
+                    val recipeCal = Calendar.getInstance().apply { time = recipeDate }
+                    val daysDiff = ((now.timeInMillis - recipeCal.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+                    
+                    val section = when {
+                        daysDiff == 0 -> "Exécutée aujourd'hui"
+                        daysDiff == 1 -> "Exécutée hier" 
+                        daysDiff <= 7 -> "Exécutée cette semaine"
+                        daysDiff <= 14 -> "Exécutée il y a 2 semaines"
+                        daysDiff <= 30 -> "Exécutée ce mois-ci"
+                        daysDiff <= 90 -> "Exécutée il y a 3 mois"
+                        daysDiff <= 180 -> "Exécutée il y a 6 mois"
+                        daysDiff <= 365 -> "Exécutée cette année"
+                        daysDiff <= 730 -> "Exécutée il y a 2 ans"
+                        else -> "Exécutée il y a plus de 2 ans"
+                    }
+                    
+                    sections.getOrPut(section) { mutableListOf() }.add(recipe)
+                }
+            } catch (e: Exception) {
+                // Add to "Jamais exécutée" section for recipes with invalid dates
+                sections.getOrPut("Jamais exécutée") { mutableListOf() }.add(recipe)
+            }
+        }
+        
+        // Define the order of sections
+        val sectionOrder = listOf(
+            "Exécutée aujourd'hui", "Exécutée hier", "Exécutée cette semaine", "Exécutée il y a 2 semaines", 
+            "Exécutée ce mois-ci", "Exécutée il y a 3 mois", "Exécutée il y a 6 mois", "Exécutée cette année", 
+            "Exécutée il y a 2 ans", "Exécutée il y a plus de 2 ans", "Jamais exécutée"
+        )
+        
+        return sectionOrder.mapNotNull { sectionName ->
+            sections[sectionName]?.let { recipesList ->
+                RecipeSection(
+                    letter = sectionName,
+                    recipes = recipesList
+                )
+            }
+        }
     }
     
     private fun processRecipesByConvivesAlphabetical(
@@ -457,6 +587,7 @@ data class RecipeListUiState(
     val availableLetters: List<String> = emptyList(),
     val filterMode: FilterMode = FilterMode.ALPHABETICAL,
     val selectedDatePeriod: DatePeriod = DatePeriod.ALL,
+    val selectedExecutionPeriod: ExecutionPeriod = ExecutionPeriod.ALL,
     val selectedConvivesPeriod: ConvivesPeriod = ConvivesPeriod.ALL,
     val selectedConvives: Int? = null,
     val availableConvives: List<Int> = emptyList(),

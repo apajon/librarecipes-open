@@ -3,6 +3,7 @@ package com.apajon.librarecipes.data.model
 import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.local.entities.FeedbackExecutionEntity
+import java.util.Date
 
 /**
  * Enum for feedback status
@@ -37,7 +38,8 @@ data class ExecutionWithDetails(
  */
 data class ExecutionCreate(
     val recipeId: String,
-    val convivesWithFeedback: List<ConviveWithFeedback>
+    val convivesWithFeedback: List<ConviveWithFeedback>,
+    val executionDate: Date = Date()
 )
 
 /**

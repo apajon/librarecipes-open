@@ -19,6 +19,7 @@ import com.apajon.librarecipes.ui.components.RecipeListItem
 import com.apajon.librarecipes.viewmodel.RecipeListViewModel
 import com.apajon.librarecipes.viewmodel.FilterMode
 import com.apajon.librarecipes.viewmodel.DatePeriod
+import com.apajon.librarecipes.viewmodel.ExecutionPeriod
 import com.apajon.librarecipes.viewmodel.ConvivesPeriod
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,10 +78,10 @@ fun RecipeListScreen(
             ScrollableTabRow(
                 selectedTabIndex = when (uiState.filterMode) {
                     FilterMode.ALPHABETICAL -> 0
-                    FilterMode.DATE -> 1
-                    FilterMode.EXECUTION -> 2
-                    FilterMode.CONVIVES -> 3
-                    FilterMode.INGREDIENT -> 4
+                    FilterMode.INGREDIENT -> 1
+                    FilterMode.DATE -> 2
+                    FilterMode.EXECUTION -> 3
+                    FilterMode.CONVIVES -> 4
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -88,6 +89,11 @@ fun RecipeListScreen(
                     selected = uiState.filterMode == FilterMode.ALPHABETICAL,
                     onClick = { viewModel.setFilterMode(FilterMode.ALPHABETICAL) },
                     text = { Text("Alphabétique") }
+                )
+                Tab(
+                    selected = uiState.filterMode == FilterMode.INGREDIENT,
+                    onClick = { viewModel.setFilterMode(FilterMode.INGREDIENT) },
+                    text = { Text("Par ingrédient") }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.DATE,
@@ -103,11 +109,6 @@ fun RecipeListScreen(
                     selected = uiState.filterMode == FilterMode.CONVIVES,
                     onClick = { viewModel.setFilterMode(FilterMode.CONVIVES) },
                     text = { Text("Par convives") }
-                )
-                Tab(
-                    selected = uiState.filterMode == FilterMode.INGREDIENT,
-                    onClick = { viewModel.setFilterMode(FilterMode.INGREDIENT) },
-                    text = { Text("Par ingrédient") }
                 )
             }
             
@@ -144,7 +145,7 @@ fun RecipeListScreen(
                         }
                     }
                 }
-                FilterMode.DATE, FilterMode.EXECUTION -> {
+                FilterMode.DATE -> {
                     // Date period filter buttons
                     LazyRow(
                         modifier = Modifier
@@ -157,6 +158,24 @@ fun RecipeListScreen(
                                 onClick = { viewModel.setDatePeriod(period) },
                                 label = { Text(period.displayName) },
                                 selected = uiState.selectedDatePeriod == period,
+                                modifier = Modifier.height(40.dp)
+                            )
+                        }
+                    }
+                }
+                FilterMode.EXECUTION -> {
+                    // Execution period filter buttons
+                    LazyRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(ExecutionPeriod.values()) { period ->
+                            FilterChip(
+                                onClick = { viewModel.setExecutionPeriod(period) },
+                                label = { Text(period.displayName) },
+                                selected = uiState.selectedExecutionPeriod == period,
                                 modifier = Modifier.height(40.dp)
                             )
                         }
@@ -292,7 +311,7 @@ fun RecipeListScreen(
                                         )
                                     }
                                 }
-                                FilterMode.DATE, FilterMode.EXECUTION -> {
+                                FilterMode.DATE -> {
                                     if (uiState.selectedDatePeriod != DatePeriod.ALL) {
                                         Text(
                                             text = "Aucune recette trouvée pour la période sélectionnée",
@@ -301,6 +320,31 @@ fun RecipeListScreen(
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.setDatePeriod(DatePeriod.ALL) }) {
+                                            Text("Voir toutes les recettes")
+                                        }
+                                    } else {
+                                        Text(
+                                            text = "Aucune recette trouvée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Text(
+                                            text = "Ajoutez votre première recette !",
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                                FilterMode.EXECUTION -> {
+                                    if (uiState.selectedExecutionPeriod != ExecutionPeriod.ALL) {
+                                        Text(
+                                            text = "Aucune recette trouvée pour la période d'exécution sélectionnée",
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Button(onClick = { viewModel.setExecutionPeriod(ExecutionPeriod.ALL) }) {
                                             Text("Voir toutes les recettes")
                                         }
                                     } else {
@@ -387,9 +431,10 @@ fun RecipeListScreen(
                                         colors = CardDefaults.cardColors(
                                             containerColor = when (uiState.filterMode) {
                                                 FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.primaryContainer
-                                                FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.secondaryContainer
-                                                FilterMode.CONVIVES -> MaterialTheme.colorScheme.tertiaryContainer
-                                                FilterMode.INGREDIENT -> MaterialTheme.colorScheme.surfaceVariant
+                                                FilterMode.INGREDIENT -> MaterialTheme.colorScheme.secondaryContainer
+                                                FilterMode.DATE -> MaterialTheme.colorScheme.tertiaryContainer
+                                                FilterMode.EXECUTION -> MaterialTheme.colorScheme.surfaceVariant
+                                                FilterMode.CONVIVES -> MaterialTheme.colorScheme.errorContainer
                                             }
                                         )
                                     ) {
@@ -406,9 +451,10 @@ fun RecipeListScreen(
                                                 fontWeight = FontWeight.Bold,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
-                                                    FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSecondaryContainer
-                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onTertiaryContainer
-                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onTertiaryContainer
+                                                    FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onErrorContainer
                                                 }
                                             )
                                             Text(
@@ -416,9 +462,10 @@ fun RecipeListScreen(
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
-                                                    FilterMode.DATE, FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSecondaryContainer
-                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onTertiaryContainer
-                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                    FilterMode.INGREDIENT -> MaterialTheme.colorScheme.onSecondaryContainer
+                                                    FilterMode.DATE -> MaterialTheme.colorScheme.onTertiaryContainer
+                                                    FilterMode.EXECUTION -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                    FilterMode.CONVIVES -> MaterialTheme.colorScheme.onErrorContainer
                                                 }
                                             )
                                         }

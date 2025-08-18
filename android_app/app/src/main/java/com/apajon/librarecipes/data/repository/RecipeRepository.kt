@@ -252,9 +252,8 @@ class RecipeRepository @Inject constructor(
     suspend fun addExecution(executionCreate: ExecutionCreate): Result<String> {
         return try {
             val executionId = UUID.randomUUID().toString()
-            val currentDate = Date()
             val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-            val dateString = dateFormat.format(currentDate)
+            val dateString = dateFormat.format(executionCreate.executionDate)
             
             // Create execution
             val execution = ExecutionEntity(
@@ -364,6 +363,22 @@ class RecipeRepository @Inject constructor(
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error deleting execution", e)
             Result.failure(e)
+        }
+    }
+    
+    /**
+     * Get all unique ingredient names from the database.
+     * @return Flow of unique ingredient names
+     */
+    fun getAllUniqueIngredients(): Flow<List<String>> {
+        return flow {
+            try {
+                val ingredients = database.ingredientDao().getAllUniqueIngredientNames()
+                emit(ingredients)
+            } catch (e: Exception) {
+                android.util.Log.e("RecipeRepository", "Error getting unique ingredients", e)
+                emit(emptyList())
+            }
         }
     }
 }
