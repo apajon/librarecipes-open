@@ -269,7 +269,9 @@ class RecipeListViewModel @Inject constructor(
             .map { (letter, recipesList) ->
                 RecipeSection(
                     letter = letter,
-                    recipes = recipesList
+                    recipes = recipesList,
+                    isIngredientSection = false,
+                    ingredients = emptyList()
                 )
             }
     }
@@ -361,7 +363,9 @@ class RecipeListViewModel @Inject constructor(
             sections[sectionName]?.let { recipesList ->
                 RecipeSection(
                     letter = sectionName,
-                    recipes = recipesList
+                    recipes = recipesList,
+                    isIngredientSection = false,
+                    ingredients = emptyList()
                 )
             }
         }
@@ -502,7 +506,9 @@ class RecipeListViewModel @Inject constructor(
             sections[sectionName]?.let { recipesList ->
                 RecipeSection(
                     letter = sectionName,
-                    recipes = recipesList
+                    recipes = recipesList,
+                    isIngredientSection = false,
+                    ingredients = emptyList()
                 )
             }
         }
@@ -535,7 +541,9 @@ class RecipeListViewModel @Inject constructor(
             .map { (letter, recipesList) ->
                 RecipeSection(
                     letter = letter,
-                    recipes = recipesList
+                    recipes = recipesList,
+                    isIngredientSection = false,
+                    ingredients = emptyList()
                 )
             }
     }
@@ -545,12 +553,34 @@ class RecipeListViewModel @Inject constructor(
         sortAscending: Boolean,
         selectedIngredient: String?
     ): List<RecipeSection> {
-        val filteredRecipes = if (selectedIngredient != null) {
-            recipes.filter { recipe ->
-                recipe.nom.contains(selectedIngredient, ignoreCase = true)
+        // If no ingredient is selected, show ingredients grouped alphabetically
+        if (selectedIngredient == null) {
+            val ingredients = _availableIngredients.value
+            val sortedIngredients = if (sortAscending) {
+                ingredients.sorted()
+            } else {
+                ingredients.sortedDescending()
             }
-        } else {
-            recipes
+            
+            return sortedIngredients
+                .groupBy { ingredient ->
+                    ingredient.firstOrNull()?.uppercase() ?: "#"
+                }
+                .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
+                .map { (letter, ingredientsList) ->
+                    RecipeSection(
+                        letter = letter,
+                        recipes = emptyList(),
+                        isIngredientSection = true,
+                        ingredients = ingredientsList
+                    )
+                }
+        }
+        
+        // If an ingredient is selected, filter recipes containing that ingredient
+        // TODO: Replace with actual database search by ingredient
+        val filteredRecipes = recipes.filter { recipe ->
+            recipe.nom.contains(selectedIngredient, ignoreCase = true)
         }
         
         val sortedRecipes = if (sortAscending) {
@@ -567,7 +597,9 @@ class RecipeListViewModel @Inject constructor(
             .map { (letter, recipesList) ->
                 RecipeSection(
                     letter = letter,
-                    recipes = recipesList
+                    recipes = recipesList,
+                    isIngredientSection = false,
+                    ingredients = emptyList()
                 )
             }
     }
@@ -575,7 +607,9 @@ class RecipeListViewModel @Inject constructor(
 
 data class RecipeSection(
     val letter: String,
-    val recipes: List<RecipeListItem>
+    val recipes: List<RecipeListItem>,
+    val isIngredientSection: Boolean = false,
+    val ingredients: List<String> = emptyList()
 )
 
 data class RecipeListUiState(

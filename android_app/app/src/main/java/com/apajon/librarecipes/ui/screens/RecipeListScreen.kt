@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -458,7 +460,10 @@ fun RecipeListScreen(
                                                 }
                                             )
                                             Text(
-                                                text = "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
+                                                text = if (section.isIngredientSection) 
+                                                    "${section.ingredients.size} ingrédient${if (section.ingredients.size > 1) "s" else ""}"
+                                                else 
+                                                    "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -472,23 +477,62 @@ fun RecipeListScreen(
                                     }
                                 }
                                 
-                                // Recipes in this section
-                                items(
-                                    items = section.recipes,
-                                    key = { recipe -> recipe.id }
-                                ) { recipe ->
-                                    RecipeListItem(
-                                        recipe = recipe,
-                                        onClick = { 
-                                            navController.navigate("recipe/${recipe.id}")
-                                        },
-                                        onEdit = {
-                                            navController.navigate("edit_recipe/${recipe.id}")
-                                        },
-                                        onDelete = {
-                                            recipeToDelete = recipe.id
+                                // Content: either ingredients or recipes
+                                if (section.isIngredientSection) {
+                                    // Show ingredients as clickable items
+                                    items(
+                                        items = section.ingredients,
+                                        key = { ingredient -> ingredient }
+                                    ) { ingredient ->
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 2.dp)
+                                                .clickable {
+                                                    viewModel.filterByIngredient(ingredient)
+                                                },
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surface
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "🥬 $ingredient",
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    modifier = Modifier.weight(1f)
+                                                )
+                                                Icon(
+                                                    Icons.Default.Search,
+                                                    contentDescription = "Rechercher avec cet ingrédient",
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                         }
-                                    )
+                                    }
+                                } else {
+                                    // Show recipes
+                                    items(
+                                        items = section.recipes,
+                                        key = { recipe -> recipe.id }
+                                    ) { recipe ->
+                                        RecipeListItem(
+                                            recipe = recipe,
+                                            onClick = { 
+                                                navController.navigate("recipe/${recipe.id}")
+                                            },
+                                            onEdit = {
+                                                navController.navigate("edit_recipe/${recipe.id}")
+                                            },
+                                            onDelete = {
+                                                recipeToDelete = recipe.id
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
