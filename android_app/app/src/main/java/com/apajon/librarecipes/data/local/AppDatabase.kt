@@ -49,11 +49,11 @@ abstract class AppDatabase : RoomDatabase() {
         
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                // Create core tables if they don't exist
+                // Create all required tables for version 2
                 
                 // Create recettes table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS recettes (
+                    CREATE TABLE recettes (
                         id TEXT NOT NULL PRIMARY KEY,
                         nom TEXT NOT NULL,
                         preparation INTEGER,
@@ -65,7 +65,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create ingredients table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS ingredients (
+                    CREATE TABLE ingredients (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         nom TEXT NOT NULL,
@@ -79,7 +79,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create etapes table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS etapes (
+                    CREATE TABLE etapes (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         ordre INTEGER NOT NULL,
@@ -90,7 +90,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create categories table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS categories (
+                    CREATE TABLE categories (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         nom TEXT NOT NULL,
@@ -100,7 +100,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create tags table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS tags (
+                    CREATE TABLE tags (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         nom TEXT NOT NULL,
@@ -110,7 +110,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create sources table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS sources (
+                    CREATE TABLE sources (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         type TEXT NOT NULL,
@@ -124,7 +124,7 @@ abstract class AppDatabase : RoomDatabase() {
                 
                 // Create photos table
                 db.execSQL("""
-                    CREATE TABLE IF NOT EXISTS photos (
+                    CREATE TABLE photos (
                         id TEXT NOT NULL PRIMARY KEY,
                         recetteId TEXT NOT NULL,
                         chemin TEXT NOT NULL,
@@ -135,12 +135,12 @@ abstract class AppDatabase : RoomDatabase() {
                 """)
                 
                 // Create indices for foreign keys
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_ingredients_recetteId ON ingredients(recetteId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_etapes_recetteId ON etapes(recetteId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_categories_recetteId ON categories(recetteId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_tags_recetteId ON tags(recetteId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_sources_recetteId ON sources(recetteId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_photos_recetteId ON photos(recetteId)")
+                db.execSQL("CREATE INDEX index_ingredients_recetteId ON ingredients(recetteId)")
+                db.execSQL("CREATE INDEX index_etapes_recetteId ON etapes(recetteId)")
+                db.execSQL("CREATE INDEX index_categories_recetteId ON categories(recetteId)")
+                db.execSQL("CREATE INDEX index_tags_recetteId ON tags(recetteId)")
+                db.execSQL("CREATE INDEX index_sources_recetteId ON sources(recetteId)")
+                db.execSQL("CREATE INDEX index_photos_recetteId ON photos(recetteId)")
                 
                 // Create executions table
                 db.execSQL("""
@@ -222,6 +222,7 @@ abstract class AppDatabase : RoomDatabase() {
                     "librarecipes_database"
                 )
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .fallbackToDestructiveMigration() // This will recreate the database if migration fails
                 .build()
                 INSTANCE = instance
                 instance
