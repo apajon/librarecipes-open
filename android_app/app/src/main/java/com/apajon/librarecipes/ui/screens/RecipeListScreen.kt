@@ -215,35 +215,26 @@ fun RecipeListScreen(
                     }
                 }
                 FilterMode.INGREDIENT -> {
-                    // Letter filter buttons (like alphabetical mode)
-                    if (uiState.availableLetters.isNotEmpty()) {
+                    // Show ingredient filter - only "All" button when ingredient is selected
+                    if (uiState.selectedIngredient != null) {
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // "All" button
                             item {
                                 FilterChip(
-                                    onClick = { viewModel.filterByLetter(null) },
-                                    label = { Text("Tout") },
-                                    selected = uiState.selectedLetter == null,
-                                    modifier = Modifier.height(40.dp)
-                                )
-                            }
-                            
-                            // Letter buttons
-                            items(uiState.availableLetters) { letter ->
-                                FilterChip(
-                                    onClick = { viewModel.filterByLetter(letter) },
-                                    label = { Text(letter) },
-                                    selected = uiState.selectedLetter == letter,
+                                    onClick = { viewModel.filterByIngredient(null) },
+                                    label = { Text("← Retour aux ingrédients") },
+                                    selected = false,
                                     modifier = Modifier.height(40.dp)
                                 )
                             }
                         }
                     }
+                    // When no ingredient is selected, don't show any filter chips
+                    // The ingredients will be shown in the content area
                 }
             }
             
@@ -389,25 +380,25 @@ fun RecipeListScreen(
                                     }
                                 }
                                 FilterMode.INGREDIENT -> {
-                                    if (uiState.selectedLetter != null) {
+                                    if (uiState.selectedIngredient != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour la lettre ${uiState.selectedLetter}",
+                                            text = "Aucune recette trouvée pour l'ingrédient \"${uiState.selectedIngredient}\"",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Button(onClick = { viewModel.filterByLetter(null) }) {
-                                            Text("Voir toutes les recettes")
+                                        Button(onClick = { viewModel.filterByIngredient(null) }) {
+                                            Text("Retour aux ingrédients")
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucune recette trouvée",
+                                            text = "Aucun ingrédient trouvé",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez votre première recette !",
+                                            text = "Ajoutez des recettes avec des ingrédients !",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -460,7 +451,11 @@ fun RecipeListScreen(
                                                 }
                                             )
                                             Text(
-                                                text = "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
+                                                text = if (section.isIngredientSection) {
+                                                    "${section.ingredients.size} ingrédient${if (section.ingredients.size > 1) "s" else ""}"
+                                                } else {
+                                                    "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}"
+                                                },
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -470,6 +465,44 @@ fun RecipeListScreen(
                                                     FilterMode.CONVIVES -> MaterialTheme.colorScheme.onErrorContainer
                                                 }
                                             )
+                                        }
+                                    }
+                                }
+                                
+                                // Show ingredients for ingredient sections
+                                if (section.isIngredientSection) {
+                                    items(
+                                        items = section.ingredients,
+                                        key = { ingredient -> "ingredient_$ingredient" }
+                                    ) { ingredient ->
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clickable { 
+                                                    viewModel.filterByIngredient(ingredient)
+                                                },
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surface
+                                            )
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Icon(
+                                                    Icons.Default.Search,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.width(12.dp))
+                                                Text(
+                                                    text = ingredient,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            }
                                         }
                                     }
                                 }

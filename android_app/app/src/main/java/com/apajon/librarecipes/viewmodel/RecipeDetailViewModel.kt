@@ -187,4 +187,50 @@ class RecipeDetailViewModel @Inject constructor(
     fun clearAddExecutionError() {
         _uiState.value = _uiState.value.copy(addExecutionError = null)
     }
+    
+    /**
+     * Delete an execution.
+     * @param executionId ID of the execution to delete
+     */
+    fun deleteExecution(executionId: String) {
+        viewModelScope.launch {
+            recipeRepository.deleteExecution(executionId)
+                .onSuccess {
+                    // Execution deleted successfully, list will be updated automatically via flow
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        addExecutionError = error.message ?: "Erreur lors de la suppression de l'exécution"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Update an existing execution.
+     * @param executionId ID of the execution to update
+     * @param executionCreate New execution data
+     */
+    fun updateExecution(executionId: String, executionCreate: ExecutionCreate) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(
+                isAddingExecution = true, 
+                addExecutionError = null
+            )
+            
+            recipeRepository.updateExecution(executionId, executionCreate)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(
+                        isAddingExecution = false,
+                        addExecutionSuccess = true
+                    )
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isAddingExecution = false,
+                        addExecutionError = error.message ?: "Erreur lors de la modification de l'exécution"
+                    )
+                }
+        }
+    }
 }

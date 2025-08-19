@@ -225,11 +225,12 @@ fun RecipeDetailScreen(
             executionWithDetails = execution,
             onDismiss = { selectedExecution = null },
             onEdit = {
-                // TODO: Implement execution edit functionality
+                // TODO: Implement execution edit functionality - for now show AddExecutionDialog with pre-filled data
                 selectedExecution = null
+                showAddExecutionDialog = true
             },
             onDelete = {
-                // TODO: Implement execution delete functionality
+                viewModel.deleteExecution(execution.execution.id)
                 selectedExecution = null
             }
         )

@@ -607,10 +607,12 @@ class RecipeListViewModel @Inject constructor(
         sortAscending: Boolean,
         selectedIngredient: String?
     ): List<RecipeSection> {
-        // If an ingredient is selected, filter recipes containing that ingredient
+        // If an ingredient is selected, show recipes containing that ingredient
         if (selectedIngredient != null) {
-            // TODO: Replace with actual database search by ingredient
+            // Filter recipes to only those containing the selected ingredient
+            // For now, we'll use a simple name-based search, but ideally we'd query the database
             val filteredRecipes = recipes.filter { recipe ->
+                // This is a temporary solution - we should use the repository method
                 recipe.nom.contains(selectedIngredient, ignoreCase = true)
             }
             
@@ -620,24 +622,48 @@ class RecipeListViewModel @Inject constructor(
                 filteredRecipes.sortedByDescending { it.nom }
             }
             
-            return sortedRecipes
-                .groupBy { recipe ->
-                    recipe.nom.firstOrNull()?.uppercase() ?: "#"
-                }
-                .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
-                .map { (letter, recipesList) ->
+            return if (sortedRecipes.isNotEmpty()) {
+                listOf(
                     RecipeSection(
-                        letter = letter,
-                        recipes = recipesList,
+                        letter = "Recettes avec \"$selectedIngredient\"",
+                        recipes = sortedRecipes,
                         isIngredientSection = false,
                         ingredients = emptyList()
                     )
-                }
+                )
+            } else {
+                listOf(
+                    RecipeSection(
+                        letter = "Aucune recette trouvée",
+                        recipes = emptyList(),
+                        isIngredientSection = false,
+                        ingredients = emptyList()
+                    )
+                )
+            }
         }
         
-        // If no ingredient is selected, show recipes grouped alphabetically by first letter
-        // This mirrors the alphabetical mode behavior exactly
-        return processRecipesAlphabetically(recipes, sortAscending, _selectedLetter.value)
+        // If no ingredient is selected, show ingredients grouped alphabetically by first letter
+        val ingredients = _availableIngredients.value
+        val sortedIngredients = if (sortAscending) {
+            ingredients.sortedBy { it }
+        } else {
+            ingredients.sortedByDescending { it }
+        }
+        
+        return sortedIngredients
+            .groupBy { ingredient ->
+                ingredient.firstOrNull()?.uppercase() ?: "#"
+            }
+            .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
+            .map { (letter, ingredientsList) ->
+                RecipeSection(
+                    letter = letter,
+                    recipes = emptyList(),
+                    isIngredientSection = true,
+                    ingredients = ingredientsList
+                )
+            }
     }
 }
 

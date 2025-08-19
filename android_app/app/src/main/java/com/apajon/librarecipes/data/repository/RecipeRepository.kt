@@ -304,13 +304,28 @@ class RecipeRepository @Inject constructor(
      * @return Flow of executions with convives and feedback
      */
     fun getExecutionsWithDetailsForRecipe(recipeId: String): Flow<List<ExecutionWithDetails>> {
-        // For simplicity, we'll return executions without detailed feedback for now
-        // In a production app, we'd implement proper Flow combination
         return database.executionDao().getExecutionsForRecipe(recipeId).map { executions ->
             executions.map { execution ->
+                // Get feedback for this execution
+                val feedbackList = database.feedbackExecutionDao().getFeedbackForExecution(execution.id).first()
+                
+                // Get convives with their feedback
+                val convivesWithFeedback = feedbackList.mapNotNull { feedback ->
+                    val convive = database.conviveDao().getConvive(feedback.conviveId)
+                    if (convive != null) {
+                        val feedbackStatus = when (feedback.statut) {
+                            "AIME" -> com.apajon.librarecipes.data.model.FeedbackStatus.AIME
+                            "PARTIELLEMENT" -> com.apajon.librarecipes.data.model.FeedbackStatus.PARTIELLEMENT
+                            "RIEN_MANGE" -> com.apajon.librarecipes.data.model.FeedbackStatus.RIEN_MANGE
+                            else -> com.apajon.librarecipes.data.model.FeedbackStatus.AIME
+                        }
+                        com.apajon.librarecipes.data.model.ConviveWithFeedback(convive, feedbackStatus)
+                    } else null
+                }
+                
                 ExecutionWithDetails(
                     execution = execution,
-                    convivesWithFeedback = emptyList() // TODO: Load convives and feedback properly
+                    convivesWithFeedback = convivesWithFeedback
                 )
             }
         }
@@ -363,6 +378,9 @@ class RecipeRepository @Inject constructor(
         return try {
             val execution = database.executionDao().getExecution(executionId)
             if (execution != null) {
+                // Delete associated feedback first
+                database.feedbackExecutionDao().deleteFeedbackForExecution(executionId)
+                // Then delete the execution
                 database.executionDao().deleteExecution(execution)
                 Result.success(Unit)
             } else {
@@ -370,6 +388,53 @@ class RecipeRepository @Inject constructor(
             }
         } catch (e: Exception) {
             android.util.Log.e("RecipeRepository", "Error deleting execution", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
+     * Update an execution with new convives and feedback.
+     * @param executionId ID of the execution to update
+     * @param executionCreate New execution data
+     * @return Result indicating success or failure
+     */
+    suspend fun updateExecution(executionId: String, executionCreate: ExecutionCreate): Result<Unit> {
+        return try {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            val dateString = dateFormat.format(executionCreate.executionDate)
+            
+            // Update execution date
+            val execution = database.executionDao().getExecution(executionId)
+            if (execution != null) {
+                val updatedExecution = execution.copy(dateExecution = dateString)
+                database.executionDao().updateExecution(updatedExecution)
+                
+                // Delete existing feedback for this execution
+                database.feedbackExecutionDao().deleteFeedbackForExecution(executionId)
+                
+                // Add new feedback
+                for (conviveWithFeedback in executionCreate.convivesWithFeedback) {
+                    // Ensure convive exists in database
+                    val existingConvive = database.conviveDao().getConvive(conviveWithFeedback.convive.id)
+                    if (existingConvive == null) {
+                        database.conviveDao().insertConvive(conviveWithFeedback.convive)
+                    }
+                    
+                    val feedback = FeedbackExecutionEntity(
+                        id = UUID.randomUUID().toString(),
+                        executionId = executionId,
+                        conviveId = conviveWithFeedback.convive.id,
+                        statut = conviveWithFeedback.feedback.name
+                    )
+                    database.feedbackExecutionDao().insertFeedback(feedback)
+                }
+                
+                Result.success(Unit)
+            } else {
+                Result.failure(Exception("Exécution non trouvée"))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error updating execution", e)
             Result.failure(e)
         }
     }
@@ -385,6 +450,26 @@ class RecipeRepository @Inject constructor(
                 emit(ingredients)
             } catch (e: Exception) {
                 android.util.Log.e("RecipeRepository", "Error getting unique ingredients", e)
+                emit(emptyList())
+            }
+        }
+    }
+    
+    /**
+     * Get recipes that contain a specific ingredient.
+     * @param ingredientName Name of the ingredient to search for
+     * @return Flow of recipes containing the ingredient
+     */
+    fun getRecipesByIngredient(ingredientName: String): Flow<List<RecipeListItem>> {
+        return flow {
+            try {
+                val recipeIds = database.ingredientDao().getRecipeIdsWithIngredient(ingredientName)
+                val allRecipes = database.recipeDao().getAllRecipes().first()
+                val filteredRecipes = allRecipes.filter { recipe -> recipe.id in recipeIds }
+                val recipeListItems = filteredRecipes.map { EntityMapper.recipeEntityToListItem(it) }
+                emit(recipeListItems)
+            } catch (e: Exception) {
+                android.util.Log.e("RecipeRepository", "Error getting recipes by ingredient", e)
                 emit(emptyList())
             }
         }
