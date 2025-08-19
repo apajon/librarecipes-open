@@ -94,19 +94,21 @@ class RecipeListViewModel @Inject constructor(
         combine(_selectedExecutionPeriod, _selectedConvives, _selectedIngredient, _availableIngredients) { selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients ->
             Quad(selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients)
         },
-        _selectedConvivesPeriod,
-        _selectedIngredientLetter
-    ) { firstGroup, secondGroup, thirdGroup, selectedConvivesPeriod, selectedIngredientLetter ->
+        combine(_selectedConvivesPeriod, _selectedIngredientLetter, _recipesFilteredByIngredient, _availableIngredients) { selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients ->
+            Quad(selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients)
+        }
+    ) { firstGroup, secondGroup, thirdGroup, fourthGroup ->
         val (recipes, executionStatus, isLoading, errorMessage) = firstGroup
         val (sortAscending, selectedLetter, filterMode, selectedDatePeriod) = secondGroup
-        val (selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients) = thirdGroup
+        val (selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredientsFromThird) = thirdGroup
+        val (selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients) = fourthGroup
         
         val processedRecipes = when (filterMode) {
             FilterMode.ALPHABETICAL -> processRecipesAlphabetically(recipes, sortAscending, selectedLetter)
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
             FilterMode.EXECUTION -> processRecipesByExecution(recipes, executionStatus, sortAscending, selectedExecutionPeriod)
             FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
-            FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient, selectedIngredientLetter)
+            FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient, selectedIngredientLetter, recipesFilteredByIngredient)
         }
         RecipeListUiState(
             recipeSections = processedRecipes,
@@ -624,12 +626,13 @@ class RecipeListViewModel @Inject constructor(
         recipes: List<RecipeListItem>,
         sortAscending: Boolean,
         selectedIngredient: String?,
-        selectedIngredientLetter: String?
+        selectedIngredientLetter: String?,
+        recipesFilteredByIngredient: List<RecipeListItem>
     ): List<RecipeSection> {
         // If an ingredient is selected, show recipes containing that ingredient
         if (selectedIngredient != null) {
-            // Use the filtered recipes from the repository method
-            val filteredRecipes = _recipesFilteredByIngredient.value
+            // Use the filtered recipes passed as parameter
+            val filteredRecipes = recipesFilteredByIngredient
             
             val sortedRecipes = if (sortAscending) {
                 filteredRecipes.sortedBy { it.nom }

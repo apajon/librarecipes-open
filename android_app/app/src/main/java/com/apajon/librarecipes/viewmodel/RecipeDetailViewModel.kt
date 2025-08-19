@@ -234,6 +234,10 @@ class RecipeDetailViewModel @Inject constructor(
                         isAddingExecution = false,
                         addExecutionSuccess = true
                     )
+                    // Force refresh of executions after successful update
+                    _uiState.value.recipe?.let { recipe ->
+                        loadExecutions(recipe.id)
+                    }
                 }
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
