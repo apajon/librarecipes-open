@@ -215,8 +215,44 @@ fun RecipeListScreen(
                     }
                 }
                 FilterMode.INGREDIENT -> {
-                    // Show ingredient filter - only "All" button when ingredient is selected
-                    if (uiState.selectedIngredient != null) {
+                    // Show ingredient letter filter when no specific ingredient is selected
+                    if (uiState.selectedIngredient == null && uiState.availableIngredients.isNotEmpty()) {
+                        // Get available ingredient letters
+                        val availableIngredientLetters = uiState.availableIngredients
+                            .mapNotNull { it.firstOrNull()?.uppercase() }
+                            .distinct()
+                            .sorted()
+                        
+                        if (availableIngredientLetters.isNotEmpty()) {
+                            LazyRow(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // "All" button
+                                item {
+                                    FilterChip(
+                                        onClick = { viewModel.filterByIngredientLetter(null) },
+                                        label = { Text("Tout") },
+                                        selected = uiState.selectedIngredientLetter == null,
+                                        modifier = Modifier.height(40.dp)
+                                    )
+                                }
+                                
+                                // Letter buttons
+                                items(availableIngredientLetters) { letter ->
+                                    FilterChip(
+                                        onClick = { viewModel.filterByIngredientLetter(letter) },
+                                        label = { Text(letter) },
+                                        selected = uiState.selectedIngredientLetter == letter,
+                                        modifier = Modifier.height(40.dp)
+                                    )
+                                }
+                            }
+                        }
+                    } else if (uiState.selectedIngredient != null) {
+                        // Show "Back to ingredients" button when ingredient is selected
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -233,8 +269,6 @@ fun RecipeListScreen(
                             }
                         }
                     }
-                    // When no ingredient is selected, don't show any filter chips
-                    // The ingredients will be shown in the content area
                 }
             }
             

@@ -208,6 +208,16 @@ class RecipeDetailViewModel @Inject constructor(
     
     /**
      * Update an existing execution.
+     * @param executionCreate Execution data with ID for update
+     */
+    fun updateExecution(executionCreate: ExecutionCreate) {
+        val executionId = executionCreate.executionId 
+            ?: throw IllegalArgumentException("ExecutionId must be provided for updates")
+        updateExecution(executionId, executionCreate)
+    }
+    
+    /**
+     * Update an existing execution.
      * @param executionId ID of the execution to update
      * @param executionCreate New execution data
      */

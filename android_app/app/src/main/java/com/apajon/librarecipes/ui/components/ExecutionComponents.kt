@@ -33,17 +33,34 @@ fun AddExecutionDialog(
     onDismiss: () -> Unit,
     onAddExecution: (ExecutionCreate) -> Unit,
     isLoading: Boolean = false,
-    availableConvives: List<ConviveEntity> = emptyList()
+    availableConvives: List<ConviveEntity> = emptyList(),
+    existingExecution: ExecutionWithDetails? = null
 ) {
-    var selectedConvives by remember { mutableStateOf<List<ConviveWithFeedback>>(emptyList()) }
+    // Initialize with existing data if editing
+    var selectedConvives by remember { 
+        mutableStateOf<List<ConviveWithFeedback>>(
+            existingExecution?.convivesWithFeedback ?: emptyList()
+        ) 
+    }
     var showAddConviveDialog by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(Date()) }
+    var selectedDate by remember { 
+        mutableStateOf(
+            existingExecution?.let { 
+                try {
+                    val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                    inputFormat.parse(it.execution.dateExecution) ?: Date()
+                } catch (e: Exception) {
+                    Date()
+                }
+            } ?: Date()
+        )
+    }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ajouter une exécution") },
+        title = { Text(if (existingExecution != null) "Modifier l'exécution" else "Ajouter une exécution") },
         text = {
             Column(
                 modifier = Modifier
@@ -148,7 +165,8 @@ fun AddExecutionDialog(
                     onAddExecution(ExecutionCreate(
                         recipeId = "", // Will be set by the caller
                         convivesWithFeedback = selectedConvives,
-                        executionDate = selectedDate
+                        executionDate = selectedDate,
+                        executionId = existingExecution?.execution?.id // Include existing ID for updates
                     ))
                 },
                 enabled = !isLoading && selectedConvives.isNotEmpty()
@@ -160,7 +178,7 @@ fun AddExecutionDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Ajouter")
+                Text(if (existingExecution != null) "Modifier" else "Ajouter")
             }
         },
         dismissButton = {

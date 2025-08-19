@@ -39,7 +39,8 @@ data class ExecutionWithDetails(
 data class ExecutionCreate(
     val recipeId: String,
     val convivesWithFeedback: List<ConviveWithFeedback>,
-    val executionDate: Date = Date()
+    val executionDate: Date = Date(),
+    val executionId: String? = null // For updates, null for new executions
 )
 
 /**

@@ -53,6 +53,7 @@ fun RecipeDetailScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showAddExecutionDialog by remember { mutableStateOf(false) }
     var selectedExecution by remember { mutableStateOf<ExecutionWithDetails?>(null) }
+    var executionToEdit by remember { mutableStateOf<ExecutionWithDetails?>(null) }
     
     // Load recipe details when the screen is first displayed
     LaunchedEffect(recipeId) {
@@ -67,11 +68,12 @@ fun RecipeDetailScreen(
         }
     }
     
-    // Handle add execution success
+    // Handle add/edit execution success
     LaunchedEffect(uiState.addExecutionSuccess) {
         if (uiState.addExecutionSuccess) {
             viewModel.clearAddExecutionSuccess()
             showAddExecutionDialog = false
+            executionToEdit = null
         }
     }
     
@@ -207,15 +209,25 @@ fun RecipeDetailScreen(
         )
     }
     
-    // Add execution dialog
+    // Add/Edit execution dialog
     if (showAddExecutionDialog) {
         com.apajon.librarecipes.ui.components.AddExecutionDialog(
-            onDismiss = { showAddExecutionDialog = false },
+            onDismiss = { 
+                showAddExecutionDialog = false
+                executionToEdit = null
+            },
             onAddExecution = { executionCreate ->
-                viewModel.addExecution(executionCreate.copy(recipeId = recipeId))
+                if (executionCreate.executionId != null) {
+                    // Update existing execution
+                    viewModel.updateExecution(executionCreate.copy(recipeId = recipeId))
+                } else {
+                    // Add new execution
+                    viewModel.addExecution(executionCreate.copy(recipeId = recipeId))
+                }
             },
             isLoading = uiState.isAddingExecution,
-            availableConvives = uiState.availableConvives
+            availableConvives = uiState.availableConvives,
+            existingExecution = executionToEdit
         )
     }
     
@@ -225,8 +237,8 @@ fun RecipeDetailScreen(
             executionWithDetails = execution,
             onDismiss = { selectedExecution = null },
             onEdit = {
-                // TODO: Implement execution edit functionality - for now show AddExecutionDialog with pre-filled data
                 selectedExecution = null
+                executionToEdit = execution
                 showAddExecutionDialog = true
             },
             onDelete = {

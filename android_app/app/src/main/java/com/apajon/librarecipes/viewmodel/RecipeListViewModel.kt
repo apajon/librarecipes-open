@@ -80,7 +80,9 @@ class RecipeListViewModel @Inject constructor(
     private val _selectedConvivesPeriod = MutableStateFlow(ConvivesPeriod.ALL)
     private val _selectedConvives = MutableStateFlow<Int?>(null)
     private val _selectedIngredient = MutableStateFlow<String?>(null)
+    private val _selectedIngredientLetter = MutableStateFlow<String?>(null)
     private val _availableIngredients = MutableStateFlow<List<String>>(emptyList())
+    private val _recipesFilteredByIngredient = MutableStateFlow<List<RecipeListItem>>(emptyList())
     
     val uiState: StateFlow<RecipeListUiState> = combine(
         combine(_recipes, _executionStatus, _isLoading, _errorMessage) { recipes, executionStatus, isLoading, errorMessage ->
@@ -92,8 +94,9 @@ class RecipeListViewModel @Inject constructor(
         combine(_selectedExecutionPeriod, _selectedConvives, _selectedIngredient, _availableIngredients) { selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients ->
             Quad(selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients)
         },
-        _selectedConvivesPeriod
-    ) { firstGroup, secondGroup, thirdGroup, selectedConvivesPeriod ->
+        _selectedConvivesPeriod,
+        _selectedIngredientLetter
+    ) { firstGroup, secondGroup, thirdGroup, selectedConvivesPeriod, selectedIngredientLetter ->
         val (recipes, executionStatus, isLoading, errorMessage) = firstGroup
         val (sortAscending, selectedLetter, filterMode, selectedDatePeriod) = secondGroup
         val (selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients) = thirdGroup
@@ -103,7 +106,7 @@ class RecipeListViewModel @Inject constructor(
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
             FilterMode.EXECUTION -> processRecipesByExecution(recipes, executionStatus, sortAscending, selectedExecutionPeriod)
             FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
-            FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient)
+            FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient, selectedIngredientLetter)
         }
         RecipeListUiState(
             recipeSections = processedRecipes,
@@ -119,7 +122,8 @@ class RecipeListViewModel @Inject constructor(
             selectedConvives = selectedConvives,
             availableConvives = getAvailableConvives(recipes),
             selectedIngredient = selectedIngredient,
-            availableIngredients = availableIngredients
+            availableIngredients = availableIngredients,
+            selectedIngredientLetter = selectedIngredientLetter
         )
     }.stateIn(
         scope = viewModelScope,
@@ -217,7 +221,7 @@ class RecipeListViewModel @Inject constructor(
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedConvives.value = null
                 _selectedIngredient.value = null
-                // Keep selectedLetter for ingredient mode (it now works like alphabetical)
+                _selectedIngredientLetter.value = null
             }
         }
     }
@@ -238,8 +242,22 @@ class RecipeListViewModel @Inject constructor(
         _selectedConvives.value = convives
     }
     
+    fun filterByIngredientLetter(letter: String?) {
+        _selectedIngredientLetter.value = letter
+    }
+    
     fun filterByIngredient(ingredient: String?) {
         _selectedIngredient.value = ingredient
+        if (ingredient != null) {
+            // Load recipes for this ingredient using the proper repository method
+            viewModelScope.launch {
+                repository.getRecipesByIngredient(ingredient).collect { recipes ->
+                    _recipesFilteredByIngredient.value = recipes
+                }
+            }
+        } else {
+            _recipesFilteredByIngredient.value = emptyList()
+        }
     }
     
     fun deleteRecipe(recipeId: String) {
@@ -605,16 +623,13 @@ class RecipeListViewModel @Inject constructor(
     private fun processRecipesByIngredientAlphabetical(
         recipes: List<RecipeListItem>,
         sortAscending: Boolean,
-        selectedIngredient: String?
+        selectedIngredient: String?,
+        selectedIngredientLetter: String?
     ): List<RecipeSection> {
         // If an ingredient is selected, show recipes containing that ingredient
         if (selectedIngredient != null) {
-            // Filter recipes to only those containing the selected ingredient
-            // For now, we'll use a simple name-based search, but ideally we'd query the database
-            val filteredRecipes = recipes.filter { recipe ->
-                // This is a temporary solution - we should use the repository method
-                recipe.nom.contains(selectedIngredient, ignoreCase = true)
-            }
+            // Use the filtered recipes from the repository method
+            val filteredRecipes = _recipesFilteredByIngredient.value
             
             val sortedRecipes = if (sortAscending) {
                 filteredRecipes.sortedBy { it.nom }
@@ -632,23 +647,26 @@ class RecipeListViewModel @Inject constructor(
                     )
                 )
             } else {
-                listOf(
-                    RecipeSection(
-                        letter = "Aucune recette trouvée",
-                        recipes = emptyList(),
-                        isIngredientSection = false,
-                        ingredients = emptyList()
-                    )
-                )
+                emptyList() // Return empty list to trigger "Aucune recette trouvée"
             }
         }
         
         // If no ingredient is selected, show ingredients grouped alphabetically by first letter
         val ingredients = _availableIngredients.value
-        val sortedIngredients = if (sortAscending) {
-            ingredients.sortedBy { it }
+        
+        // Filter ingredients by selected letter if any
+        val filteredIngredients = if (selectedIngredientLetter != null) {
+            ingredients.filter { ingredient ->
+                ingredient.firstOrNull()?.uppercase() == selectedIngredientLetter.uppercase()
+            }
         } else {
-            ingredients.sortedByDescending { it }
+            ingredients
+        }
+        
+        val sortedIngredients = if (sortAscending) {
+            filteredIngredients.sortedBy { it }
+        } else {
+            filteredIngredients.sortedByDescending { it }
         }
         
         return sortedIngredients
@@ -688,5 +706,6 @@ data class RecipeListUiState(
     val selectedConvives: Int? = null,
     val availableConvives: List<Int> = emptyList(),
     val selectedIngredient: String? = null,
-    val availableIngredients: List<String> = emptyList()
+    val availableIngredients: List<String> = emptyList(),
+    val selectedIngredientLetter: String? = null
 )
