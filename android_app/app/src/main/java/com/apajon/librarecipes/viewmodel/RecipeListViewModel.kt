@@ -217,6 +217,7 @@ class RecipeListViewModel @Inject constructor(
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedConvives.value = null
                 _selectedIngredient.value = null
+                // Keep selectedLetter for ingredient mode (it now works like alphabetical)
             }
         }
     }
@@ -635,26 +636,8 @@ class RecipeListViewModel @Inject constructor(
         }
         
         // If no ingredient is selected, show recipes grouped alphabetically by first letter
-        // This mirrors the alphabetical mode behavior
-        val sortedRecipes = if (sortAscending) {
-            recipes.sortedBy { it.nom }
-        } else {
-            recipes.sortedByDescending { it.nom }
-        }
-        
-        return sortedRecipes
-            .groupBy { recipe ->
-                recipe.nom.firstOrNull()?.uppercase() ?: "#"
-            }
-            .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
-            .map { (letter, recipesList) ->
-                RecipeSection(
-                    letter = letter,
-                    recipes = recipesList,
-                    isIngredientSection = false,
-                    ingredients = emptyList()
-                )
-            }
+        // This mirrors the alphabetical mode behavior exactly
+        return processRecipesAlphabetically(recipes, sortAscending, _selectedLetter.value)
     }
 }
 
