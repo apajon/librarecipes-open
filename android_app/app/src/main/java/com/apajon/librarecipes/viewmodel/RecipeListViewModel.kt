@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.data.repository.RecipeRepository
 import com.apajon.librarecipes.data.repository.RecipeResult
+import com.apajon.librarecipes.data.repository.ExecutionStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -68,6 +69,7 @@ class RecipeListViewModel @Inject constructor(
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
     
     private val _recipes = MutableStateFlow<List<RecipeListItem>>(emptyList())
+    private val _executionStatus = MutableStateFlow<Map<String, ExecutionStatus>>(emptyMap())
     private val _isLoading = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow<String?>(null)
     private val _sortAscending = MutableStateFlow(true)
@@ -81,24 +83,25 @@ class RecipeListViewModel @Inject constructor(
     private val _availableIngredients = MutableStateFlow<List<String>>(emptyList())
     
     val uiState: StateFlow<RecipeListUiState> = combine(
-        combine(_recipes, _isLoading, _errorMessage, _sortAscending) { recipes, isLoading, errorMessage, sortAscending ->
-            Quad(recipes, isLoading, errorMessage, sortAscending)
+        combine(_recipes, _executionStatus, _isLoading, _errorMessage) { recipes, executionStatus, isLoading, errorMessage ->
+            Quad(recipes, executionStatus, isLoading, errorMessage)
         },
-        combine(_selectedLetter, _filterMode, _selectedDatePeriod, _selectedExecutionPeriod) { selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod ->
-            Quad(selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod)
+        combine(_sortAscending, _selectedLetter, _filterMode, _selectedDatePeriod) { sortAscending, selectedLetter, filterMode, selectedDatePeriod ->
+            Quad(sortAscending, selectedLetter, filterMode, selectedDatePeriod)
         },
-        combine(_selectedConvives, _selectedIngredient, _availableIngredients, _selectedConvivesPeriod) { selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod ->
-            Quad(selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod)
-        }
-    ) { firstGroup, secondGroup, thirdGroup ->
-        val (recipes, isLoading, errorMessage, sortAscending) = firstGroup
-        val (selectedLetter, filterMode, selectedDatePeriod, selectedExecutionPeriod) = secondGroup
-        val (selectedConvives, selectedIngredient, availableIngredients, selectedConvivesPeriod) = thirdGroup
+        combine(_selectedExecutionPeriod, _selectedConvives, _selectedIngredient, _availableIngredients) { selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients ->
+            Quad(selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients)
+        },
+        _selectedConvivesPeriod
+    ) { firstGroup, secondGroup, thirdGroup, selectedConvivesPeriod ->
+        val (recipes, executionStatus, isLoading, errorMessage) = firstGroup
+        val (sortAscending, selectedLetter, filterMode, selectedDatePeriod) = secondGroup
+        val (selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredients) = thirdGroup
         
         val processedRecipes = when (filterMode) {
             FilterMode.ALPHABETICAL -> processRecipesAlphabetically(recipes, sortAscending, selectedLetter)
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
-            FilterMode.EXECUTION -> processRecipesByExecution(recipes, sortAscending, selectedExecutionPeriod)
+            FilterMode.EXECUTION -> processRecipesByExecution(recipes, executionStatus, sortAscending, selectedExecutionPeriod)
             FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
             FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient)
         }
@@ -127,6 +130,7 @@ class RecipeListViewModel @Inject constructor(
     init {
         loadRecipes()
         loadAvailableIngredients()
+        loadExecutionStatus()
     }
     
     fun loadRecipes() {
@@ -158,6 +162,14 @@ class RecipeListViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getAllUniqueIngredients().collect { ingredients ->
                 _availableIngredients.value = ingredients
+            }
+        }
+    }
+    
+    private fun loadExecutionStatus() {
+        viewModelScope.launch {
+            repository.getRecipesWithExecutionStatus().collect { executionStatus ->
+                _executionStatus.value = executionStatus
             }
         }
     }
@@ -200,11 +212,11 @@ class RecipeListViewModel @Inject constructor(
                 _selectedIngredient.value = null
             }
             FilterMode.INGREDIENT -> {
-                _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
                 _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedConvives.value = null
+                _selectedIngredient.value = null
             }
         }
     }
@@ -412,6 +424,7 @@ class RecipeListViewModel @Inject constructor(
     
     private fun processRecipesByExecution(
         recipes: List<RecipeListItem>,
+        executionStatus: Map<String, ExecutionStatus>,
         sortAscending: Boolean,
         selectedExecutionPeriod: ExecutionPeriod
     ): List<RecipeSection> {
@@ -420,9 +433,10 @@ class RecipeListViewModel @Inject constructor(
             selectedExecutionPeriod == ExecutionPeriod.ALL -> recipes
             selectedExecutionPeriod.isNever -> {
                 // Filter recipes that have never been executed
-                // For now, we'll simulate this by showing all recipes
-                // TODO: Implement actual check for recipes without executions
-                recipes
+                recipes.filter { recipe ->
+                    val status = executionStatus[recipe.id]
+                    status?.hasExecutions != true
+                }
             }
             else -> {
                 // Filter by execution date within period
@@ -430,28 +444,58 @@ class RecipeListViewModel @Inject constructor(
                     add(Calendar.DAY_OF_YEAR, -(selectedExecutionPeriod.days ?: 0))
                 }.time
                 
-                // For now, we'll use recipe creation date as a placeholder
-                // TODO: Replace with actual execution date filtering
                 recipes.filter { recipe ->
-                    try {
-                        val recipeDate = dateFormat.parse(recipe.dateAjout)
-                        recipeDate?.after(cutoffDate) == true
-                    } catch (e: Exception) {
+                    val status = executionStatus[recipe.id]
+                    if (status?.hasExecutions != true || status.lastExecutionDate == null) {
                         false
+                    } else {
+                        try {
+                            val executionDate = dateFormat.parse(status.lastExecutionDate)
+                            executionDate?.after(cutoffDate) == true
+                        } catch (e: Exception) {
+                            false
+                        }
                     }
                 }
             }
         }
         
-        // Sort by execution date (using recipe date as placeholder)
+        // Sort by execution date (using execution date when available, fallback to recipe date)
         val sortedRecipes = try {
             if (sortAscending) {
                 filteredRecipes.sortedByDescending { recipe ->
-                    dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                    val status = executionStatus[recipe.id]
+                    if (status?.hasExecutions == true && status.lastExecutionDate != null) {
+                        try {
+                            dateFormat.parse(status.lastExecutionDate)?.time ?: 0L
+                        } catch (e: Exception) {
+                            0L
+                        }
+                    } else {
+                        // Fallback to recipe creation date
+                        try {
+                            dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                        } catch (e: Exception) {
+                            0L
+                        }
+                    }
                 }
             } else {
                 filteredRecipes.sortedBy { recipe ->
-                    dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                    val status = executionStatus[recipe.id]
+                    if (status?.hasExecutions == true && status.lastExecutionDate != null) {
+                        try {
+                            dateFormat.parse(status.lastExecutionDate)?.time ?: 0L
+                        } catch (e: Exception) {
+                            0L
+                        }
+                    } else {
+                        try {
+                            dateFormat.parse(recipe.dateAjout)?.time ?: 0L
+                        } catch (e: Exception) {
+                            0L
+                        }
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -459,40 +503,49 @@ class RecipeListViewModel @Inject constructor(
         }
         
         // Group by execution periods
-        return groupRecipesByExecutionRanges(sortedRecipes)
+        return groupRecipesByExecutionRanges(sortedRecipes, executionStatus)
     }
     
-    private fun groupRecipesByExecutionRanges(recipes: List<RecipeListItem>): List<RecipeSection> {
+    private fun groupRecipesByExecutionRanges(
+        recipes: List<RecipeListItem>,
+        executionStatus: Map<String, ExecutionStatus>
+    ): List<RecipeSection> {
         val now = Calendar.getInstance()
         val sections = mutableMapOf<String, MutableList<RecipeListItem>>()
         
         for (recipe in recipes) {
-            try {
-                // TODO: Replace with actual last execution date
-                val recipeDate = dateFormat.parse(recipe.dateAjout)
-                if (recipeDate != null) {
-                    val recipeCal = Calendar.getInstance().apply { time = recipeDate }
-                    val daysDiff = ((now.timeInMillis - recipeCal.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
-                    
-                    val section = when {
-                        daysDiff == 0 -> "Exécutée aujourd'hui"
-                        daysDiff == 1 -> "Exécutée hier" 
-                        daysDiff <= 7 -> "Exécutée cette semaine"
-                        daysDiff <= 14 -> "Exécutée il y a 2 semaines"
-                        daysDiff <= 30 -> "Exécutée ce mois-ci"
-                        daysDiff <= 90 -> "Exécutée il y a 3 mois"
-                        daysDiff <= 180 -> "Exécutée il y a 6 mois"
-                        daysDiff <= 365 -> "Exécutée cette année"
-                        daysDiff <= 730 -> "Exécutée il y a 2 ans"
-                        else -> "Exécutée il y a plus de 2 ans"
+            val status = executionStatus[recipe.id]
+            
+            val section = if (status?.hasExecutions != true || status.lastExecutionDate == null) {
+                "Jamais exécutée"
+            } else {
+                try {
+                    val executionDate = dateFormat.parse(status.lastExecutionDate)
+                    if (executionDate != null) {
+                        val executionCal = Calendar.getInstance().apply { time = executionDate }
+                        val daysDiff = ((now.timeInMillis - executionCal.timeInMillis) / (1000 * 60 * 60 * 24)).toInt()
+                        
+                        when {
+                            daysDiff == 0 -> "Exécutée aujourd'hui"
+                            daysDiff == 1 -> "Exécutée hier" 
+                            daysDiff <= 7 -> "Exécutée cette semaine"
+                            daysDiff <= 14 -> "Exécutée il y a 2 semaines"
+                            daysDiff <= 30 -> "Exécutée ce mois-ci"
+                            daysDiff <= 90 -> "Exécutée il y a 3 mois"
+                            daysDiff <= 180 -> "Exécutée il y a 6 mois"
+                            daysDiff <= 365 -> "Exécutée cette année"
+                            daysDiff <= 730 -> "Exécutée il y a 2 ans"
+                            else -> "Exécutée il y a plus de 2 ans"
+                        }
+                    } else {
+                        "Jamais exécutée"
                     }
-                    
-                    sections.getOrPut(section) { mutableListOf() }.add(recipe)
+                } catch (e: Exception) {
+                    "Jamais exécutée"
                 }
-            } catch (e: Exception) {
-                // Add to "Jamais exécutée" section for recipes with invalid dates
-                sections.getOrPut("Jamais exécutée") { mutableListOf() }.add(recipe)
             }
+            
+            sections.getOrPut(section) { mutableListOf() }.add(recipe)
         }
         
         // Define the order of sections
@@ -553,40 +606,40 @@ class RecipeListViewModel @Inject constructor(
         sortAscending: Boolean,
         selectedIngredient: String?
     ): List<RecipeSection> {
-        // If no ingredient is selected, show ingredients grouped alphabetically
-        if (selectedIngredient == null) {
-            val ingredients = _availableIngredients.value
-            val sortedIngredients = if (sortAscending) {
-                ingredients.sorted()
-            } else {
-                ingredients.sortedDescending()
+        // If an ingredient is selected, filter recipes containing that ingredient
+        if (selectedIngredient != null) {
+            // TODO: Replace with actual database search by ingredient
+            val filteredRecipes = recipes.filter { recipe ->
+                recipe.nom.contains(selectedIngredient, ignoreCase = true)
             }
             
-            return sortedIngredients
-                .groupBy { ingredient ->
-                    ingredient.firstOrNull()?.uppercase() ?: "#"
+            val sortedRecipes = if (sortAscending) {
+                filteredRecipes.sortedBy { it.nom }
+            } else {
+                filteredRecipes.sortedByDescending { it.nom }
+            }
+            
+            return sortedRecipes
+                .groupBy { recipe ->
+                    recipe.nom.firstOrNull()?.uppercase() ?: "#"
                 }
                 .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
-                .map { (letter, ingredientsList) ->
+                .map { (letter, recipesList) ->
                     RecipeSection(
                         letter = letter,
-                        recipes = emptyList(),
-                        isIngredientSection = true,
-                        ingredients = ingredientsList
+                        recipes = recipesList,
+                        isIngredientSection = false,
+                        ingredients = emptyList()
                     )
                 }
         }
         
-        // If an ingredient is selected, filter recipes containing that ingredient
-        // TODO: Replace with actual database search by ingredient
-        val filteredRecipes = recipes.filter { recipe ->
-            recipe.nom.contains(selectedIngredient, ignoreCase = true)
-        }
-        
+        // If no ingredient is selected, show recipes grouped alphabetically by first letter
+        // This mirrors the alphabetical mode behavior
         val sortedRecipes = if (sortAscending) {
-            filteredRecipes.sortedBy { it.nom }
+            recipes.sortedBy { it.nom }
         } else {
-            filteredRecipes.sortedByDescending { it.nom }
+            recipes.sortedByDescending { it.nom }
         }
         
         return sortedRecipes

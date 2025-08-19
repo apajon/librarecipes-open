@@ -33,6 +33,14 @@ sealed class RecipeResult {
 }
 
 /**
+ * Data class representing the execution status of a recipe.
+ */
+data class ExecutionStatus(
+    val hasExecutions: Boolean,
+    val lastExecutionDate: String?
+)
+
+/**
  * Repository for recipe data operations.
  * Handles data operations using local Room database.
  */
@@ -378,6 +386,49 @@ class RecipeRepository @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("RecipeRepository", "Error getting unique ingredients", e)
                 emit(emptyList())
+            }
+        }
+    }
+    
+    /**
+     * Get recipes with their execution status (whether they have executions and last execution date).
+     * @return Flow of recipes with execution information
+     */
+    fun getRecipesWithExecutionStatus(): Flow<Map<String, ExecutionStatus>> {
+        return flow {
+            try {
+                val recipes = database.recipeDao().getAllRecipes().first()
+                val executionStatus = mutableMapOf<String, ExecutionStatus>()
+                
+                for (recipe in recipes) {
+                    val executions = database.executionDao().getExecutionsForRecipe(recipe.id).first()
+                    
+                    if (executions.isEmpty()) {
+                        executionStatus[recipe.id] = ExecutionStatus(
+                            hasExecutions = false,
+                            lastExecutionDate = null
+                        )
+                    } else {
+                        // Find the most recent execution
+                        val latestExecution = executions.maxByOrNull { 
+                            try {
+                                EntityMapper.dateFormat.parse(it.dateExecution)?.time ?: 0L
+                            } catch (e: Exception) {
+                                0L
+                            }
+                        }
+                        
+                        executionStatus[recipe.id] = ExecutionStatus(
+                            hasExecutions = true,
+                            lastExecutionDate = latestExecution?.dateExecution
+                        )
+                    }
+                }
+                
+                emit(executionStatus)
+            } catch (e: Exception) {
+                android.util.Log.e("RecipeRepository", "Error getting execution status", e)
+                emit(emptyMap())
             }
         }
     }

@@ -215,8 +215,8 @@ fun RecipeListScreen(
                     }
                 }
                 FilterMode.INGREDIENT -> {
-                    // Ingredient filter buttons (like alphabetical)
-                    if (uiState.availableIngredients.isNotEmpty()) {
+                    // Letter filter buttons (like alphabetical mode)
+                    if (uiState.availableLetters.isNotEmpty()) {
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -226,19 +226,19 @@ fun RecipeListScreen(
                             // "All" button
                             item {
                                 FilterChip(
-                                    onClick = { viewModel.filterByIngredient(null) },
-                                    label = { Text("Tous") },
-                                    selected = uiState.selectedIngredient == null,
+                                    onClick = { viewModel.filterByLetter(null) },
+                                    label = { Text("Tout") },
+                                    selected = uiState.selectedLetter == null,
                                     modifier = Modifier.height(40.dp)
                                 )
                             }
                             
-                            // Ingredient buttons
-                            items(uiState.availableIngredients) { ingredient ->
+                            // Letter buttons
+                            items(uiState.availableLetters) { letter ->
                                 FilterChip(
-                                    onClick = { viewModel.filterByIngredient(ingredient) },
-                                    label = { Text(ingredient) },
-                                    selected = uiState.selectedIngredient == ingredient,
+                                    onClick = { viewModel.filterByLetter(letter) },
+                                    label = { Text(letter) },
+                                    selected = uiState.selectedLetter == letter,
                                     modifier = Modifier.height(40.dp)
                                 )
                             }
@@ -389,14 +389,14 @@ fun RecipeListScreen(
                                     }
                                 }
                                 FilterMode.INGREDIENT -> {
-                                    if (!uiState.selectedIngredient.isNullOrBlank()) {
+                                    if (uiState.selectedLetter != null) {
                                         Text(
-                                            text = "Aucune recette trouvée contenant '${uiState.selectedIngredient}'",
+                                            text = "Aucune recette trouvée pour la lettre ${uiState.selectedLetter}",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Button(onClick = { viewModel.filterByIngredient(null) }) {
+                                        Button(onClick = { viewModel.filterByLetter(null) }) {
                                             Text("Voir toutes les recettes")
                                         }
                                     } else {
@@ -460,10 +460,7 @@ fun RecipeListScreen(
                                                 }
                                             )
                                             Text(
-                                                text = if (section.isIngredientSection) 
-                                                    "${section.ingredients.size} ingrédient${if (section.ingredients.size > 1) "s" else ""}"
-                                                else 
-                                                    "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
+                                                text = "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}",
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = when (uiState.filterMode) {
                                                     FilterMode.ALPHABETICAL -> MaterialTheme.colorScheme.onPrimaryContainer
@@ -477,62 +474,23 @@ fun RecipeListScreen(
                                     }
                                 }
                                 
-                                // Content: either ingredients or recipes
-                                if (section.isIngredientSection) {
-                                    // Show ingredients as clickable items
-                                    items(
-                                        items = section.ingredients,
-                                        key = { ingredient -> ingredient }
-                                    ) { ingredient ->
-                                        Card(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(vertical = 2.dp)
-                                                .clickable {
-                                                    viewModel.filterByIngredient(ingredient)
-                                                },
-                                            colors = CardDefaults.cardColors(
-                                                containerColor = MaterialTheme.colorScheme.surface
-                                            )
-                                        ) {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(16.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                Text(
-                                                    text = "🥬 $ingredient",
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    modifier = Modifier.weight(1f)
-                                                )
-                                                Icon(
-                                                    Icons.Default.Search,
-                                                    contentDescription = "Rechercher avec cet ingrédient",
-                                                    tint = MaterialTheme.colorScheme.primary
-                                                )
-                                            }
+                                // Show recipes
+                                items(
+                                    items = section.recipes,
+                                    key = { recipe -> recipe.id }
+                                ) { recipe ->
+                                    RecipeListItem(
+                                        recipe = recipe,
+                                        onClick = { 
+                                            navController.navigate("recipe/${recipe.id}")
+                                        },
+                                        onEdit = {
+                                            navController.navigate("edit_recipe/${recipe.id}")
+                                        },
+                                        onDelete = {
+                                            recipeToDelete = recipe.id
                                         }
-                                    }
-                                } else {
-                                    // Show recipes
-                                    items(
-                                        items = section.recipes,
-                                        key = { recipe -> recipe.id }
-                                    ) { recipe ->
-                                        RecipeListItem(
-                                            recipe = recipe,
-                                            onClick = { 
-                                                navController.navigate("recipe/${recipe.id}")
-                                            },
-                                            onEdit = {
-                                                navController.navigate("edit_recipe/${recipe.id}")
-                                            },
-                                            onDelete = {
-                                                recipeToDelete = recipe.id
-                                            }
-                                        )
-                                    }
+                                    )
                                 }
                             }
                         }

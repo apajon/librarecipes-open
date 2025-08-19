@@ -52,6 +52,7 @@ fun RecipeDetailScreen(
     val uiState by viewModel.uiState.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showAddExecutionDialog by remember { mutableStateOf(false) }
+    var selectedExecution by remember { mutableStateOf<ExecutionWithDetails?>(null) }
     
     // Load recipe details when the screen is first displayed
     LaunchedEffect(recipeId) {
@@ -169,8 +170,7 @@ fun RecipeDetailScreen(
                         onEditSection = { section -> navController.navigate("edit_recipe/$recipeId/section/$section") },
                         onAddExecution = { showAddExecutionDialog = true },
                         onExecutionClick = { execution ->
-                            // TODO: Implement execution detail/edit dialog
-                            // For now, we'll just add a placeholder
+                            selectedExecution = execution
                         }
                     )
                 }
@@ -216,6 +216,22 @@ fun RecipeDetailScreen(
             },
             isLoading = uiState.isAddingExecution,
             availableConvives = uiState.availableConvives
+        )
+    }
+    
+    // Execution detail dialog
+    selectedExecution?.let { execution ->
+        com.apajon.librarecipes.ui.components.ExecutionDetailDialog(
+            executionWithDetails = execution,
+            onDismiss = { selectedExecution = null },
+            onEdit = {
+                // TODO: Implement execution edit functionality
+                selectedExecution = null
+            },
+            onDelete = {
+                // TODO: Implement execution delete functionality
+                selectedExecution = null
+            }
         )
     }
     
