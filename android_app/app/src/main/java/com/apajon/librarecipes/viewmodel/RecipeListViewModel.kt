@@ -643,7 +643,7 @@ class RecipeListViewModel @Inject constructor(
             return if (sortedRecipes.isNotEmpty()) {
                 listOf(
                     RecipeSection(
-                        letter = "Recettes avec \"$selectedIngredient\"",
+                        letter = "Recettes avec:\n\"$selectedIngredient\"",
                         recipes = sortedRecipes,
                         isIngredientSection = false,
                         ingredients = emptyList()
