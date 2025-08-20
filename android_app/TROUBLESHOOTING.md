@@ -2,6 +2,47 @@
 
 ## Common Build Issues and Solutions
 
+### Issue: Cannot read the array length because "&lt;local6&gt;" is null
+
+If you encounter a compilation error like:
+```
+Cannot read the array length because "<local6>" is null
+```
+
+This error typically occurs during annotation processing (KAPT) when Room or Hilt generates code. The project has been configured with preventive measures, but if you still encounter this error:
+
+#### Solution 1: Clean and Rebuild
+```bash
+cd android_app
+
+# Clean project completely
+./gradlew clean
+
+# Rebuild from scratch
+./gradlew assembleDebug
+```
+
+#### Solution 2: Clear KAPT Generated Files
+```bash
+# Remove generated annotation processing files
+rm -rf app/build/generated/source/kapt/
+rm -rf app/build/tmp/kapt3/
+
+# Rebuild
+./gradlew clean assembleDebug
+```
+
+#### Solution 3: Reset Gradle Daemon (if Solutions 1-2 don't work)
+```bash
+# Stop all Gradle processes
+./gradlew --stop
+
+# Clear cache and rebuild
+./gradlew clean assembleDebug
+```
+
+**Note**: The project is configured with enhanced KAPT stability settings to prevent this error from occurring. These include disabled incremental processing and improved memory allocation.
+
 ### Issue: Failed to create Jar file bcprov-jdk18on-1.79.jar
 
 If you encounter an error like:

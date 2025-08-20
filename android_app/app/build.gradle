@@ -53,10 +53,22 @@ android {
 kapt {
     correctErrorTypes = true
     useBuildCache = true
+    
     javacOptions {
         // These options can help with annotation processing issues
         option("-Adagger.fastInit=enabled")
         option("-Adagger.hilt.android.internal.disableAndroidSuperclassValidation=true")
+        
+        // Room specific options for better null safety
+        option("-Aroom.schemaLocation", "$projectDir/schemas")
+        option("-Aroom.incremental", "true")
+        option("-Aroom.expandProjection", "true")
+        
+        // General Java compiler options for better error handling
+        option("-source", "8")
+        option("-target", "8")
+        option("-Xlint:all")
+        option("-Xlint:-processing")
     }
 }
 
