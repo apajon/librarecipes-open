@@ -27,4 +27,7 @@ interface FeedbackExecutionDao {
 
     @Query("DELETE FROM feedback_execution WHERE executionId = :executionId")
     suspend fun deleteFeedbackForExecution(executionId: String)
+
+    @Query("SELECT * FROM feedback_execution")
+    fun getAllFeedback(): Flow<List<FeedbackExecutionEntity>>
 }

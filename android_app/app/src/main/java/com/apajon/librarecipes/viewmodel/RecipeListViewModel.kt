@@ -83,6 +83,10 @@ class RecipeListViewModel @Inject constructor(
     private val _selectedIngredientLetter = MutableStateFlow<String?>(null)
     private val _availableIngredients = MutableStateFlow<List<String>>(emptyList())
     private val _recipesFilteredByIngredient = MutableStateFlow<List<RecipeListItem>>(emptyList())
+    private val _selectedConvive = MutableStateFlow<String?>(null)
+    private val _selectedConviveLetter = MutableStateFlow<String?>(null)
+    private val _availableConvivesFromExecutions = MutableStateFlow<List<String>>(emptyList())
+    private val _recipesFilteredByConvive = MutableStateFlow<List<RecipeListItem>>(emptyList())
     
     val uiState: StateFlow<RecipeListUiState> = combine(
         combine(_recipes, _executionStatus, _isLoading, _errorMessage) { recipes, executionStatus, isLoading, errorMessage ->
@@ -96,18 +100,22 @@ class RecipeListViewModel @Inject constructor(
         },
         combine(_selectedConvivesPeriod, _selectedIngredientLetter, _recipesFilteredByIngredient, _availableIngredients) { selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients ->
             Quad(selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients)
+        },
+        combine(_selectedConvive, _selectedConviveLetter, _availableConvivesFromExecutions, _recipesFilteredByConvive) { selectedConvive, selectedConviveLetter, availableConvivesFromExecutions, recipesFilteredByConvive ->
+            Quad(selectedConvive, selectedConviveLetter, availableConvivesFromExecutions, recipesFilteredByConvive)
         }
-    ) { firstGroup, secondGroup, thirdGroup, fourthGroup ->
+    ) { firstGroup, secondGroup, thirdGroup, fourthGroup, fifthGroup ->
         val (recipes, executionStatus, isLoading, errorMessage) = firstGroup
         val (sortAscending, selectedLetter, filterMode, selectedDatePeriod) = secondGroup
         val (selectedExecutionPeriod, selectedConvives, selectedIngredient, availableIngredientsFromThird) = thirdGroup
         val (selectedConvivesPeriod, selectedIngredientLetter, recipesFilteredByIngredient, availableIngredients) = fourthGroup
+        val (selectedConvive, selectedConviveLetter, availableConvivesFromExecutions, recipesFilteredByConvive) = fifthGroup
         
         val processedRecipes = when (filterMode) {
             FilterMode.ALPHABETICAL -> processRecipesAlphabetically(recipes, sortAscending, selectedLetter)
             FilterMode.DATE -> processRecipesByDate(recipes, sortAscending, selectedDatePeriod)
             FilterMode.EXECUTION -> processRecipesByExecution(recipes, executionStatus, sortAscending, selectedExecutionPeriod)
-            FilterMode.CONVIVES -> processRecipesByConvivesAlphabetical(recipes, sortAscending, selectedConvives)
+            FilterMode.CONVIVES -> processRecipesByConviveAlphabetical(recipes, sortAscending, selectedConvive, selectedConviveLetter, recipesFilteredByConvive)
             FilterMode.INGREDIENT -> processRecipesByIngredientAlphabetical(recipes, sortAscending, selectedIngredient, selectedIngredientLetter, recipesFilteredByIngredient)
         }
         RecipeListUiState(
@@ -125,7 +133,10 @@ class RecipeListViewModel @Inject constructor(
             availableConvives = getAvailableConvives(recipes),
             selectedIngredient = selectedIngredient,
             availableIngredients = availableIngredients,
-            selectedIngredientLetter = selectedIngredientLetter
+            selectedIngredientLetter = selectedIngredientLetter,
+            selectedConvive = selectedConvive,
+            availableConvivesFromExecutions = availableConvivesFromExecutions,
+            selectedConviveLetter = selectedConviveLetter
         )
     }.stateIn(
         scope = viewModelScope,
@@ -136,6 +147,7 @@ class RecipeListViewModel @Inject constructor(
     init {
         loadRecipes()
         loadAvailableIngredients()
+        loadAvailableConvivesFromExecutions()
         loadExecutionStatus()
     }
     
@@ -172,6 +184,14 @@ class RecipeListViewModel @Inject constructor(
         }
     }
     
+    private fun loadAvailableConvivesFromExecutions() {
+        viewModelScope.launch {
+            repository.getAllUniqueConvivesFromExecutions().collect { convives ->
+                _availableConvivesFromExecutions.value = convives
+            }
+        }
+    }
+    
     private fun loadExecutionStatus() {
         viewModelScope.launch {
             repository.getRecipesWithExecutionStatus().collect { executionStatus ->
@@ -197,18 +217,21 @@ class RecipeListViewModel @Inject constructor(
                 _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedIngredient.value = null
+                _selectedConvive.value = null
             }
             FilterMode.DATE -> {
                 _selectedLetter.value = null
                 _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedIngredient.value = null
+                _selectedConvive.value = null
             }
             FilterMode.EXECUTION -> {
                 _selectedLetter.value = null
                 _selectedDatePeriod.value = DatePeriod.ALL
                 _selectedConvivesPeriod.value = ConvivesPeriod.ALL
                 _selectedIngredient.value = null
+                _selectedConvive.value = null
             }
             FilterMode.CONVIVES -> {
                 _selectedLetter.value = null
@@ -216,6 +239,8 @@ class RecipeListViewModel @Inject constructor(
                 _selectedExecutionPeriod.value = ExecutionPeriod.ALL
                 _selectedConvives.value = null
                 _selectedIngredient.value = null
+                _selectedConvive.value = null
+                _selectedConviveLetter.value = null
             }
             FilterMode.INGREDIENT -> {
                 _selectedDatePeriod.value = DatePeriod.ALL
@@ -224,6 +249,7 @@ class RecipeListViewModel @Inject constructor(
                 _selectedConvives.value = null
                 _selectedIngredient.value = null
                 _selectedIngredientLetter.value = null
+                _selectedConvive.value = null
             }
         }
     }
@@ -259,6 +285,24 @@ class RecipeListViewModel @Inject constructor(
             }
         } else {
             _recipesFilteredByIngredient.value = emptyList()
+        }
+    }
+    
+    fun filterByConviveLetter(letter: String?) {
+        _selectedConviveLetter.value = letter
+    }
+    
+    fun filterByConvive(convive: String?) {
+        _selectedConvive.value = convive
+        if (convive != null) {
+            // Load recipes for this convive using the proper repository method
+            viewModelScope.launch {
+                repository.getRecipesByConvive(convive).collect { recipes ->
+                    _recipesFilteredByConvive.value = recipes
+                }
+            }
+        } else {
+            _recipesFilteredByConvive.value = emptyList()
         }
     }
     
@@ -588,36 +632,67 @@ class RecipeListViewModel @Inject constructor(
         }
     }
     
-    private fun processRecipesByConvivesAlphabetical(
+    private fun processRecipesByConviveAlphabetical(
         recipes: List<RecipeListItem>,
         sortAscending: Boolean,
-        selectedConvives: Int?
+        selectedConvive: String?,
+        selectedConviveLetter: String?,
+        recipesFilteredByConvive: List<RecipeListItem>
     ): List<RecipeSection> {
-        val filteredRecipes = if (selectedConvives != null) {
-            recipes.filter { recipe ->
-                recipe.portions == selectedConvives
+        // If a convive is selected, show recipes where that convive participated
+        if (selectedConvive != null) {
+            // Use the filtered recipes passed as parameter
+            val filteredRecipes = recipesFilteredByConvive
+            
+            val sortedRecipes = if (sortAscending) {
+                filteredRecipes.sortedBy { it.nom }
+            } else {
+                filteredRecipes.sortedByDescending { it.nom }
+            }
+            
+            return if (sortedRecipes.isNotEmpty()) {
+                listOf(
+                    RecipeSection(
+                        letter = "Recettes avec:\n\"$selectedConvive\"",
+                        recipes = sortedRecipes,
+                        isIngredientSection = false,
+                        ingredients = emptyList()
+                    )
+                )
+            } else {
+                emptyList() // Return empty list to trigger "Aucune recette trouvée"
+            }
+        }
+        
+        // If no convive is selected, show convives grouped alphabetically by first letter
+        val convives = _availableConvivesFromExecutions.value
+        
+        // Filter convives by selected letter if any
+        val filteredConvives = if (selectedConviveLetter != null) {
+            convives.filter { convive ->
+                convive.firstOrNull()?.uppercase() == selectedConviveLetter.uppercase()
             }
         } else {
-            recipes
+            convives
         }
         
-        val sortedRecipes = if (sortAscending) {
-            filteredRecipes.sortedBy { it.nom }
+        val sortedConvives = if (sortAscending) {
+            filteredConvives.sortedBy { it }
         } else {
-            filteredRecipes.sortedByDescending { it.nom }
+            filteredConvives.sortedByDescending { it }
         }
         
-        return sortedRecipes
-            .groupBy { recipe ->
-                recipe.nom.firstOrNull()?.uppercase() ?: "#"
+        return sortedConvives
+            .groupBy { convive ->
+                convive.firstOrNull()?.uppercase() ?: "#"
             }
             .toSortedMap(if (sortAscending) compareBy { it } else compareByDescending { it })
-            .map { (letter, recipesList) ->
+            .map { (letter, convivesList) ->
                 RecipeSection(
                     letter = letter,
-                    recipes = recipesList,
-                    isIngredientSection = false,
-                    ingredients = emptyList()
+                    recipes = emptyList(),
+                    isIngredientSection = true, // Reuse this flag to indicate it's showing convives, not recipes
+                    ingredients = convivesList // Reuse this field to store convive names
                 )
             }
     }
@@ -710,5 +785,8 @@ data class RecipeListUiState(
     val availableConvives: List<Int> = emptyList(),
     val selectedIngredient: String? = null,
     val availableIngredients: List<String> = emptyList(),
-    val selectedIngredientLetter: String? = null
+    val selectedIngredientLetter: String? = null,
+    val selectedConvive: String? = null,
+    val availableConvivesFromExecutions: List<String> = emptyList(),
+    val selectedConviveLetter: String? = null
 )

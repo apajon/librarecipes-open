@@ -517,4 +517,70 @@ class RecipeRepository @Inject constructor(
             }
         }
     }
+    
+    /**
+     * Get all unique convives from executions.
+     * @return Flow of unique convive names from executions
+     */
+    fun getAllUniqueConvivesFromExecutions(): Flow<List<String>> {
+        return flow {
+            try {
+                val allFeedback = database.feedbackExecutionDao().getAllFeedback().first()
+                val conviveIds = allFeedback.map { it.conviveId }.distinct()
+                val conviveNames = mutableListOf<String>()
+                
+                for (conviveId in conviveIds) {
+                    val convive = database.conviveDao().getConvive(conviveId)
+                    convive?.let { conviveNames.add(it.nom) }
+                }
+                
+                emit(conviveNames.distinct().sorted())
+            } catch (e: Exception) {
+                android.util.Log.e("RecipeRepository", "Error getting unique convives from executions", e)
+                emit(emptyList())
+            }
+        }
+    }
+    
+    /**
+     * Get recipes where a specific convive participated in executions.
+     * @param conviveName Name of the convive to search for
+     * @return Flow of recipes where the convive participated
+     */
+    fun getRecipesByConvive(conviveName: String): Flow<List<RecipeListItem>> {
+        return flow {
+            try {
+                // Find the convive by name
+                val convive = database.conviveDao().getConviveByName(conviveName)
+                if (convive == null) {
+                    emit(emptyList())
+                    return@flow
+                }
+                
+                // Get all feedback for this convive
+                val allFeedback = database.feedbackExecutionDao().getAllFeedback().first()
+                val conviveFeedback = allFeedback.filter { it.conviveId == convive.id }
+                
+                // Get execution IDs where this convive participated
+                val executionIds = conviveFeedback.map { it.executionId }.distinct()
+                
+                // Get recipe IDs from these executions
+                val recipeIds = mutableSetOf<String>()
+                for (executionId in executionIds) {
+                    val execution = database.executionDao().getExecution(executionId)
+                    execution?.let { recipeIds.add(it.recetteId) }
+                }
+                
+                // Get the actual recipes
+                val allRecipes = database.recipeDao().getAllRecipes().first()
+                val filteredRecipes = allRecipes.filter { recipe -> recipe.id in recipeIds }
+                val recipeListItems = filteredRecipes.map { EntityMapper.recipeEntityToListItem(it) }
+                
+                emit(recipeListItems)
+            } catch (e: Exception) {
+                android.util.Log.e("RecipeRepository", "Error getting recipes by convive", e)
+                emit(emptyList())
+            }
+        }
+    }
 }

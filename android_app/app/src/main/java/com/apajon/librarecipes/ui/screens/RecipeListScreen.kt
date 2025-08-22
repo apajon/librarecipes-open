@@ -184,30 +184,55 @@ fun RecipeListScreen(
                     }
                 }
                 FilterMode.CONVIVES -> {
-                    // Convives filter buttons (like alphabetical)
-                    if (uiState.availableConvives.isNotEmpty()) {
+                    // Show convive letter filter when no specific convive is selected
+                    if (uiState.selectedConvive == null && uiState.availableConvivesFromExecutions.isNotEmpty()) {
+                        // Get available convive letters
+                        val availableConviveLetters = uiState.availableConvivesFromExecutions
+                            .mapNotNull { it.firstOrNull()?.uppercase() }
+                            .distinct()
+                            .sorted()
+                        
+                        if (availableConviveLetters.isNotEmpty()) {
+                            LazyRow(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // "All" button
+                                item {
+                                    FilterChip(
+                                        onClick = { viewModel.filterByConviveLetter(null) },
+                                        label = { Text("Tout") },
+                                        selected = uiState.selectedConviveLetter == null,
+                                        modifier = Modifier.height(40.dp)
+                                    )
+                                }
+                                
+                                // Letter buttons
+                                items(availableConviveLetters) { letter ->
+                                    FilterChip(
+                                        onClick = { viewModel.filterByConviveLetter(letter) },
+                                        label = { Text(letter) },
+                                        selected = uiState.selectedConviveLetter == letter,
+                                        modifier = Modifier.height(40.dp)
+                                    )
+                                }
+                            }
+                        }
+                    } else if (uiState.selectedConvive != null) {
+                        // Show "Back to convives" button when convive is selected
                         LazyRow(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // "All" button
                             item {
                                 FilterChip(
-                                    onClick = { viewModel.filterByConvives(null) },
-                                    label = { Text("Tous") },
-                                    selected = uiState.selectedConvives == null,
-                                    modifier = Modifier.height(40.dp)
-                                )
-                            }
-                            
-                            // Convives buttons
-                            items(uiState.availableConvives) { convives ->
-                                FilterChip(
-                                    onClick = { viewModel.filterByConvives(convives) },
-                                    label = { Text("$convives") },
-                                    selected = uiState.selectedConvives == convives,
+                                    onClick = { viewModel.filterByConvive(null) },
+                                    label = { Text("← Retour aux convives") },
+                                    selected = false,
                                     modifier = Modifier.height(40.dp)
                                 )
                             }
@@ -389,25 +414,25 @@ fun RecipeListScreen(
                                     }
                                 }
                                 FilterMode.CONVIVES -> {
-                                    if (uiState.selectedConvives != null) {
+                                    if (uiState.selectedConvive != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour ${uiState.selectedConvives} convive${if (uiState.selectedConvives!! > 1) "s" else ""}",
+                                            text = "Aucune recette trouvée pour le convive \"${uiState.selectedConvive}\"",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
-                                        Button(onClick = { viewModel.filterByConvives(null) }) {
-                                            Text("Voir toutes les recettes")
+                                        Button(onClick = { viewModel.filterByConvive(null) }) {
+                                            Text("Retour aux convives")
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucune recette trouvée",
+                                            text = "Aucun convive trouvé",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez votre première recette !",
+                                            text = "Aucune exécution de recette avec des convives !",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -486,7 +511,11 @@ fun RecipeListScreen(
                                             )
                                             Text(
                                                 text = if (section.isIngredientSection) {
-                                                    "${section.ingredients.size} ingrédient${if (section.ingredients.size > 1) "s" else ""}"
+                                                    when (uiState.filterMode) {
+                                                        FilterMode.INGREDIENT -> "${section.ingredients.size} ingrédient${if (section.ingredients.size > 1) "s" else ""}"
+                                                        FilterMode.CONVIVES -> "${section.ingredients.size} convive${if (section.ingredients.size > 1) "s" else ""}"
+                                                        else -> "${section.ingredients.size} élément${if (section.ingredients.size > 1) "s" else ""}"
+                                                    }
                                                 } else {
                                                     "${section.recipes.size} recette${if (section.recipes.size > 1) "s" else ""}"
                                                 },
@@ -503,17 +532,25 @@ fun RecipeListScreen(
                                     }
                                 }
                                 
-                                // Show ingredients for ingredient sections
+                                // Show ingredients/convives for ingredient/convive sections
                                 if (section.isIngredientSection) {
                                     items(
                                         items = section.ingredients,
-                                        key = { ingredient -> "ingredient_$ingredient" }
-                                    ) { ingredient ->
+                                        key = { item -> when (uiState.filterMode) {
+                                            FilterMode.INGREDIENT -> "ingredient_$item"
+                                            FilterMode.CONVIVES -> "convive_$item"
+                                            else -> "item_$item"
+                                        }}
+                                    ) { item ->
                                         Card(
                                             modifier = Modifier
                                                 .fillMaxWidth()
                                                 .clickable { 
-                                                    viewModel.filterByIngredient(ingredient)
+                                                    when (uiState.filterMode) {
+                                                        FilterMode.INGREDIENT -> viewModel.filterByIngredient(item)
+                                                        FilterMode.CONVIVES -> viewModel.filterByConvive(item)
+                                                        else -> {}
+                                                    }
                                                 },
                                             colors = CardDefaults.cardColors(
                                                 containerColor = MaterialTheme.colorScheme.surface
@@ -532,7 +569,7 @@ fun RecipeListScreen(
                                                 )
                                                 Spacer(modifier = Modifier.width(12.dp))
                                                 Text(
-                                                    text = ingredient,
+                                                    text = item,
                                                     style = MaterialTheme.typography.bodyLarge,
                                                     fontWeight = FontWeight.Medium
                                                 )
