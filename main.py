@@ -25,7 +25,7 @@ if __name__ == "__main__":
         try:
             import streamlit.web.bootstrap as st_bootstrap
 
-            st_bootstrap.run("app/Home.py", "", [], flag_options={})
+            st_bootstrap.run("streamlit_app/Home.py", "", [], flag_options={})
         except Exception:
             # Fallback: exécuter la Kivy app en local si Streamlit indisponible
             from mobile_app.main import LibraRecipesApp
