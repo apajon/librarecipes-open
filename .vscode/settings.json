@@ -33,4 +33,5 @@
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "src"
     },
+    "java.configuration.updateBuildConfiguration": "interactive",
 }

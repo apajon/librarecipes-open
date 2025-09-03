@@ -65,7 +65,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Gérez vos recettes de cuisine facilement",
+                            text = "Le carnet de cuisine que vous ne perdrez jamais.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Center
@@ -73,7 +73,7 @@ fun HomeScreen(
                     }
                 }
             }
-            
+
             item {
                 Text(
                     text = "Actions principales",
@@ -82,7 +82,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            
+
             item {
                 ActionCard(
                     title = "Voir mes recettes",
@@ -91,7 +91,7 @@ fun HomeScreen(
                     onClick = { navController.navigate("recipes") }
                 )
             }
-            
+
             item {
                 ActionCard(
                     title = "Ajouter une recette",
@@ -100,7 +100,7 @@ fun HomeScreen(
                     onClick = { navController.navigate("create_recipe") }
                 )
             }
-            
+
             item {
                 ActionCard(
                     title = "Rechercher",

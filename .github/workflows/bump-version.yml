@@ -14,15 +14,15 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install bump2version
+      - name: Install Poetry and bump2version
         run: |
-          pip install bump2version
+          pip install poetry bump2version
       - name: Bump patch
         run: |
-          poetry run bump2version patch
+          bump2version patch
       - name: Push tag and commit
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

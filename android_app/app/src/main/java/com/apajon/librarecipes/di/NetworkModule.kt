@@ -17,6 +17,7 @@ object NetworkModule {
     
     private const val BASE_URL = "http://10.0.2.2:8000/" // For Android emulator
     // Use "http://localhost:8000/" for real device connected to same network
+    // Make sure to start the backend server with: uvicorn backend.main:app --host 0.0.0.0 --port 8000
     
     @Provides
     @Singleton

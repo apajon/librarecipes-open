@@ -9,6 +9,7 @@ import com.apajon.librarecipes.ui.screens.HomeScreen
 import com.apajon.librarecipes.ui.screens.RecipeListScreen
 import com.apajon.librarecipes.ui.screens.RecipeDetailScreen
 import com.apajon.librarecipes.ui.screens.CreateRecipeScreen
+import com.apajon.librarecipes.ui.screens.EditRecipeScreen
 import com.apajon.librarecipes.ui.screens.SearchScreen
 
 @Composable
@@ -34,6 +35,28 @@ fun LibraRecipesNavigation(
         }
         composable("create_recipe") {
             CreateRecipeScreen(navController = navController)
+        }
+        composable("edit_recipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: ""
+            EditRecipeScreen(
+                recipeId = recipeId,
+                navController = navController
+            )
+        }
+        composable("edit_recipe/{recipeId}/section/{section}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: ""
+            val section = backStackEntry.arguments?.getString("section") ?: ""
+            EditRecipeScreen(
+                recipeId = recipeId,
+                editSection = section,
+                navController = navController
+            )
+        }
+        composable("create_new_recipe") {
+            EditRecipeScreen(
+                recipeId = null,
+                navController = navController
+            )
         }
         composable("search") {
             SearchScreen(navController = navController)
