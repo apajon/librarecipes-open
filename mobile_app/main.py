@@ -22,6 +22,7 @@ from screens.home_screen import HomeScreen  # noqa: E402
 from screens.recipe_detail_screen import RecipeDetailScreen  # noqa: E402
 from screens.recipe_list_screen import RecipeListScreen  # noqa: E402
 from screens.search_screen import SearchScreen  # noqa: E402
+from screens.que_cuisiner_screen import QueCuisinerScreen  # noqa: E402
 
 # Import database layer based on platform
 if platform == "android":
@@ -99,6 +100,7 @@ class LibraRecipesApp(MDApp):
         sm.add_widget(AddRecipeScreen(name="add_recipe"))
         sm.add_widget(RecipeDetailScreen(name="recipe_detail"))
         sm.add_widget(SearchScreen(name="search"))
+        sm.add_widget(QueCuisinerScreen(name="que_cuisiner"))
 
         return sm
 

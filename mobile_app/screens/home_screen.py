@@ -159,7 +159,7 @@ class HomeScreen(MDScreen):
 
     def create_actions_card(self):
         """Create quick actions card"""
-        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(200))
+        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(240))
 
         layout = MDBoxLayout(orientation="vertical", spacing=dp(15))
 
@@ -206,9 +206,20 @@ class HomeScreen(MDScreen):
             on_release=lambda x: self.navigate_to_screen("search"),
         )
 
+        # Que cuisiner button  
+        que_cuisiner_btn = MDButton(
+            MDButtonIcon(icon="dice-6"),
+            MDButtonText(text="Que cuisiner ?"),
+            style="filled",
+            size_hint_y=None,
+            height=dp(40),
+            on_release=lambda x: self.navigate_to_screen("que_cuisiner"),
+        )
+
         actions_layout.add_widget(add_btn)
         actions_layout.add_widget(browse_btn)
         actions_layout.add_widget(search_btn)
+        actions_layout.add_widget(que_cuisiner_btn)
 
         layout.add_widget(title)
         layout.add_widget(actions_layout)
