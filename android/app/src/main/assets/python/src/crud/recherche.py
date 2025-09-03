@@ -53,3 +53,7 @@ def rechercher_recettes(
         joinedload(Recette.executions),
         joinedload(Recette.categories),
     ).all()
+
+
+# Alias pour les tests
+search_recipes_by_ingredients = rechercher_recettes

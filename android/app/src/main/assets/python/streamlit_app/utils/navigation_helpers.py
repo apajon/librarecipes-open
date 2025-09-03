@@ -39,3 +39,30 @@ def clear_selected_recipe() -> None:
 def get_selected_recipe_id() -> str | None:
     """Récupère l'ID de la recette sélectionnée"""
     return st.session_state.get(SESSION_KEYS["selected_recette_id"])
+
+
+def setup_page_config():
+    """Configure la page pour l'utilisation mobile/Android"""
+    st.set_page_config(page_title="LibraRecipes", page_icon="📚", layout="wide", initial_sidebar_state="collapsed")
+
+
+def get_mobile_navigation():
+    """Retourne la configuration de navigation mobile"""
+    return {
+        "home": {"title": "Accueil", "icon": "🏠"},
+        "add": {"title": "Ajouter", "icon": "➕"},
+        "search": {"title": "Rechercher", "icon": "🔍"},
+        "cook": {"title": "Que cuisiner", "icon": "👨‍🍳"},
+        "index": {"title": "Index A-Z", "icon": "📖"},
+    }
+
+
+def setup_mobile_sidebar():
+    """Configure la sidebar pour mobile Android"""
+    with st.sidebar:
+        st.title("📚 LibraRecipes")
+        nav_config = get_mobile_navigation()
+
+        for key, config in nav_config.items():
+            if st.button(f"{config['icon']} {config['title']}", key=f"nav_{key}"):
+                st.session_state.current_page = key

@@ -311,3 +311,56 @@ def mobile_container():
 def mobile_expander(label: str, expanded: bool = False):
     """Expander optimisé mobile"""
     return st.expander(label, expanded=expanded)
+
+
+def get_mobile_css() -> str:
+    """Retourne le CSS optimisé pour mobile"""
+    return """
+    <style>
+    /* Styles mobiles LibraRecipes */
+    @media (max-width: 768px) {
+        .stButton > button {
+            width: 100%;
+            font-size: 16px;
+            padding: 12px;
+            margin: 8px 0;
+        }
+
+        .stTextInput > div > input {
+            font-size: 16px;
+            padding: 12px;
+        }
+
+        .stSelectbox > div > div {
+            font-size: 16px;
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+        }
+
+        .stTabs [data-baseweb="tab"] {
+            font-size: 14px;
+            padding: 8px 12px;
+        }
+    }
+
+    /* Optimisations touch */
+    .element-container {
+        touch-action: manipulation;
+    }
+
+    /* Viewport responsive */
+    .main .block-container {
+        padding-top: 1rem;
+        padding-bottom: 1rem;
+        max-width: 100%;
+    }
+    </style>
+    """
+
+
+def apply_mobile_optimizations():
+    """Applique les optimisations mobiles à la page"""
+    mobile_css = get_mobile_css()
+    st.markdown(mobile_css, unsafe_allow_html=True)

@@ -104,3 +104,22 @@ def set_selected_recette(recette_id: str) -> None:
     """Définit la recette sélectionnée dans session state et query params"""
     st.session_state.selected_recette_id = str(recette_id)
     st.query_params.recette_id = str(recette_id)
+
+
+class SessionManager:
+    """Gestionnaire de session pour les recettes"""
+
+    @staticmethod
+    def get_current_recipe_id() -> str:
+        """Retourne l'ID de la recette courante"""
+        return st.session_state.get("selected_recette_id", "")
+
+    @staticmethod
+    def set_current_recipe_id(recipe_id: str) -> None:
+        """Définit l'ID de la recette courante"""
+        st.session_state["selected_recette_id"] = recipe_id
+
+    @staticmethod
+    def init_session() -> None:
+        """Initialise la session"""
+        init_recette_session_state()
