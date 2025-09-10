@@ -11,6 +11,7 @@ import com.apajon.librarecipes.ui.screens.RecipeDetailScreen
 import com.apajon.librarecipes.ui.screens.CreateRecipeScreen
 import com.apajon.librarecipes.ui.screens.EditRecipeScreen
 import com.apajon.librarecipes.ui.screens.SearchScreen
+import com.apajon.librarecipes.ui.screens.QueChoisirScreen
 
 @Composable
 fun LibraRecipesNavigation(
@@ -60,6 +61,9 @@ fun LibraRecipesNavigation(
         }
         composable("search") {
             SearchScreen(navController = navController)
+        }
+        composable("que_choisir") {
+            QueChoisirScreen(navController = navController)
         }
     }
 }
