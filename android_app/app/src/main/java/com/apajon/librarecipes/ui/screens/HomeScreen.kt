@@ -109,6 +109,15 @@ fun HomeScreen(
                     onClick = { navController.navigate("search") }
                 )
             }
+
+            item {
+                ActionCard(
+                    title = "Que choisir ?",
+                    description = "Suggestions de recettes et inspiration culinaire",
+                    icon = Icons.Default.Star,
+                    onClick = { navController.navigate("que_choisir") }
+                )
+            }
         }
     }
 }
