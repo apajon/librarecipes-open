@@ -12,6 +12,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.gridlayout import MDGridLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.screen import MDScreen
+from kivymd.uix.scrollview import MDScrollView
 
 from src.crud.metadata import get_all_categories
 from src.crud.recettes import list_recettes
@@ -34,7 +35,8 @@ class HomeScreen(MDScreen):
         app_bar = MDTopAppBar(MDTopAppBarTitle(text="LibraRecipes"))
         main_layout.add_widget(app_bar)
 
-        # Content area
+        # Scrollable content area
+        scroll_view = MDScrollView()
         content = MDBoxLayout(orientation="vertical", spacing=dp(20), adaptive_height=True)
 
         # Welcome section
@@ -49,7 +51,8 @@ class HomeScreen(MDScreen):
         actions_card = self.create_actions_card()
         content.add_widget(actions_card)
 
-        main_layout.add_widget(content)
+        scroll_view.add_widget(content)
+        main_layout.add_widget(scroll_view)
         self.add_widget(main_layout)
 
     def create_welcome_card(self):
@@ -159,7 +162,7 @@ class HomeScreen(MDScreen):
 
     def create_actions_card(self):
         """Create quick actions card"""
-        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(240))
+        card = MDCard(padding=dp(20), spacing=dp(15), elevation=2, radius=[dp(10)], size_hint_y=None, height=dp(280))
 
         layout = MDBoxLayout(orientation="vertical", spacing=dp(15))
 
