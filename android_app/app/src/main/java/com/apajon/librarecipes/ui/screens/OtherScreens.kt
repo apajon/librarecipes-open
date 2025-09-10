@@ -19,6 +19,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -1432,4 +1434,323 @@ fun EtapeDisplayItem(etape: com.apajon.librarecipes.data.model.EtapeDetail) {
     }
     
     Spacer(modifier = Modifier.height(8.dp))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun QueChoisirScreen(
+    navController: NavHostController,
+    viewModel: com.apajon.librarecipes.viewmodel.SearchViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+    var selectedFilter by remember { mutableStateOf("suggestions") }
+    
+    // Load random recipes when screen first loads
+    LaunchedEffect(Unit) {
+        viewModel.loadRandomRecipes()
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Que choisir ?") },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            // Welcome card
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Inspiration culinaire",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            text = "Découvrez de nouvelles recettes ou trouvez l'inspiration pour votre prochain repas !",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
+            // Filter tabs
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    items(
+                        listOf(
+                            "suggestions" to "Suggestions",
+                            "popular" to "Populaires", 
+                            "random" to "Au hasard"
+                        )
+                    ) { (key, label) ->
+                        FilterChip(
+                            onClick = { 
+                                selectedFilter = key
+                                when (key) {
+                                    "suggestions" -> viewModel.loadRandomRecipes()
+                                    "popular" -> viewModel.loadAllRecipes()
+                                    "random" -> viewModel.loadRandomRecipes()
+                                }
+                            },
+                            label = { Text(label) },
+                            selected = selectedFilter == key
+                        )
+                    }
+                }
+            }
+
+            // Action buttons
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Button(
+                        onClick = { viewModel.loadRandomRecipes() },
+                        modifier = Modifier.weight(1f),
+                        enabled = !uiState.isLoading
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Renouveler")
+                    }
+                    
+                    OutlinedButton(
+                        onClick = { navController.navigate("search") },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Search, contentDescription = null)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Rechercher")
+                    }
+                }
+            }
+
+            // Content section
+            when (selectedFilter) {
+                "suggestions" -> {
+                    item {
+                        Text(
+                            text = "Suggestions pour vous",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+                "popular" -> {
+                    item {
+                        Text(
+                            text = "Recettes populaires",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+                "random" -> {
+                    item {
+                        Text(
+                            text = "Recettes au hasard",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+
+            // Loading indicator
+            if (uiState.isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
+
+            // Error message
+            uiState.errorMessage?.let { error ->
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Empty state
+            if (!uiState.isLoading && uiState.errorMessage == null && uiState.searchResults.isEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Default.FavoriteBorder,
+                                contentDescription = null,
+                                modifier = Modifier.size(48.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Aucune recette disponible",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Ajoutez quelques recettes pour recevoir des suggestions personnalisées !",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = { navController.navigate("create_recipe") }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Ajouter une recette")
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Recipe results list
+            items(uiState.searchResults.size) { index ->
+                val recipe = uiState.searchResults[index]
+                com.apajon.librarecipes.ui.components.RecipeListItem(
+                    recipe = recipe,
+                    onClick = {
+                        navController.navigate("recipe/${recipe.id}")
+                    },
+                    onEdit = {
+                        navController.navigate("edit_recipe/${recipe.id}")
+                    },
+                    onDelete = {
+                        // For this screen, we don't allow deleting
+                        // User can go to recipe detail to delete if needed
+                    }
+                )
+            }
+
+            // Tips section (if no recipes to show)
+            if (!uiState.isLoading && uiState.errorMessage == null && uiState.searchResults.isNotEmpty()) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.tertiaryContainer
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    Icons.Default.Info,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Conseil culinaire",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = when (selectedFilter) {
+                                    "suggestions" -> "Ces recettes sont sélectionnées en fonction de vos préférences et des recettes que vous avez récemment consultées."
+                                    "popular" -> "Les recettes populaires sont celles qui ont été les plus consultées et exécutées par les utilisateurs."
+                                    "random" -> "Laissez-vous surprendre ! Parfois les meilleures découvertes se font par hasard."
+                                    else -> "Explorez de nouvelles saveurs et techniques culinaires."
+                                },
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

@@ -201,4 +201,38 @@ class SearchViewModel @Inject constructor(
                 }
         }
     }
+    
+    /**
+     * Load random recipes for inspiration.
+     */
+    fun loadRandomRecipes() {
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            errorMessage = null,
+            hasSearched = true
+        )
+
+        viewModelScope.launch {
+            recipeRepository.getRecipes().collect { result ->
+                when (result) {
+                    is RecipeResult.Success -> {
+                        // Shuffle the recipes and take a random selection
+                        val shuffledRecipes = result.recipes.shuffled().take(10)
+                        _uiState.value = _uiState.value.copy(
+                            searchResults = shuffledRecipes,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                    is RecipeResult.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            searchResults = emptyList(),
+                            isLoading = false,
+                            errorMessage = result.message
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
