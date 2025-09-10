@@ -152,6 +152,7 @@ data class RecipeDetail(
     val etapes: List<EtapeDetail>,
     val categories: List<String>,
     val tags: List<String>,
+    val photos: List<PhotoDetail> = emptyList(),
     val source: SourceDetail? = null
 )
 
@@ -183,6 +184,16 @@ data class SourceDetail(
     val bookTitle: String? = null,
     val bookAuthors: String? = null,
     val bookPage: String? = null
+)
+
+/**
+ * Photo detail model for UI display.
+ */
+data class PhotoDetail(
+    val id: String,
+    val chemin: String,
+    val categorie: String? = null,
+    val ordre: Int = 0
 )
 
 /**

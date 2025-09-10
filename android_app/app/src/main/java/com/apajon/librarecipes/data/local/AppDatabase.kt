@@ -39,6 +39,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun categorieDao(): CategorieDao
     abstract fun tagDao(): TagDao
     abstract fun sourceDao(): SourceDao
+    abstract fun photoDao(): PhotoDao
     abstract fun executionDao(): ExecutionDao
     abstract fun conviveDao(): ConviveDao
     abstract fun feedbackExecutionDao(): FeedbackExecutionDao

@@ -583,4 +583,92 @@ class RecipeRepository @Inject constructor(
             }
         }
     }
+    
+    // Photo management methods
+    
+    /**
+     * Get photos for a recipe.
+     * @param recipeId ID of the recipe
+     * @return Flow of photos
+     */
+    fun getPhotosForRecipe(recipeId: String): Flow<List<com.apajon.librarecipes.data.local.entities.PhotoEntity>> {
+        return database.photoDao().getPhotosForRecipeFlow(recipeId)
+    }
+    
+    /**
+     * Add a photo to a recipe.
+     * @param recipeId ID of the recipe
+     * @param photoPath Path to the photo file
+     * @param category Photo category (préparation, ingrédient, cuisson, final)
+     * @return Result with success or error
+     */
+    suspend fun addPhoto(recipeId: String, photoPath: String, category: String?): Result<String> {
+        return try {
+            val existingPhotos = database.photoDao().getPhotosForRecipe(recipeId)
+            val nextOrder = (existingPhotos.maxOfOrNull { it.ordre } ?: 0) + 1
+            
+            val photoEntity = com.apajon.librarecipes.data.local.entities.PhotoEntity(
+                id = UUID.randomUUID().toString(),
+                recetteId = recipeId,
+                chemin = photoPath,
+                categorie = category,
+                ordre = nextOrder
+            )
+            
+            database.photoDao().insertPhoto(photoEntity)
+            Result.success(photoEntity.id)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error adding photo", e)
+            Result.failure(Exception("Erreur lors de l'ajout de la photo"))
+        }
+    }
+    
+    /**
+     * Update photo category.
+     * @param photoId ID of the photo
+     * @param category New category
+     * @return Result with success or error
+     */
+    suspend fun updatePhotoCategory(photoId: String, category: String?): Result<Unit> {
+        return try {
+            database.photoDao().updatePhotoCategory(photoId, category)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error updating photo category", e)
+            Result.failure(Exception("Erreur lors de la mise à jour de la catégorie"))
+        }
+    }
+    
+    /**
+     * Reorder photos.
+     * @param recipeId ID of the recipe
+     * @param photoOrders Map of photo ID to new order
+     * @return Result with success or error
+     */
+    suspend fun reorderPhotos(recipeId: String, photoOrders: Map<String, Int>): Result<Unit> {
+        return try {
+            photoOrders.forEach { (photoId, order) ->
+                database.photoDao().updatePhotoOrder(photoId, order)
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error reordering photos", e)
+            Result.failure(Exception("Erreur lors du réordonnancement des photos"))
+        }
+    }
+    
+    /**
+     * Delete a photo.
+     * @param photoId ID of the photo to delete
+     * @return Result with success or error
+     */
+    suspend fun deletePhoto(photoId: String): Result<Unit> {
+        return try {
+            database.photoDao().deletePhotoById(photoId)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error deleting photo", e)
+            Result.failure(Exception("Erreur lors de la suppression de la photo"))
+        }
+    }
 }
