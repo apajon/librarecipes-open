@@ -2,7 +2,6 @@ import streamlit as st
 
 from src.crud.recettes import delete_recette, get_recette_by_id
 from src.db import get_db_session
-from streamlit_app.pages_functions.photos_recette import photo_viewer
 from streamlit_app.utils.navigation import (
     navigate_to_photos_manage,
     navigate_to_recipe_modify,
@@ -11,7 +10,16 @@ from streamlit_app.utils.navigation import (
 
 # Import des utilitaires
 from streamlit_app.utils.session_manager import get_recette_id_from_state
-from streamlit_app.utils.ui_components import create_recipe_navigation_buttons, show_recipe_metrics
+from streamlit_app.utils.ui_components import create_recipe_navigation_buttons
+from streamlit_app.utils.card_components import (
+    create_photos_card,
+    create_categories_card,
+    create_ingredients_card,
+    create_steps_card,
+    create_metrics_card,
+    create_tags_card,
+    create_source_card,
+)
 
 
 def card_recette_page():
@@ -43,97 +51,32 @@ def _get_recipe_or_show_error(recette_id):
 
 
 def _render_recipe_details(recette):
-    """Affiche les détails de la recette"""
+    """Affiche les détails de la recette avec un layout en cartes"""
+    # Main title (not in a card)
     st.title(recette.nom)
-
-    # Photos
-    st.subheader("📷 Photos")
-    photo_viewer(recette)
-
-    # Catégories
-    _show_categories(recette)
-
-    # Ingrédients
-    _show_ingredients(recette)
-
-    # Étapes
-    _show_etapes(recette)
-
-    # Métriques
-    show_recipe_metrics(recette)
-
-    # Tags
-    _show_tags(recette)
-
-    # Source
-    _show_source(recette)
-
-
-def _show_categories(recette):
-    """Affiche les catégories de la recette"""
-    st.markdown("### 🏷️ Catégories")
-    if recette.categories:
-        st.write(", ".join([c.nom for c in recette.categories]))
-    else:
-        st.write("Aucune catégorie")
+    
+    # Card 1: Photos (as requested - second card after title)
+    create_photos_card(recette)
+    
+    # Card 2: Categories 
+    create_categories_card(recette)
+    
+    # Card 3: Ingredients
+    create_ingredients_card(recette)
+    
+    # Card 4: Steps
+    create_steps_card(recette)
+    
+    # Card 5: Metrics/Timing
+    create_metrics_card(recette)
+    
+    # Card 6: Tags (collapsed by default)
+    create_tags_card(recette)
+    
+    # Card 7: Source (collapsed by default)  
+    create_source_card(recette)
 
 
-def _show_ingredients(recette):
-    """Affiche les ingrédients de la recette"""
-    st.markdown("### 🧂 Ingrédients")
-    for ing in recette.ingredients:
-        ligne = f"- {ing.nom} : {ing.quantite} {ing.unite or ''}"
-        if ing.indispensable:
-            ligne += " (🟢 indispensable)"
-        elif ing.alternatives:
-            ligne += f" (🔄 alternatives : {ing.alternatives})"
-        st.markdown(ligne)
-
-
-def _show_etapes(recette):
-    """Affiche les étapes de la recette"""
-    st.markdown("### 📝 Étapes")
-    for etape in recette.etapes:
-        st.markdown(f"**{etape.ordre}.** {etape.description}")
-
-
-def _show_tags(recette):
-    """Affiche les tags de la recette"""
-    if recette.tags:
-        st.markdown("### 🏷️ Tags")
-        st.write(", ".join([t.nom for t in recette.tags]))
-
-
-def _show_source(recette):
-    """Affiche la source de la recette"""
-    if recette.source:
-        st.markdown("### 📚 Source")
-        source = recette.source
-
-        if source.type == "homemade":
-            st.info("🏠 **Recette maison** - Création originale")
-
-        elif source.type == "url" and source.url:
-            st.markdown(f"🌐 **Source web :** {source.url}")
-
-        elif source.type == "book":
-            _show_book_source(source)
-
-
-def _show_book_source(source):
-    """Affiche les informations d'une source livre"""
-    livre_info = []
-    if source.book_title:
-        livre_info.append(f"📖 **{source.book_title}**")
-    if source.book_authors:
-        livre_info.append(f"✍️ {source.book_authors}")
-    if source.book_page:
-        livre_info.append(f"📄 Page {source.book_page}")
-
-    if livre_info:
-        st.markdown(" | ".join(livre_info))
-    else:
-        st.info("📚 **Source livre** - Informations incomplètes")
 
 
 def _render_recipe_actions(recette):
