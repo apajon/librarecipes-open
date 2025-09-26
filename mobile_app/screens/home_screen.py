@@ -17,26 +17,13 @@ from src.crud.metadata import get_all_categories
 from src.crud.recettes import list_recettes
 from src.db import get_db_session
 
-# Import FAB Manager
-try:
-    from components.fab_manager import FABManager
-except ImportError:
-    FABManager = None
-
 
 class HomeScreen(MDScreen):
     """Home screen with app branding and quick navigation"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.fab_manager = None
         self.build_screen()
-        self.setup_fabs()
-
-    def setup_fabs(self):
-        """Initialize floating action buttons"""
-        if FABManager:
-            self.fab_manager = FABManager(self, context="general")
 
     def build_screen(self):
         """Build the home screen layout"""
@@ -47,8 +34,8 @@ class HomeScreen(MDScreen):
         app_bar = MDTopAppBar(MDTopAppBarTitle(text="LibraRecipes"))
         main_layout.add_widget(app_bar)
 
-        # Content area with padding for FABs
-        content = MDBoxLayout(orientation="vertical", spacing=dp(20), adaptive_height=True, padding=(0, 0, 0, dp(140)))  # Bottom padding for FABs
+        # Content area
+        content = MDBoxLayout(orientation="vertical", spacing=dp(20), adaptive_height=True)
 
         # Welcome section
         welcome_card = self.create_welcome_card()

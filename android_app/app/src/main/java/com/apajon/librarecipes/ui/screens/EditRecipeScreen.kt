@@ -120,6 +120,22 @@ fun EditRecipeScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            // Camera FAB for adding photos to the recipe
+            FloatingActionButton(
+                onClick = { 
+                    // TODO: Implement camera functionality to add photos to current recipe
+                    // This would integrate with the existing photo management system
+                },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PhotoCamera,
+                    contentDescription = "Ajouter une photo à la recette"
+                )
+            }
         }
     ) { paddingValues ->
         if (isLoading) {
