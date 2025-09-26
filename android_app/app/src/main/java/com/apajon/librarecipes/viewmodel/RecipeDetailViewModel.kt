@@ -6,6 +6,7 @@ import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.ExecutionCreate
 import com.apajon.librarecipes.data.model.ExecutionWithDetails
+import com.apajon.librarecipes.data.model.PhotoDetail
 import com.apajon.librarecipes.data.model.RecipeDetail
 import com.apajon.librarecipes.data.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +31,12 @@ data class RecipeDetailUiState(
     val addExecutionSuccess: Boolean = false,
     val addExecutionError: String? = null,
     val availableConvives: List<ConviveEntity> = emptyList(),
-    val isLoadingConvives: Boolean = false
+    val isLoadingConvives: Boolean = false,
+    // Photo management state
+    val selectedPhotoIndex: Int = 0,
+    val isPhotoManagementVisible: Boolean = false,
+    val isAddingPhoto: Boolean = false,
+    val addPhotoError: String? = null
 )
 
 /**
@@ -246,5 +252,184 @@ class RecipeDetailViewModel @Inject constructor(
                     )
                 }
         }
+    }
+    
+    // Photo management methods
+    
+    /**
+     * Navigate to next photo in the gallery.
+     */
+    fun nextPhoto() {
+        val photos = _uiState.value.recipe?.photos
+        if (photos != null && photos.isNotEmpty()) {
+            val currentIndex = _uiState.value.selectedPhotoIndex
+            val nextIndex = if (currentIndex >= photos.size - 1) 0 else currentIndex + 1
+            _uiState.value = _uiState.value.copy(selectedPhotoIndex = nextIndex)
+        }
+    }
+    
+    /**
+     * Navigate to previous photo in the gallery.
+     */
+    fun previousPhoto() {
+        val photos = _uiState.value.recipe?.photos
+        if (photos != null && photos.isNotEmpty()) {
+            val currentIndex = _uiState.value.selectedPhotoIndex
+            val previousIndex = if (currentIndex <= 0) photos.size - 1 else currentIndex - 1
+            _uiState.value = _uiState.value.copy(selectedPhotoIndex = previousIndex)
+        }
+    }
+    
+    /**
+     * Select a specific photo by index.
+     */
+    fun selectPhoto(index: Int) {
+        val photos = _uiState.value.recipe?.photos
+        if (photos != null && index in 0 until photos.size) {
+            _uiState.value = _uiState.value.copy(selectedPhotoIndex = index)
+        }
+    }
+    
+    /**
+     * Toggle photo management panel visibility.
+     */
+    fun togglePhotoManagement() {
+        _uiState.value = _uiState.value.copy(
+            isPhotoManagementVisible = !_uiState.value.isPhotoManagementVisible
+        )
+    }
+    
+    /**
+     * Add a new photo to the recipe.
+     * @param recipeId ID of the recipe
+     * @param photoPath Path to the photo file
+     * @param category Photo category
+     */
+    fun addPhoto(recipeId: String, photoPath: String, category: String?) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isAddingPhoto = true, addPhotoError = null)
+            
+            recipeRepository.addPhoto(recipeId, photoPath, category)
+                .onSuccess {
+                    _uiState.value = _uiState.value.copy(isAddingPhoto = false)
+                    // Refresh recipe details to get updated photos
+                    loadRecipeDetails(recipeId)
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isAddingPhoto = false,
+                        addPhotoError = error.message ?: "Erreur lors de l'ajout de la photo"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Update photo category.
+     * @param photoId ID of the photo
+     * @param category New category
+     */
+    fun updatePhotoCategory(photoId: String, category: String?) {
+        viewModelScope.launch {
+            recipeRepository.updatePhotoCategory(photoId, category)
+                .onSuccess {
+                    // Refresh recipe details to get updated photos
+                    _uiState.value.recipe?.let { recipe ->
+                        loadRecipeDetails(recipe.id)
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        addPhotoError = error.message ?: "Erreur lors de la mise à jour de la catégorie"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Delete a photo.
+     * @param photoId ID of the photo to delete
+     */
+    fun deletePhoto(photoId: String) {
+        viewModelScope.launch {
+            recipeRepository.deletePhoto(photoId)
+                .onSuccess {
+                    // Refresh recipe details to get updated photos
+                    _uiState.value.recipe?.let { recipe ->
+                        loadRecipeDetails(recipe.id)
+                        // Reset photo index if needed
+                        val photos = _uiState.value.recipe?.photos
+                        if (photos != null && _uiState.value.selectedPhotoIndex >= photos.size) {
+                            _uiState.value = _uiState.value.copy(selectedPhotoIndex = 0)
+                        }
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        addPhotoError = error.message ?: "Erreur lors de la suppression de la photo"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Move photo up in order.
+     * @param photoId ID of the photo to move
+     */
+    fun movePhotoUp(photoId: String) {
+        val photos = _uiState.value.recipe?.photos ?: return
+        val currentIndex = photos.indexOfFirst { it.id == photoId }
+        if (currentIndex > 0) {
+            val reorderedPhotos = photos.toMutableList()
+            val photo = reorderedPhotos.removeAt(currentIndex)
+            reorderedPhotos.add(currentIndex - 1, photo)
+            reorderPhotos(reorderedPhotos)
+        }
+    }
+    
+    /**
+     * Move photo down in order.
+     * @param photoId ID of the photo to move
+     */
+    fun movePhotoDown(photoId: String) {
+        val photos = _uiState.value.recipe?.photos ?: return
+        val currentIndex = photos.indexOfFirst { it.id == photoId }
+        if (currentIndex < photos.size - 1) {
+            val reorderedPhotos = photos.toMutableList()
+            val photo = reorderedPhotos.removeAt(currentIndex)
+            reorderedPhotos.add(currentIndex + 1, photo)
+            reorderPhotos(reorderedPhotos)
+        }
+    }
+    
+    /**
+     * Reorder photos based on new list.
+     * @param reorderedPhotos New photo order
+     */
+    private fun reorderPhotos(reorderedPhotos: List<PhotoDetail>) {
+        val recipeId = _uiState.value.recipe?.id ?: return
+        val photoOrders = reorderedPhotos.mapIndexed { index, photo ->
+            photo.id to index + 1
+        }.toMap()
+        
+        viewModelScope.launch {
+            recipeRepository.reorderPhotos(recipeId, photoOrders)
+                .onSuccess {
+                    // Refresh recipe details to get updated order
+                    loadRecipeDetails(recipeId)
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        addPhotoError = error.message ?: "Erreur lors du réordonnancement des photos"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Clear photo error.
+     */
+    fun clearPhotoError() {
+        _uiState.value = _uiState.value.copy(addPhotoError = null)
     }
 }

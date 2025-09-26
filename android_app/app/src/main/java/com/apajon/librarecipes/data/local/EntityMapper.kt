@@ -131,6 +131,14 @@ object EntityMapper {
             },
             categories = recipeWithDetails.categories.map { it.nom },
             tags = recipeWithDetails.tags.map { it.nom },
+            photos = recipeWithDetails.photos.sortedBy { it.ordre }.map { photo ->
+                PhotoDetail(
+                    id = photo.id,
+                    chemin = photo.chemin,
+                    categorie = photo.categorie,
+                    ordre = photo.ordre
+                )
+            },
             source = recipeWithDetails.source?.let { source ->
                 SourceDetail(
                     type = source.type,

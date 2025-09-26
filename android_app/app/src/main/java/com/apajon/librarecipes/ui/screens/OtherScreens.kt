@@ -175,7 +175,20 @@ fun RecipeDetailScreen(
                         onAddExecution = { showAddExecutionDialog = true },
                         onExecutionClick = { execution ->
                             selectedExecution = execution
-                        }
+                        },
+                        // Photo management callbacks
+                        selectedPhotoIndex = uiState.selectedPhotoIndex,
+                        isPhotoManagementVisible = uiState.isPhotoManagementVisible,
+                        isAddingPhoto = uiState.isAddingPhoto,
+                        onPhotoSelected = viewModel::selectPhoto,
+                        onPreviousPhoto = viewModel::previousPhoto,
+                        onNextPhoto = viewModel::nextPhoto,
+                        onTogglePhotoManagement = viewModel::togglePhotoManagement,
+                        onAddPhoto = { path, category -> viewModel.addPhoto(recipeId, path, category) },
+                        onUpdatePhotoCategory = viewModel::updatePhotoCategory,
+                        onDeletePhoto = viewModel::deletePhoto,
+                        onMovePhotoUp = viewModel::movePhotoUp,
+                        onMovePhotoDown = viewModel::movePhotoDown
                     )
                 }
             }
@@ -937,7 +950,20 @@ fun RecipeDetailContent(
     onDelete: () -> Unit = {},
     onEditSection: (String) -> Unit = {},
     onAddExecution: () -> Unit = {},
-    onExecutionClick: (ExecutionWithDetails) -> Unit = {}
+    onExecutionClick: (ExecutionWithDetails) -> Unit = {},
+    // Photo management parameters
+    selectedPhotoIndex: Int = 0,
+    isPhotoManagementVisible: Boolean = false,
+    isAddingPhoto: Boolean = false,
+    onPhotoSelected: (Int) -> Unit = {},
+    onPreviousPhoto: () -> Unit = {},
+    onNextPhoto: () -> Unit = {},
+    onTogglePhotoManagement: () -> Unit = {},
+    onAddPhoto: (String, String?) -> Unit = { _, _ -> },
+    onUpdatePhotoCategory: (String, String?) -> Unit = { _, _ -> },
+    onDeletePhoto: (String) -> Unit = {},
+    onMovePhotoUp: (String) -> Unit = {},
+    onMovePhotoDown: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -949,6 +975,32 @@ fun RecipeDetailContent(
         // Recipe basic information
         item {
             RecipeBasicInfoDisplay(recipe = recipe)
+        }
+        
+        // Photos section - positioned as second card
+        item {
+            PhotoViewerCard(
+                photos = recipe.photos,
+                selectedPhotoIndex = selectedPhotoIndex,
+                onPhotoSelected = onPhotoSelected,
+                onPreviousPhoto = onPreviousPhoto,
+                onNextPhoto = onNextPhoto
+            )
+        }
+        
+        // Photo management section
+        item {
+            PhotoManagementCard(
+                photos = recipe.photos,
+                isVisible = isPhotoManagementVisible,
+                onToggleVisibility = onTogglePhotoManagement,
+                onAddPhotoWithPath = onAddPhoto,
+                onUpdateCategory = onUpdatePhotoCategory,
+                onDeletePhoto = onDeletePhoto,
+                onMovePhotoUp = onMovePhotoUp,
+                onMovePhotoDown = onMovePhotoDown,
+                isAddingPhoto = isAddingPhoto
+            )
         }
         
         // Ingredients section
