@@ -5,6 +5,7 @@ Form to create new recipes with ingredients and steps
 
 from kivy.app import App
 from kivy.metrics import dp
+from kivy.logger import Logger
 from kivymd.uix.appbar import (
     MDActionTopAppBarButton,
     MDTopAppBar,
@@ -34,6 +35,12 @@ try:
 except ImportError:
     PhotoManager = None
 
+# Import FAB Manager
+try:
+    from components.fab_manager import FABManager
+except ImportError:
+    FABManager = None
+
 
 def show_snackbar(text: str):
     """Helper function to show snackbar with KivyMD 2.0 syntax"""
@@ -52,11 +59,46 @@ class AddRecipeScreen(MDScreen):
         self.editing_ingredient_index = None  # For tracking which ingredient is being edited
         self.editing_step_index = None  # For tracking which step is being edited
         self.editing_recipe_id = None  # For tracking if we're editing an existing recipe
+        self.fab_manager = None
 
         # Initialize photo manager
         self.photo_manager = PhotoManager() if PhotoManager else None
 
         self.build_screen()
+        self.setup_fabs()
+
+    def setup_fabs(self):
+        """Initialize floating action buttons"""
+        if FABManager:
+            self.fab_manager = FABManager(self, context="add_recipe")
+
+    def add_photo_to_recipe(self, photo_path):
+        """Add a photo captured from FAB to current recipe"""
+        if photo_path and photo_path not in [p.get('chemin') for p in self.photos]:
+            # Add photo to internal list
+            photo_data = {
+                'chemin': str(photo_path),
+                'description': 'Photo prise avec l\'appareil photo'
+            }
+            self.photos.append(photo_data)
+            
+            # Refresh the photos display
+            self.refresh_photos_display()
+            
+            # Show success message
+            show_snackbar(f"Photo ajoutée: {Path(photo_path).name}")
+
+    def refresh_photos_display(self):
+        """Refresh the photos grid display"""
+        if hasattr(self, 'photos_grid') and self.photos_grid:
+            # Clear current photos display
+            self.photos_grid.clear_widgets()
+            
+            # Re-add all photos
+            for i, photo in enumerate(self.photos):
+                photo_item = self.create_photo_item(photo, i)
+                if photo_item:
+                    self.photos_grid.add_widget(photo_item)
 
     def quantity_filter(self, string, from_undo):
         """Custom filter for quantity field to allow numbers, decimals and fractions"""
@@ -431,6 +473,51 @@ class AddRecipeScreen(MDScreen):
 
         card.add_widget(layout)
         return card
+
+    def create_photo_item(self, photo_data, index):
+        """Create a photo item widget for the photos list"""
+        from kivymd.uix.list import MDListItem, MDListItemHeadlineText, MDListItemSupportingText
+        from kivymd.uix.button import MDIconButton
+        from pathlib import Path
+        
+        try:
+            photo_path = photo_data.get('chemin', '')
+            photo_name = Path(photo_path).name if photo_path else 'Photo sans nom'
+            
+            # Create list item
+            item = MDListItem(
+                size_hint_y=None,
+                height=dp(72)
+            )
+            
+            # Add photo name and description
+            item.add_widget(MDListItemHeadlineText(text=photo_name))
+            if photo_data.get('description'):
+                item.add_widget(MDListItemSupportingText(text=photo_data['description']))
+            
+            # Add delete button
+            delete_btn = MDIconButton(
+                icon="delete",
+                theme_icon_color="Error",
+                on_release=lambda x: self.remove_photo(index)
+            )
+            item.add_widget(delete_btn)
+            
+            return item
+            
+        except Exception as e:
+            Logger.error(f"AddRecipeScreen: Error creating photo item: {e}")
+            return None
+
+    def remove_photo(self, index):
+        """Remove a photo from the recipe"""
+        try:
+            if 0 <= index < len(self.photos):
+                removed_photo = self.photos.pop(index)
+                self.refresh_photos_display()
+                show_snackbar(f"Photo supprimée: {Path(removed_photo['chemin']).name}")
+        except Exception as e:
+            Logger.error(f"AddRecipeScreen: Error removing photo: {e}")
 
     def create_source_section(self):
         """Create source section for recipe origin"""

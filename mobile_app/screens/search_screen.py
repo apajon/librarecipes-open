@@ -26,6 +26,12 @@ from kivymd.uix.textfield import MDTextField
 from src.crud.recherche import IngredientsMode, rechercher_recettes
 from src.db import get_db_session
 
+# Import FAB Manager
+try:
+    from components.fab_manager import FABManager
+except ImportError:
+    FABManager = None
+
 
 class SearchScreen(MDScreen):
     """Screen for searching and filtering recipes"""
@@ -33,7 +39,14 @@ class SearchScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.search_results = []
+        self.fab_manager = None
         self.build_screen()
+        self.setup_fabs()
+
+    def setup_fabs(self):
+        """Initialize floating action buttons"""
+        if FABManager:
+            self.fab_manager = FABManager(self, context="search")
 
     def build_screen(self):
         """Build the search screen layout"""

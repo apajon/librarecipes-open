@@ -21,6 +21,12 @@ from src.crud.recettes import list_recettes
 from src.db import get_db_session
 from src.model import Execution, Recette
 
+# Import FAB Manager
+try:
+    from components.fab_manager import FABManager
+except ImportError:
+    FABManager = None
+
 
 class RecipeListScreen(MDScreen):
     """Screen showing list of all recipes with sorting and categorization"""
@@ -33,7 +39,14 @@ class RecipeListScreen(MDScreen):
         # Filtering options
         self.current_filter = None  # Current active filter
         self.filter_buttons = []  # Store filter buttons for updates
+        self.fab_manager = None
         self.build_screen()
+        self.setup_fabs()
+
+    def setup_fabs(self):
+        """Initialize floating action buttons"""
+        if FABManager:
+            self.fab_manager = FABManager(self, context="recipe_list")
 
     def build_screen(self):
         """Build the recipe list screen layout"""
@@ -440,7 +453,8 @@ class RecipeListScreen(MDScreen):
     def create_recipe_list(self):
         """Create scrollable list of recipes with sorting and categorization"""
         scroll = MDScrollView()
-        list_widget = MDList(spacing=dp(5))
+        # Add padding at bottom to prevent FAB overlap
+        list_widget = MDList(spacing=dp(5), padding=(0, 0, 0, dp(140)))
 
         # Load and sort recipes from database
         recipes = self.load_and_sort_recipes()
