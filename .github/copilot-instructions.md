@@ -1,72 +1,46 @@
-# LibraRecipes – Instructions pour agents IA
+# LibraRecipes – Règles pour agents IA
 
-Objectif: aider rapidement à coder dans ce dépôt Streamlit/SQLAlchemy avec une app mobile Kivy optionnelle.
+But: vous rendre productif immédiatement sur cette app Streamlit + FastAPI + SQLAlchemy, avec une app mobile Kivy optionnelle.
 
-## Vue d’ensemble
-- Deux interfaces:
-  - Desktop Web: Streamlit dans `streamlit_app/` (point d’entrée `streamlit_app/Home.py`). Navigation via `st.Page` et `st.navigation`.
-  - Mobile Android: Kivy dans `mobile_app/` (point d’entrée `mobile_app/main.py`), non prioritaire ici.
-- Backend: SQLite via SQLAlchemy. Modèles dans `src/model.py`, session DB depuis `src/db.py` (get_db_session()).
-- Couche CRUD dans `src/crud/` (ex: `recettes.py`, `recherche.py`, `metadata.py`).
-- Données locales: `data/recettes.db` et photos sous `data/photos/`.
+## Vue d’ensemble architecture
+- UI Streamlit: `streamlit_app/` (entrée `streamlit_app/Home.py`). Navigation avec `st.Page` + `st.navigation` (voir `config/app.py`, `config/pages.py`).
+- Backend API: FastAPI dans `backend/` (entrée `backend/main.py`, schémas Pydantic `backend/schemas.py`). Utilisé par les tests d’API.
+- Métiers & Données: SQLAlchemy dans `src/` (`model.py`, `db.py`, `crud/`). SQLite en local: `data/recettes.db` (+ photos sous `data/photos/`). Android: chemin via `android.storage.app_storage_path()`.
 
-## Démarrage & workflows dev
-- Installer dépendances (Poetry désactivé en package-mode; dépendances listées dans `[project]` de `pyproject.toml`).
-- Init DB: `PYTHONPATH=. python scripts/init_db.py` crée `data/recettes.db` à partir des modèles.
-- Lancer l’app Streamlit:
-  - Script: `./run.sh` (utilise `PYTHONPATH=.` et démarre `streamlit_app/Home.py`).
-  - Ou: `PYTHONPATH=. streamlit run streamlit_app/Home.py`.
-  - Tâche VS Code disponible: “Lancer LibraRecipes”.
-- Tests rapides manuels dans `tests/` (scripts d’intégration simples utilisant `get_db_session()`). Pas de framework spécifique câblé; si vous ajoutez des tests, utilisez pytest.
+## Workflows dev essentiels
+- Initialiser la base: `PYTHONPATH=. python scripts/init_db.py` (crée `data/recettes.db`).
+- Lancer l’UI: `PYTHONPATH=. streamlit run streamlit_app/Home.py` (⚠️ la tâche VS Code “Lancer LibraRecipes” pointe parfois vers `app/Home.py`; utilisez le chemin ci‑dessus si échec).
+- Lancer l’API: `PYTHONPATH=. uvicorn backend.main:app --reload` (API versionnée, CORS ouvert pour dev).
+- Tests: `PYTHONPATH=. pytest -q` (tests CRUD + tests d’API via `fastapi.testclient`).
 
-## Architecture Streamlit
-- Point d’entrée `Home.py`:
-  - Configure la page (`config/app.py`), crée les `Page` et la navigation (`config/pages.py`).
-  - Sidebar via `utils/sidebar.py`.
-- Pages:
-  - Fonctions de pages dans `streamlit_app/pages_functions/*`. Exemples:
-    - `add_recette.py`: création; compose les formulaires avec `utils/*_manager.py`, valide puis appelle `src.crud.recettes.create_recette`.
-    - `recherche_recette.py`: recherches via `src.crud.recherche.rechercher_recettes` et navigate vers le détail avec `utils/navigation.py`.
-- Navigation avancée:
-  - `utils/navigation.py` stocke l’ID sélectionné dans `st.session_state.selected_recette_id` + `st.query_params.recette_id`, puis `st.switch_page()` avec des objets `st.Page` conservés dans `st.session_state.*_page_obj` (placés par `config/pages.setup_session_state_pages`).
+## Navigation & état Streamlit
+- Créez les pages via `st.Page` dans `config/pages.py` et sauvegardez les objets dans `st.session_state` avec `setup_session_state_pages`.
+- Pour changer de page, utilisez `streamlit_app/utils/navigation.py`:
+  - `navigate_to_recipe_detail/modify/photos(recette_id)` définit `st.session_state.selected_recette_id` et `st.query_params.recette_id`, puis `st.switch_page(...)`.
+- La sidebar est gérée par `utils/sidebar.py` et le sélecteur par `utils/recipe_selector.py`.
 
-## Modèle & Accès Données
-- Modèles SQLAlchemy dans `src/model.py` (Recette, Ingredient, Etape, Photo, Categorie, Tag, Convive, Execution, FeedbackExecution, Source). UUID string comme PK; cascade "all, delete-orphan" sur relations enfants.
-- DB path:
-  - Desktop: `data/recettes.db` (créé au besoin).
-  - Android: via `android.storage.app_storage_path()`.
-- Session:
-  - `src/db.py` expose `get_db_session()` (context manager). Toujours ouvrir une session localement dans les pages/CRUD.
-- CRUD:
-  - `src/crud/recettes.py` crée/charge/liste/maj/supprime recettes. Les updates font un clear+recreate des enfants (ingredients/etapes/categories/tags/photos) puis réaffectent `Source` (suppression explicite + flush avant réinsertion).
-  - `src/crud/recherche.py` prend en charge les filtres nom/ingrédients/tags/catégories. `IngredientsMode` ANY vs ALL géré par HAVING COUNT(DISTINCT Ingredient.nom).
+## Modèle & CRUD: conventions clés
+- PK en UUID string; castez toujours en `str` avant d’écrire dans `session_state`/`query_params`.
+- Ouvrez une session DB locale avec `with get_db_session():` (ne partagez pas la session entre callbacks Streamlit).
+- `crud/recettes.py`:
+  - `create_recette(session, data)` attend `etapes: list[str]` (l’ordre est calculé); idem pour `update_recette`.
+  - `update_recette` remplace entièrement enfants si la clé est présente et non `None` (ingredients/etapes/categories/tags/photos). Omettre la clé pour conserver; passer `[]` pour vider.
+  - Pour `Source`, l’existant est supprimé puis recréé (flush requis avant insert).
+- Recherche (`crud/recherche.py`): `IngredientsMode` ANY/ALL; ALL utilise `HAVING COUNT(DISTINCT Ingredient.nom)` pour exiger tous les ingrédients.
 
-## Conventions importantes
-- Tous les appels DB dans des with get_db_session(): context manager ferme proprement.
-- Les IDs recette sont des strings UUID; toujours caster en `str()` quand vous les mettez dans `st.session_state`/`st.query_params`.
-- Affichage nom recette uniformisé via `utils/recipe_display.format_recette_display_name()` (inclut source, date d’ajout, dernière exécution). Réutiliser cette fonction pour lister.
-- Navigation: utiliser les helpers `navigate_to_recipe_detail/modify/...` pour gérer état + redirection.
-- Validation d’entrée pour création/modification via `utils/recipe_validator.py` et préparation de payload via `prepare_recipe_data`.
+## UI: réutiliser les helpers
+- Nom affiché uniforme: `utils/recipe_display.format_recette_display_name(recette)` (type de source via `utils/constants.SOURCE_TYPES`, date d’ajout, dernière exécution).
+- Validation/Préparation: `utils/recipe_validator.py` (validez avant création). Note: fournissez des étapes en `list[str]` côté CRUD/API; évitez des dicts `{description, ordre}` côté payload brut.
 
-## Points d’attention
-- Streamlit 1.46: API `st.Page`, `st.navigation`, `st.switch_page` utilisées. Garder la compatibilité si vous touchez la config de pages.
-- Concurrence SQLite: `connect_args={"check_same_thread": False}` déjà activé. Éviter de partager la même session entre callbacks.
-- Photos: chemins stockés en base (`Photo.chemin`), gestion UI en cours; ne déplacez pas les fichiers sans mettre à jour la DB.
-- Les tests existants ne seedent pas la DB; exécutez `scripts/add_sample_data.py` si nécessaire pour démo.
+## Points d’attention (pièges)
+- Streamlit ≥ 1.46: APIs `st.Page`, `st.navigation`, `st.switch_page` utilisées.
+- SQLite: `check_same_thread=False` actif; ouvrez/fermez vos sessions dans le scope du callback.
+- Photos: le modèle `Photo` n’a pas de champ `description` (les schémas API en définissent un: il est ignoré actuellement).
+- API Source: `SourceCreate.valeur` est optionnel et peut ne pas se refléter en base; pour persister URL/livre, le modèle attend `url`/`book_*` (gap connu).
 
-## Exemples d’extension
-- Ajouter une page:
-  1) Créer la fonction de page dans `streamlit_app/pages_functions/ma_page.py`.
-  2) L’enregistrer dans `config/pages.get_pages_config()` sous une section.
-  3) Si navigation programmatique: exposer `st.Page` et sauvegarder l’objet dans `setup_session_state_pages`.
-- Ajouter un filtre de recherche: étendre `src/crud/recherche.rechercher_recettes` et propager l’UI dans `pages_functions/recherche_recette.py`.
+## Ajouter une page ou une feature
+- Page: créez `streamlit_app/pages_functions/ma_page.py`, référencez-la dans `config/pages.get_pages_config()`, et exposez un `st.Page` si navigation directe.
+- Filtre de recherche: étendez `crud/recherche.rechercher_recettes()` puis l’UI dans `pages_functions/recherche_recette.py`.
 
-## Commandes utiles
-- Init DB: `PYTHONPATH=. python scripts/init_db.py`
-- Lancer UI: `PYTHONPATH=. streamlit run streamlit_app/Home.py`
-- Bump version: `poetry run bump2version patch` (si Poetry configuré)
-
-Questions ouvertes à clarifier
-- Convention d’emplacement définitif des photos (dossier exact) et stratégies de renommage.
-- Portée de la Kivy app dans ce dépôt (doit-on tester/packager ici?).
-- Données de démonstration officielles (scripts de seed) et jeu de tags/catégories canonique.
+Feedback demandé
+- Indiquez si vous souhaitez standardiser l’API Source (`valeur` vs `url/book_*`) et si la tâche VS Code doit être corrigée vers `streamlit_app/Home.py`.
