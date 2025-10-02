@@ -120,6 +120,70 @@ class RecipeRepository @Inject constructor(
     }
     
     /**
+     * Copy a recipe with an incremented number in the title.
+     * Creates a new recipe based on an existing one with " (x)" appended to the name,
+     * where x is incremented to avoid conflicts.
+     * @param recipeId ID of the recipe to copy
+     * @return Result with created recipe response or error
+     */
+    suspend fun copyRecipe(recipeId: String): Result<RecipeResponse> {
+        return try {
+            // Get the original recipe details
+            val originalRecipe = database.recipeDao().getRecipeWithDetails(recipeId)
+                ?: return Result.failure(Exception("Recette originale non trouvée"))
+            
+            // Find existing copies to determine the next copy number
+            val baseName = originalRecipe.recipe.nom
+            // Remove existing " (x)" suffix if present
+            val baseNameWithoutSuffix = baseName.replace(Regex("""\s*\(\d+\)$"""), "")
+            
+            // Get all recipes that start with the base name
+            val allRecipes = database.recipeDao().getAllRecipesSync()
+            val copyNumbers = allRecipes
+                .filter { it.nom.startsWith(baseNameWithoutSuffix) }
+                .mapNotNull { recipe ->
+                    val match = Regex("""$baseNameWithoutSuffix\s*\((\d+)\)""").find(recipe.nom)
+                    match?.groupValues?.get(1)?.toIntOrNull()
+                }
+            
+            // Determine the next copy number
+            val nextNumber = if (copyNumbers.isEmpty()) 2 else (copyNumbers.maxOrNull() ?: 1) + 1
+            val newName = "$baseNameWithoutSuffix ($nextNumber)"
+            
+            // Create RecipeCreate from the original recipe
+            val recipeCopy = RecipeCreate(
+                nom = newName,
+                preparation = originalRecipe.recipe.preparation,
+                cuisson = originalRecipe.recipe.cuisson,
+                portions = originalRecipe.recipe.portions,
+                ingredients = originalRecipe.ingredients.map { ingredient ->
+                    com.apajon.librarecipes.data.model.IngredientCreate(
+                        nom = ingredient.nom,
+                        quantite = ingredient.quantite,
+                        unite = ingredient.unite,
+                        indispensable = ingredient.indispensable,
+                        alternatives = ingredient.alternatives
+                    )
+                },
+                etapes = originalRecipe.etapes.sortedBy { it.numero }.map { it.description },
+                categories = originalRecipe.categories.map { it.nom },
+                tags = originalRecipe.tags.map { it.nom },
+                sourceType = originalRecipe.source?.type,
+                sourceUrl = originalRecipe.source?.url,
+                sourceBookTitle = originalRecipe.source?.bookTitle,
+                sourceBookAuthors = originalRecipe.source?.bookAuthors,
+                sourceBookPage = originalRecipe.source?.bookPage
+            )
+            
+            // Create the new recipe using the existing createRecipe function
+            createRecipe(recipeCopy)
+        } catch (e: Exception) {
+            android.util.Log.e("RecipeRepository", "Error copying recipe", e)
+            Result.failure(e)
+        }
+    }
+    
+    /**
      * Get recipe details by ID from the local database.
      * @param recipeId ID of the recipe to fetch
      * @return Result with recipe details or error

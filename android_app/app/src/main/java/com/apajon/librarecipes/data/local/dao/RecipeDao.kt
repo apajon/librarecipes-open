@@ -20,6 +20,9 @@ interface RecipeDao {
     @Query("SELECT * FROM recettes ORDER BY dateAjout DESC")
     fun getAllRecipes(): Flow<List<RecipeEntity>>
     
+    @Query("SELECT * FROM recettes ORDER BY dateAjout DESC")
+    suspend fun getAllRecipesSync(): List<RecipeEntity>
+    
     @Query("SELECT * FROM recettes WHERE id = :recipeId")
     suspend fun getRecipeById(recipeId: String): RecipeEntity?
     

@@ -80,6 +80,14 @@ fun RecipeDetailScreen(
         }
     }
     
+    // Handle copy success - navigate to the copied recipe
+    LaunchedEffect(uiState.copySuccess) {
+        if (uiState.copySuccess && uiState.copiedRecipeId != null) {
+            viewModel.clearCopySuccess()
+            navController.navigate("recipe/${uiState.copiedRecipeId}")
+        }
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -137,18 +145,24 @@ fun RecipeDetailScreen(
                 // Tertiary FAB - Copy recipe
                 FloatingActionButton(
                     onClick = { 
-                        // TODO: Implement copy recipe functionality
-                        // This should create a copy with incremented number in title
-                        // For now, show a placeholder action or navigate to create with pre-filled data
+                        viewModel.copyRecipe(recipeId)
                     },
                     modifier = Modifier.size(56.dp),
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                    enabled = uiState.recipe != null && !uiState.isCopying
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copier la recette"
-                    )
+                    if (uiState.isCopying) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Copier la recette"
+                        )
+                    }
                 }
                 
                 // Secondary FAB - Edit recipe
@@ -306,6 +320,14 @@ fun RecipeDetailScreen(
         LaunchedEffect(error) {
             // Show error snackbar - you might want to implement a proper snackbar here
             viewModel.clearDeleteError()
+        }
+    }
+    
+    // Copy error display
+    uiState.copyError?.let { error ->
+        LaunchedEffect(error) {
+            // Show error snackbar - you might want to implement a proper snackbar here
+            viewModel.clearCopyError()
         }
     }
     
