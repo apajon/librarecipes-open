@@ -25,7 +25,7 @@ if [[ "$LEVEL" != "patch" && "$LEVEL" != "minor" && "$LEVEL" != "major" ]]; then
 fi
 
 # Appelle bump2version
-bump2version "$NEW_VERSION" $DRY_RUN_FLAG
+bump2version "$LEVEL" $DRY_RUN_FLAG
 
 if [[ "$PUSH_FLAG" == "--push" ]]; then
     git push --tags
