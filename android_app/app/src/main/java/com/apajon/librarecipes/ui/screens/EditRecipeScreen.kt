@@ -331,6 +331,35 @@ fun EditRecipeScreen(
                     )
                 }
 
+                // Photo management section
+                // TODO: Integrate photo management functionality with EditRecipeViewModel
+                // This section should allow users to add, edit, delete, and reorder photos
+                // when editing a recipe. The PhotoManagementCard component is available
+                // in ui/components/PhotoComponents.kt
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Text(
+                                text = "📷 Gestion des photos",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "Fonctionnalité en cours d'implémentation",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
                 // Save button
                 item {
                     Button(
