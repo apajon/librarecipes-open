@@ -28,5 +28,5 @@ fi
 bump2version "$LEVEL" $DRY_RUN_FLAG
 
 if [[ "$PUSH_FLAG" == "--push" ]]; then
-    git push --tags
+    git push && git push --tags
 fi
