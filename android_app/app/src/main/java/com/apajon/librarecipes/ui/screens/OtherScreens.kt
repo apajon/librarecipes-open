@@ -10,10 +10,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
@@ -149,8 +149,7 @@ fun RecipeDetailScreen(
                     },
                     modifier = Modifier.size(56.dp),
                     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    enabled = uiState.recipe != null && !uiState.isCopying
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
                 ) {
                     if (uiState.isCopying) {
                         CircularProgressIndicator(
@@ -159,7 +158,7 @@ fun RecipeDetailScreen(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Default.ContentCopy,
+                            imageVector = Icons.Default.AddCircle,
                             contentDescription = "Copier la recette"
                         )
                     }
@@ -172,8 +171,7 @@ fun RecipeDetailScreen(
                     },
                     modifier = Modifier.size(56.dp),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    enabled = uiState.recipe != null
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ) {
                     Icon(
                         imageVector = Icons.Default.Edit,

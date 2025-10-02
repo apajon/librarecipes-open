@@ -159,20 +159,25 @@ class RecipeRepository @Inject constructor(
                 ingredients = originalRecipe.ingredients.map { ingredient ->
                     com.apajon.librarecipes.data.model.IngredientCreate(
                         nom = ingredient.nom,
-                        quantite = ingredient.quantite,
+                        quantite = ingredient.quantite?.toFloatOrNull(),
                         unite = ingredient.unite,
                         indispensable = ingredient.indispensable,
                         alternatives = ingredient.alternatives
                     )
                 },
-                etapes = originalRecipe.etapes.sortedBy { it.numero }.map { it.description },
+                etapes = originalRecipe.etapes.sortedBy { it.ordre }.map { it.description },
                 categories = originalRecipe.categories.map { it.nom },
                 tags = originalRecipe.tags.map { it.nom },
-                sourceType = originalRecipe.source?.type,
-                sourceUrl = originalRecipe.source?.url,
-                sourceBookTitle = originalRecipe.source?.bookTitle,
-                sourceBookAuthors = originalRecipe.source?.bookAuthors,
-                sourceBookPage = originalRecipe.source?.bookPage
+                source = originalRecipe.source?.let { source ->
+                    com.apajon.librarecipes.data.model.SourceCreate(
+                        type = source.type,
+                        valeur = when (source.type) {
+                            "url" -> source.url
+                            "book" -> source.bookTitle
+                            else -> null
+                        }
+                    )
+                }
             )
             
             // Create the new recipe using the existing createRecipe function
