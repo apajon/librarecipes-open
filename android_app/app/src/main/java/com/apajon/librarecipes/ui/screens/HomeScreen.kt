@@ -45,7 +45,7 @@ fun HomeScreen(
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 ) {
                     Icon(
-                        imageVector = Icons.Default.CameraAlt,
+                        imageVector = Icons.Default.AddAPhoto,
                         contentDescription = "Prendre une photo"
                     )
                 }
