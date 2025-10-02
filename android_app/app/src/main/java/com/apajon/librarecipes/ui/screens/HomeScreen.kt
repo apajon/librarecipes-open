@@ -29,6 +29,43 @@ fun HomeScreen(
                     titleContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Camera FAB - Secondary FAB for photo capture
+                FloatingActionButton(
+                    onClick = { 
+                        // TODO: Implement camera functionality
+                        // For now, just show a placeholder action
+                    },
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Prendre une photo"
+                    )
+                }
+                
+                // Primary Add Recipe FAB
+                FloatingActionButton(
+                    onClick = { 
+                        navController.navigate("create_new_recipe")
+                    },
+                    modifier = Modifier.size(64.dp),
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Ajouter une recette",
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         LazyColumn(
