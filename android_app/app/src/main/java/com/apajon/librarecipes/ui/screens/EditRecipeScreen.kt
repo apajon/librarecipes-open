@@ -332,20 +332,18 @@ fun EditRecipeScreen(
                 }
 
                 // Photo management section
-                if (viewModel.isEditMode()) {
-                    item {
-                        PhotoManagementCard(
-                            photos = viewModel.photos.collectAsState().value,
-                            isVisible = viewModel.isPhotoManagementVisible.collectAsState().value,
-                            onToggleVisibility = viewModel::togglePhotoManagement,
-                            onAddPhotoWithPath = { path, category -> viewModel.addPhoto(path, category) },
-                            onUpdateCategory = viewModel::updatePhotoCategory,
-                            onDeletePhoto = viewModel::deletePhoto,
-                            onMovePhotoUp = viewModel::movePhotoUp,
-                            onMovePhotoDown = viewModel::movePhotoDown,
-                            isAddingPhoto = viewModel.isAddingPhoto.collectAsState().value
-                        )
-                    }
+                item {
+                    PhotoManagementCard(
+                        photos = viewModel.photos.collectAsState().value,
+                        isVisible = viewModel.isPhotoManagementVisible.collectAsState().value,
+                        onToggleVisibility = viewModel::togglePhotoManagement,
+                        onAddPhotoWithPath = { path, category -> viewModel.addPhoto(path, category) },
+                        onUpdateCategory = viewModel::updatePhotoCategory,
+                        onDeletePhoto = viewModel::deletePhoto,
+                        onMovePhotoUp = viewModel::movePhotoUp,
+                        onMovePhotoDown = viewModel::movePhotoDown,
+                        isAddingPhoto = viewModel.isAddingPhoto.collectAsState().value
+                    )
                 }
 
                 // Save button

@@ -288,7 +288,15 @@ class EditRecipeViewModel @Inject constructor(
                     repository.createRecipe(recipe)
                 }
                 
-                result.onSuccess {
+                result.onSuccess { response ->
+                    // If creating a new recipe and there are photos to add
+                    if (!_isEditMode && _photos.value.isNotEmpty()) {
+                        val newRecipeId = response.id
+                        // Save all temporary photos to the database
+                        _photos.value.forEach { photo ->
+                            repository.addPhoto(newRecipeId, photo.chemin, photo.categorie)
+                        }
+                    }
                     _saveSuccess.value = true
                 }.onFailure { exception ->
                     _formState.value = state.copy(
@@ -328,23 +336,35 @@ class EditRecipeViewModel @Inject constructor(
      * Add a photo to the recipe.
      */
     fun addPhoto(photoPath: String, category: String?) {
-        if (_recipeId == null) return
-        
         viewModelScope.launch {
             _isAddingPhoto.value = true
             
-            repository.addPhoto(_recipeId!!, photoPath, category)
-                .onSuccess { photoId ->
-                    // Reload recipe details to get updated photos
-                    repository.getRecipeDetails(_recipeId!!).onSuccess { recipeDetail ->
-                        _photos.value = recipeDetail.photos
+            if (_recipeId != null) {
+                // Edit mode - save directly to database
+                repository.addPhoto(_recipeId!!, photoPath, category)
+                    .onSuccess { photoId ->
+                        // Reload recipe details to get updated photos
+                        repository.getRecipeDetails(_recipeId!!).onSuccess { recipeDetail ->
+                            _photos.value = recipeDetail.photos
+                        }
+                        _isAddingPhoto.value = false
                     }
-                    _isAddingPhoto.value = false
-                }
-                .onFailure { error ->
-                    _isAddingPhoto.value = false
-                    _errorMessage.value = "Erreur lors de l'ajout de la photo: ${error.message}"
-                }
+                    .onFailure { error ->
+                        _isAddingPhoto.value = false
+                        _errorMessage.value = "Erreur lors de l'ajout de la photo: ${error.message}"
+                    }
+            } else {
+                // Create mode - store in memory temporarily
+                val nextOrder = (_photos.value.maxOfOrNull { it.ordre } ?: 0) + 1
+                val tempPhoto = PhotoDetail(
+                    id = "temp_${System.currentTimeMillis()}", // Temporary ID
+                    chemin = photoPath,
+                    categorie = category,
+                    ordre = nextOrder
+                )
+                _photos.value = _photos.value + tempPhoto
+                _isAddingPhoto.value = false
+            }
         }
     }
     
@@ -353,15 +373,23 @@ class EditRecipeViewModel @Inject constructor(
      */
     fun updatePhotoCategory(photoId: String, category: String?) {
         viewModelScope.launch {
-            repository.updatePhotoCategory(photoId, category)
-                .onSuccess {
-                    _photos.value = _photos.value.map { photo ->
-                        if (photo.id == photoId) photo.copy(categorie = category) else photo
+            if (_recipeId != null) {
+                // Edit mode - update in database
+                repository.updatePhotoCategory(photoId, category)
+                    .onSuccess {
+                        _photos.value = _photos.value.map { photo ->
+                            if (photo.id == photoId) photo.copy(categorie = category) else photo
+                        }
                     }
+                    .onFailure { error ->
+                        _errorMessage.value = "Erreur lors de la mise à jour: ${error.message}"
+                    }
+            } else {
+                // Create mode - update in memory
+                _photos.value = _photos.value.map { photo ->
+                    if (photo.id == photoId) photo.copy(categorie = category) else photo
                 }
-                .onFailure { error ->
-                    _errorMessage.value = "Erreur lors de la mise à jour: ${error.message}"
-                }
+            }
         }
     }
     
@@ -370,13 +398,19 @@ class EditRecipeViewModel @Inject constructor(
      */
     fun deletePhoto(photoId: String) {
         viewModelScope.launch {
-            repository.deletePhoto(photoId)
-                .onSuccess {
-                    _photos.value = _photos.value.filter { it.id != photoId }
-                }
-                .onFailure { error ->
-                    _errorMessage.value = "Erreur lors de la suppression: ${error.message}"
-                }
+            if (_recipeId != null) {
+                // Edit mode - delete from database
+                repository.deletePhoto(photoId)
+                    .onSuccess {
+                        _photos.value = _photos.value.filter { it.id != photoId }
+                    }
+                    .onFailure { error ->
+                        _errorMessage.value = "Erreur lors de la suppression: ${error.message}"
+                    }
+            } else {
+                // Create mode - remove from memory
+                _photos.value = _photos.value.filter { it.id != photoId }
+            }
         }
     }
     
@@ -414,19 +448,21 @@ class EditRecipeViewModel @Inject constructor(
      * Reorder photos and update in repository.
      */
     private fun reorderPhotos(reorderedPhotos: List<PhotoDetail>) {
-        if (_recipeId == null) return
-        
         viewModelScope.launch {
             val updatedPhotos = reorderedPhotos.mapIndexed { index, photo ->
                 photo.copy(ordre = index + 1)
             }
             _photos.value = updatedPhotos
             
-            // Create map of photoId to order
-            val photoOrders = updatedPhotos.associate { it.id to it.ordre }
-            
-            // Update in repository
-            repository.reorderPhotos(_recipeId!!, photoOrders)
+            // Only update in repository if in edit mode
+            if (_recipeId != null) {
+                // Create map of photoId to order
+                val photoOrders = updatedPhotos.associate { it.id to it.ordre }
+                
+                // Update in repository
+                repository.reorderPhotos(_recipeId!!, photoOrders)
+            }
+            // In create mode, just keep in memory
         }
     }
 }
