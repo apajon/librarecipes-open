@@ -342,7 +342,7 @@ class EditRecipeViewModel @Inject constructor(
             if (_recipeId != null) {
                 // Edit mode - save directly to database
                 repository.addPhoto(_recipeId!!, photoPath, category)
-                    .onSuccess { photoId ->
+                    .onSuccess { _ ->
                         // Reload recipe details to get updated photos
                         repository.getRecipeDetails(_recipeId!!).onSuccess { recipeDetail ->
                             _photos.value = recipeDetail.photos
