@@ -332,46 +332,19 @@ fun EditRecipeScreen(
                 }
 
                 // Photo management section
-                // TODO: Integrate photo management functionality with EditRecipeViewModel
-                // This section should allow users to add, edit, delete, and reorder photos
-                // when editing a recipe. The PhotoManagementCard component is available
-                // in ui/components/PhotoComponents.kt
-                //
-                // Implementation steps:
-                // 1. Add photo state to RecipeFormState (photos: List<PhotoDetail>)
-                // 2. Add photo functions to EditRecipeViewModel:
-                //    - loadPhotosForRecipe(recipeId)
-                //    - addPhoto(path, category)
-                //    - updatePhotoCategory(photoId, category)
-                //    - deletePhoto(photoId)
-                //    - movePhotoUp(photoId)
-                //    - movePhotoDown(photoId)
-                // 3. Use PhotoManagementCard here with the state and callbacks
-                //
-                // For now, using a simple placeholder card
                 if (viewModel.isEditMode()) {
                     item {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = MaterialTheme.shapes.medium,
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Text(
-                                    text = "📷 Gestion des photos",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "Fonctionnalité en cours d'implémentation. Pour gérer les photos, utilisez la vue détail de la recette après sauvegarde.",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
+                        PhotoManagementCard(
+                            photos = viewModel.photos.collectAsState().value,
+                            isVisible = viewModel.isPhotoManagementVisible.collectAsState().value,
+                            onToggleVisibility = viewModel::togglePhotoManagement,
+                            onAddPhotoWithPath = { path, category -> viewModel.addPhoto(path, category) },
+                            onUpdateCategory = viewModel::updatePhotoCategory,
+                            onDeletePhoto = viewModel::deletePhoto,
+                            onMovePhotoUp = viewModel::movePhotoUp,
+                            onMovePhotoDown = viewModel::movePhotoDown,
+                            isAddingPhoto = viewModel.isAddingPhoto.collectAsState().value
+                        )
                     }
                 }
 
