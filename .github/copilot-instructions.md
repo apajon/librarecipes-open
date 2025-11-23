@@ -1,6 +1,6 @@
 # LibraRecipes – Règles pour agents IA
 
-But: vous rendre productif immédiatement sur cette app Streamlit + FastAPI + SQLAlchemy, avec une app mobile Kivy optionnelle.
+But: vous rendre productif immédiatement sur cette app Streamlit + FastAPI + SQLAlchemy, avec une app Android native (Kotlin/Compose).
 
 ## Vue d’ensemble architecture
 - UI Streamlit: `streamlit_app/` (entrée `streamlit_app/Home.py`). Navigation avec `st.Page` + `st.navigation` (voir `config/app.py`, `config/pages.py`).
