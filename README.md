@@ -1,158 +1,129 @@
 # LibraRecipes 🍽️
 
-LibraRecipes est une application de gestion de recettes de cuisine développée avec Streamlit et SQLAlchemy. Elle permet de créer, rechercher, et organiser vos recettes avec photos, ingrédients, étapes et métadonnées.
+LibraRecipes est une application de gestion de recettes de cuisine qui vous permet de créer, organiser et rechercher vos recettes préférées avec photos, ingrédients, étapes détaillées et métadonnées.
 
-**✨ Nouvelle version avec `st.Page` et `st.navigation` !**
-Cette application utilise maintenant la nouvelle API de navigation de Streamlit pour une expérience utilisateur améliorée.
+## 📱 Interfaces disponibles
 
-## 🚀 Fonctionnalités
+LibraRecipes propose deux interfaces :
 
-### ✅ Implémentées
+- **Interface Web** : Application Streamlit moderne avec navigation intuitive
+- **Application Android** : Application native pour smartphones et tablettes Android
 
-- **🏠 Page d'accueil** : Vue d'ensemble et navigation principale
-- **🔍 Recherche & Exploration** :
-  - Recherche avancée par nom, ingrédients, tags et catégories
-  - Index alphabétique des recettes
-  - Index des ingrédients
-  - Suggestions "Que cuisiner ?"
-- **➕ Gestion des recettes** :
-  - Ajout de recettes complètes avec ingrédients et étapes
-  - Affichage détaillé des recettes
-  - Modification et gestion des photos (en développement)
-- **📊 Organisation** :
-  - Classification par catégories et tags
-  - Gestion des temps de préparation et cuisson
-  - Support des sources (maison, URL, livre)
+## ✨ Fonctionnalités principales
 
-### 📋 Architecture Moderne
+- 🔍 **Recherche avancée** : Trouvez vos recettes par nom, ingrédients, catégories ou tags
+- 📝 **Gestion complète** : Ajoutez et modifiez vos recettes avec tous les détails
+- 📷 **Photos** : Ajoutez plusieurs photos à chaque recette
+- 🏷️ **Organisation** : Classez vos recettes par catégories et tags personnalisables
+- ⏱️ **Temps de préparation** : Suivez les temps de préparation et de cuisson
+- 📚 **Sources** : Gardez une trace des sources (recettes maison, sites web, livres)
+- 🔤 **Index** : Parcourez vos recettes par ordre alphabétique ou par ingrédients
+- 💡 **Suggestions** : Découvrez quoi cuisiner selon vos envies
 
-```text
-├── app/                           # Interface Streamlit
-│   ├── Home.py                   # Point d'entrée avec st.navigation 🆕
-│   ├── pages_functions/          # Fonctions des pages 🆕
-│   │   ├── home.py              # Page d'accueil
-│   │   ├── recherche_recette.py # Recherche avancée
-│   │   ├── add_recette.py       # Ajout de recettes
-│   │   ├── card_recette.py      # Détail d'une recette
-│   │   ├── index_recettes.py    # Index A-Z des recettes
-│   │   ├── index_ingredients.py # Index des ingrédients
-│   │   ├── que_cuisiner.py      # Suggestions de recettes
-│   │   ├── modify_recette.py    # Modification (placeholder)
-│   │   └── photos_recette.py    # Gestion photos (placeholder)
-│   └── assets/                   # Images et ressources
-├── src/                          # Logique métier
-│   ├── model.py                 # Modèles SQLAlchemy
-│   ├── db.py                    # Configuration base de données
-│   └── crud/                    # Opérations CRUD
-├── data/                        # Données et photos
-└── tests/                       # Tests unitaires
-```
-
-## 🛠️ Installation et Lancement
+## 🚀 Installation et démarrage
 
 ### Prérequis
 
-- Python 3.12+
-- Poetry (gestionnaire de dépendances)
+- Python 3.12 ou supérieur
+- Poetry (gestionnaire de dépendances Python)
 
 ### Installation
 
 ```bash
-# Cloner le projet
-git clone <repository-url>
+# Cloner le dépôt
+git clone https://github.com/apajon/librarecipes-open.git
 cd librarecipes-open
 
-# Installer les dépendances
+# Installer les dépendances avec Poetry
 poetry install --no-root
 
 # Initialiser la base de données
-PYTHONPATH=. python scripts/init_db.py
+PYTHONPATH=. poetry run python scripts/init_db.py
+
+# (Optionnel) Ajouter des données d'exemple
+PYTHONPATH=. poetry run python scripts/add_sample_data.py
 ```
 
-### Lancement
+### Lancement de l'interface Web (Streamlit)
 
 ```bash
-# Via le script
+# Méthode 1 : Via le script de lancement
 ./run.sh
 
-# Ou directement
-PYTHONPATH=. streamlit run app/Home.py
+# Méthode 2 : Directement avec Streamlit
+PYTHONPATH=. poetry run streamlit run streamlit_app/Home.py
 ```
 
-## 📝 Utilisation
+L'application s'ouvrira automatiquement dans votre navigateur à l'adresse `http://localhost:8501`.
 
-### Ajouter une nouvelle recette
+### Lancement du backend API (optionnel)
 
-1. **Accédez à la page d'ajout** : Depuis l'accueil, cliquez sur "➕ Ajouter une recette"
+Le backend FastAPI est nécessaire si vous utilisez l'application Android ou souhaitez accéder à l'API REST.
 
-2. **Remplissez les informations générales** :
-   - Nom de la recette (obligatoire)
-   - Temps de préparation et cuisson
-   - Nombre de portions
-   - Catégories et tags (suggestions automatiques)
-   - Source (maison, URL, ou livre)
+```bash
+# Démarrer le serveur API
+PYTHONPATH=. poetry run uvicorn backend.main:app --host 0.0.0.0 --port 8000
 
-3. **Ajoutez les ingrédients** :
-   - Nom, quantité, unité
-   - Marquez comme indispensable ou optionnel
-   - Ajoutez des alternatives si nécessaire
+# Accéder à la documentation API
+# Ouvrez http://localhost:8000/docs dans votre navigateur
+```
 
-4. **Décrivez les étapes** :
-   - Ajoutez chaque étape de préparation
-   - Réorganisez l'ordre si nécessaire
+### Lancement de l'application Android
 
-5. **Ajoutez des photos** (optionnel) :
-   - Upload multiple de photos
-   - Catégorisez chaque photo (final, cuisson, ingrédient, etc.)
+Pour utiliser l'application Android native :
 
-6. **Enregistrez** : La recette est créée en base avec toutes ses données
+1. **Démarrez le backend API** (voir ci-dessus)
 
-### Modifier une recette existante
+2. **Configurez l'application Android** :
+   - Consultez le fichier `android_app/README.md` pour les instructions détaillées
+   - Consultez `android_app/BACKEND_SETUP.md` pour la configuration de la connexion au backend
 
-1. **Accédez à la page de modification** : Depuis la page de détail d'une recette, cliquez sur "✏️ Modifier cette recette"
+3. **Compilez et installez** l'application sur votre appareil Android ou émulateur
 
-2. **Modifiez les informations** :
-   - Tous les champs sont pré-remplis avec les données actuelles
-   - Ajustez le nom, temps, portions selon vos besoins
-   - Modifiez les catégories et tags
+## 📖 Utilisation
 
-3. **Gérez les ingrédients** :
-   - Les ingrédients existants sont affichés
-   - Ajoutez de nouveaux ingrédients
-   - Supprimez ceux que vous ne voulez plus
+### Ajouter une recette
 
-4. **Modifiez les étapes** :
-   - Les étapes actuelles sont listées
-   - Ajoutez, supprimez ou réorganisez les étapes
-   - L'ordre est automatiquement mis à jour
+1. Cliquez sur "➕ Ajouter une recette" depuis la page d'accueil
+2. Remplissez les informations : nom, temps, portions, catégories, tags
+3. Ajoutez les ingrédients avec quantités et unités
+4. Décrivez les étapes de préparation
+5. Ajoutez des photos (optionnel)
+6. Enregistrez votre recette
 
-5. **Ajoutez de nouvelles photos** (optionnel) :
-   - Les photos existantes restent accessibles via "Gérer les photos existantes"
-   - Vous pouvez ajouter de nouvelles photos qui s'ajouteront aux existantes
+### Rechercher une recette
 
-6. **Enregistrez** : Les modifications sont appliquées immédiatement
+1. Utilisez la barre de recherche pour trouver par nom
+2. Accédez à "🔍 Recherche avancée" pour des critères multiples
+3. Parcourez l'index alphabétique ou l'index des ingrédients
+4. Découvrez les suggestions "Que cuisiner ?"
 
-### Fonctionnalités avancées
+### Modifier une recette
 
-- **Validation** : Vérification des champs obligatoires
-- **Gestion d'erreurs** : Messages d'erreur explicites
-- **Auto-suggestions** : Catégories et tags existants proposés
-- **Réorganisation** : Déplacement des étapes, suppression d'éléments
-- **Lien direct** : Accès immédiat à la recette créée
+1. Ouvrez la fiche détaillée d'une recette
+2. Cliquez sur "✏️ Modifier cette recette"
+3. Modifiez les informations souhaitées
+4. Enregistrez les modifications
 
-## 🗄️ Modèle de données
+## 🗄️ Structure des données
 
-- **Recette** : Entité principale avec métadonnées
-- **Ingrédients** : Avec quantités, unités et alternatives
-- **Étapes** : Ordonnées avec descriptions
-- **Photos** : Catégorisées et stockées localement
-- **Sources** : Multiples types (maison/URL/livre)
-- **Catégories et Tags** : Pour classification
-- **Convives et Exécutions** : Suivi des réalisations
+Vos données sont stockées localement dans :
+- **Base de données** : `data/recettes.db` (SQLite)
+- **Photos** : `data/photos/`
 
-## 🔧 Technologies
+## 🆘 Aide et support
 
-- **Frontend** : Streamlit + streamlit-tags
-- **Backend** : SQLAlchemy + SQLite
-- **Images** : Pillow (PIL)
-- **Dev Tools** : Poetry, pre-commit, pylint, black, pyright
+Si vous rencontrez des problèmes :
+
+1. Vérifiez que toutes les dépendances sont installées : `poetry install --no-root`
+2. Assurez-vous que la base de données est initialisée : `PYTHONPATH=. python scripts/init_db.py`
+3. Consultez le fichier `README_dev.md` pour plus de détails techniques
+4. Pour l'application Android, consultez `android_app/TROUBLESHOOTING.md`
+
+## 📄 Licence
+
+Ce projet est distribué sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Pour plus d'informations sur l'architecture du projet et les conventions de développement, consultez le fichier `README_dev.md`.
