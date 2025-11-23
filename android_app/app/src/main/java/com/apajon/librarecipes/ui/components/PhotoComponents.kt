@@ -210,11 +210,11 @@ fun CategoryBadge(
     modifier: Modifier = Modifier
 ) {
     val (backgroundColor, emoji) = when (category.lowercase()) {
-        "préparation", "preparation" -> Pair(Color(0xFFFFEB3B), "🟡") // Yellow
-        "ingrédient", "ingredient" -> Pair(Color(0xFF4CAF50), "🟢") // Green
-        "cuisson" -> Pair(Color(0xFFFF9800), "🟠") // Orange
-        "final" -> Pair(Color(0xFF2196F3), "🔵") // Blue
-        else -> Pair(Color(0xFF9E9E9E), "⚪") // Gray
+        "préparation", "preparation" -> Pair(com.apajon.librarecipes.ui.theme.CategoryPreparation, "🟡") // Yellow
+        "ingrédient", "ingredient" -> Pair(com.apajon.librarecipes.ui.theme.CategoryIngredient, "🟢") // Green
+        "cuisson" -> Pair(com.apajon.librarecipes.ui.theme.CategoryCuisson, "🟠") // Orange
+        "final" -> Pair(com.apajon.librarecipes.ui.theme.CategoryFinal, "🔵") // Blue
+        else -> Pair(com.apajon.librarecipes.ui.theme.CategoryDefault, "⚪") // Gray
     }
     
     Surface(
