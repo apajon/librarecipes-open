@@ -1,6 +1,6 @@
 [project]
 name = "librarecipes"
-version = "version = "version = "version = "2.7.3"
+version = "2.7.3"
 description = ""
 authors = [
     {name = "Adrien PAJON",email = "adrien.pajon@gmail.com"}
