@@ -4,14 +4,16 @@ Pydantic schemas for LibraRecipes API.
 These schemas define the request and response models for the API endpoints.
 """
 
-from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 
 class IngredientCreate(BaseModel):
     """Schema for creating an ingredient."""
+
     nom: str = Field(..., description="Ingredient name")
     quantite: Optional[float] = Field(None, description="Quantity")
     unite: Optional[str] = Field(None, description="Unit of measurement")
@@ -21,6 +23,7 @@ class IngredientCreate(BaseModel):
 
 class IngredientResponse(BaseModel):
     """Schema for ingredient response."""
+
     nom: str
     quantite: Optional[float] = None
     unite: Optional[str] = None
@@ -35,7 +38,7 @@ class IngredientResponse(BaseModel):
             quantite=ingredient.quantite,
             unite=ingredient.unite,
             indispensable=ingredient.indispensable,
-            alternatives=ingredient.alternatives
+            alternatives=ingredient.alternatives,
         )
 
     class Config:
@@ -44,22 +47,21 @@ class IngredientResponse(BaseModel):
 
 class EtapeCreate(BaseModel):
     """Schema for creating a step."""
+
     description: str = Field(..., description="Step description")
     ordre: int = Field(..., description="Step order")
 
 
 class EtapeResponse(BaseModel):
     """Schema for step response."""
+
     description: str
     ordre: int
 
     @classmethod
     def from_orm(cls, etape):
         """Create from SQLAlchemy model."""
-        return cls(
-            description=etape.description,
-            ordre=etape.ordre
-        )
+        return cls(description=etape.description, ordre=etape.ordre)
 
     class Config:
         from_attributes = True
@@ -67,6 +69,7 @@ class EtapeResponse(BaseModel):
 
 class PhotoCreate(BaseModel):
     """Schema for creating a photo."""
+
     chemin: str = Field(..., description="Photo file path")
     categorie: Optional[str] = Field(None, description="Photo category")
     description: Optional[str] = Field(None, description="Photo description")
@@ -74,40 +77,51 @@ class PhotoCreate(BaseModel):
 
 class PhotoResponse(BaseModel):
     """Schema for photo response."""
+
     chemin: str
     categorie: Optional[str] = None
     description: Optional[str] = None
 
     @classmethod
     def from_orm(cls, photo):
-        """Create from SQLAlchemy model."""
-        return cls(
-            chemin=photo.chemin,
-            categorie=photo.categorie,
-            description=photo.description
-        )
+        """Create from SQLAlchemy model. Note: model has no `description` field; it's ignored if absent."""
+        return cls(chemin=photo.chemin, categorie=photo.categorie, description=getattr(photo, "description", None))
 
     class Config:
         from_attributes = True
 
 
 class SourceCreate(BaseModel):
-    """Schema for creating a source."""
+    """Schema for creating a source.
+
+    Standardized to explicit fields matching the SQLAlchemy model: `url` or `book_*`.
+    """
+
     type: str = Field(..., description="Source type (homemade, url, book)")
-    valeur: Optional[str] = Field(None, description="Source value")
+    url: Optional[str] = Field(None, description="URL for source type 'url'")
+    book_title: Optional[str] = Field(None, description="Book title for source type 'book'")
+    book_authors: Optional[str] = Field(None, description="Book authors for source type 'book'")
+    book_page: Optional[str] = Field(None, description="Book page for source type 'book'")
 
 
 class SourceResponse(BaseModel):
-    """Schema for source response."""
+    """Schema for source response (explicit fields)."""
+
     type: str
-    valeur: Optional[str] = None
+    url: Optional[str] = None
+    book_title: Optional[str] = None
+    book_authors: Optional[str] = None
+    book_page: Optional[str] = None
 
     @classmethod
     def from_orm(cls, source):
         """Create from SQLAlchemy model."""
         return cls(
             type=source.type,
-            valeur=source.url or source.book_title
+            url=source.url,
+            book_title=source.book_title,
+            book_authors=source.book_authors,
+            book_page=source.book_page,
         )
 
     class Config:
@@ -116,6 +130,7 @@ class SourceResponse(BaseModel):
 
 class RecetteCreate(BaseModel):
     """Schema for creating a recipe."""
+
     nom: str = Field(..., description="Recipe name")
     preparation: Optional[int] = Field(None, description="Preparation time in minutes")
     cuisson: Optional[int] = Field(None, description="Cooking time in minutes")
@@ -130,6 +145,7 @@ class RecetteCreate(BaseModel):
 
 class RecetteUpdate(BaseModel):
     """Schema for updating a recipe."""
+
     nom: Optional[str] = Field(None, description="Recipe name")
     preparation: Optional[int] = Field(None, description="Preparation time in minutes")
     cuisson: Optional[int] = Field(None, description="Cooking time in minutes")
@@ -144,6 +160,7 @@ class RecetteUpdate(BaseModel):
 
 class RecetteListResponse(BaseModel):
     """Schema for recipe list response (summary)."""
+
     id: str
     nom: str
     preparation: Optional[int] = None
@@ -164,7 +181,7 @@ class RecetteListResponse(BaseModel):
             portions=recipe.portions,
             date_ajout=recipe.date_ajout,
             categories=[cat.nom for cat in recipe.categories],
-            tags=[tag.nom for tag in recipe.tags]
+            tags=[tag.nom for tag in recipe.tags],
         )
 
     class Config:
@@ -173,6 +190,7 @@ class RecetteListResponse(BaseModel):
 
 class RecetteResponse(BaseModel):
     """Schema for full recipe response."""
+
     id: str
     nom: str
     preparation: Optional[int] = None
@@ -201,7 +219,7 @@ class RecetteResponse(BaseModel):
             categories=[cat.nom for cat in recipe.categories],
             tags=[tag.nom for tag in recipe.tags],
             photos=[PhotoResponse.from_orm(photo) for photo in recipe.photos],
-            source=SourceResponse.from_orm(recipe.source) if recipe.source else None
+            source=SourceResponse.from_orm(recipe.source) if recipe.source else None,
         )
 
     class Config:
@@ -210,12 +228,14 @@ class RecetteResponse(BaseModel):
 
 class IngredientsMode(str, Enum):
     """Enum for ingredients search mode."""
+
     ANY = "ANY"
     ALL = "ALL"
 
 
 class SearchFilters(BaseModel):
     """Schema for recipe search filters."""
+
     nom: Optional[str] = Field(None, description="Recipe name filter")
     ingredients: Optional[List[str]] = Field(None, description="Ingredients filter")
     ingredients_mode: IngredientsMode = Field(IngredientsMode.ANY, description="Ingredients search mode")
@@ -225,6 +245,7 @@ class SearchFilters(BaseModel):
 
 class CategorieResponse(BaseModel):
     """Schema for category response."""
+
     nom: str
 
     class Config:
@@ -233,6 +254,7 @@ class CategorieResponse(BaseModel):
 
 class TagResponse(BaseModel):
     """Schema for tag response."""
+
     nom: str
 
     class Config:
@@ -241,5 +263,7 @@ class TagResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Schema for error response."""
+
     detail: str
+    status_code: int
     status_code: int
