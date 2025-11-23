@@ -81,7 +81,7 @@ val SecondaryOrange = LightSecondary
 @Deprecated("Use MaterialTheme.colorScheme.tertiary instead")
 val AccentRed = LightTertiary
 
-// Remove unused Material2 colors
+// Legacy Material2 colors (kept for backward compatibility but not used in theme)
 val Purple80 = Color(0xFFD0BCFF)
 val PurpleGrey80 = Color(0xFFCCC2DC)
 val Pink80 = Color(0xFFEFB8C8)
