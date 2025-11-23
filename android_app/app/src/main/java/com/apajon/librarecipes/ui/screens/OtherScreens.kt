@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -79,6 +80,14 @@ fun RecipeDetailScreen(
         }
     }
     
+    // Handle copy success - navigate to the copied recipe
+    LaunchedEffect(uiState.copySuccess) {
+        if (uiState.copySuccess && uiState.copiedRecipeId != null) {
+            viewModel.clearCopySuccess()
+            navController.navigate("recipe/${uiState.copiedRecipeId}")
+        }
+    }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -128,6 +137,48 @@ fun RecipeDetailScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Tertiary FAB - Copy recipe
+                FloatingActionButton(
+                    onClick = { 
+                        viewModel.copyRecipe(recipeId)
+                    },
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                ) {
+                    if (uiState.isCopying) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = "Copier la recette"
+                        )
+                    }
+                }
+                
+                // Secondary FAB - Edit recipe
+                FloatingActionButton(
+                    onClick = { 
+                        navController.navigate("edit_recipe/$recipeId")
+                    },
+                    modifier = Modifier.size(56.dp),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Modifier la recette"
+                    )
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -176,19 +227,11 @@ fun RecipeDetailScreen(
                         onExecutionClick = { execution ->
                             selectedExecution = execution
                         },
-                        // Photo management callbacks
+                        // Photo viewer callbacks
                         selectedPhotoIndex = uiState.selectedPhotoIndex,
-                        isPhotoManagementVisible = uiState.isPhotoManagementVisible,
-                        isAddingPhoto = uiState.isAddingPhoto,
                         onPhotoSelected = viewModel::selectPhoto,
                         onPreviousPhoto = viewModel::previousPhoto,
-                        onNextPhoto = viewModel::nextPhoto,
-                        onTogglePhotoManagement = viewModel::togglePhotoManagement,
-                        onAddPhoto = { path, category -> viewModel.addPhoto(recipeId, path, category) },
-                        onUpdatePhotoCategory = viewModel::updatePhotoCategory,
-                        onDeletePhoto = viewModel::deletePhoto,
-                        onMovePhotoUp = viewModel::movePhotoUp,
-                        onMovePhotoDown = viewModel::movePhotoDown
+                        onNextPhoto = viewModel::nextPhoto
                     )
                 }
             }
@@ -275,6 +318,14 @@ fun RecipeDetailScreen(
         LaunchedEffect(error) {
             // Show error snackbar - you might want to implement a proper snackbar here
             viewModel.clearDeleteError()
+        }
+    }
+    
+    // Copy error display
+    uiState.copyError?.let { error ->
+        LaunchedEffect(error) {
+            // Show error snackbar - you might want to implement a proper snackbar here
+            viewModel.clearCopyError()
         }
     }
     
@@ -663,40 +714,20 @@ fun SearchScreen(
             )
         },
         floatingActionButton = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            // Primary Add Recipe FAB only
+            FloatingActionButton(
+                onClick = { 
+                    navController.navigate("create_new_recipe")
+                },
+                modifier = Modifier.size(64.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                // Camera FAB - Secondary FAB for photo capture
-                FloatingActionButton(
-                    onClick = { 
-                        // TODO: Implement camera functionality
-                        // For now, just show a placeholder action
-                    },
-                    modifier = Modifier.size(56.dp),
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Prendre une photo"
-                    )
-                }
-                
-                // Primary Add Recipe FAB
-                FloatingActionButton(
-                    onClick = { 
-                        navController.navigate("create_new_recipe")
-                    },
-                    modifier = Modifier.size(64.dp),
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Ajouter une recette",
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Ajouter une recette",
+                    modifier = Modifier.size(32.dp)
+                )
             }
         }
     ) { paddingValues ->
@@ -988,19 +1019,11 @@ fun RecipeDetailContent(
     onEditSection: (String) -> Unit = {},
     onAddExecution: () -> Unit = {},
     onExecutionClick: (ExecutionWithDetails) -> Unit = {},
-    // Photo management parameters
+    // Photo viewer parameters
     selectedPhotoIndex: Int = 0,
-    isPhotoManagementVisible: Boolean = false,
-    isAddingPhoto: Boolean = false,
     onPhotoSelected: (Int) -> Unit = {},
     onPreviousPhoto: () -> Unit = {},
-    onNextPhoto: () -> Unit = {},
-    onTogglePhotoManagement: () -> Unit = {},
-    onAddPhoto: (String, String?) -> Unit = { _, _ -> },
-    onUpdatePhotoCategory: (String, String?) -> Unit = { _, _ -> },
-    onDeletePhoto: (String) -> Unit = {},
-    onMovePhotoUp: (String) -> Unit = {},
-    onMovePhotoDown: (String) -> Unit = {}
+    onNextPhoto: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = Modifier
@@ -1022,21 +1045,6 @@ fun RecipeDetailContent(
                 onPhotoSelected = onPhotoSelected,
                 onPreviousPhoto = onPreviousPhoto,
                 onNextPhoto = onNextPhoto
-            )
-        }
-        
-        // Photo management section
-        item {
-            PhotoManagementCard(
-                photos = recipe.photos,
-                isVisible = isPhotoManagementVisible,
-                onToggleVisibility = onTogglePhotoManagement,
-                onAddPhotoWithPath = onAddPhoto,
-                onUpdateCategory = onUpdatePhotoCategory,
-                onDeletePhoto = onDeletePhoto,
-                onMovePhotoUp = onMovePhotoUp,
-                onMovePhotoDown = onMovePhotoDown,
-                isAddingPhoto = isAddingPhoto
             )
         }
         
@@ -1554,6 +1562,23 @@ fun QueChoisirScreen(
                     navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            // Primary Add Recipe FAB
+            FloatingActionButton(
+                onClick = { 
+                    navController.navigate("create_new_recipe")
+                },
+                modifier = Modifier.size(64.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Ajouter une recette",
+                    modifier = Modifier.size(32.dp)
+                )
+            }
         }
     ) { paddingValues ->
         LazyColumn(

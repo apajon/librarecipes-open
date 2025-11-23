@@ -36,7 +36,12 @@ data class RecipeDetailUiState(
     val selectedPhotoIndex: Int = 0,
     val isPhotoManagementVisible: Boolean = false,
     val isAddingPhoto: Boolean = false,
-    val addPhotoError: String? = null
+    val addPhotoError: String? = null,
+    // Copy recipe state
+    val isCopying: Boolean = false,
+    val copySuccess: Boolean = false,
+    val copyError: String? = null,
+    val copiedRecipeId: String? = null
 )
 
 /**
@@ -124,6 +129,47 @@ class RecipeDetailViewModel @Inject constructor(
      */
     fun clearDeleteError() {
         _uiState.value = _uiState.value.copy(deleteError = null)
+    }
+    
+    /**
+     * Copy the current recipe with an incremented number in the title.
+     * @param recipeId ID of the recipe to copy
+     */
+    fun copyRecipe(recipeId: String) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isCopying = true, copyError = null)
+            
+            recipeRepository.copyRecipe(recipeId)
+                .onSuccess { response ->
+                    _uiState.value = _uiState.value.copy(
+                        isCopying = false,
+                        copySuccess = true,
+                        copiedRecipeId = response.id,
+                        copyError = null
+                    )
+                }
+                .onFailure { error ->
+                    _uiState.value = _uiState.value.copy(
+                        isCopying = false,
+                        copySuccess = false,
+                        copyError = error.message ?: "Erreur lors de la copie de la recette"
+                    )
+                }
+        }
+    }
+    
+    /**
+     * Clear copy success state.
+     */
+    fun clearCopySuccess() {
+        _uiState.value = _uiState.value.copy(copySuccess = false, copiedRecipeId = null)
+    }
+    
+    /**
+     * Clear copy error state.
+     */
+    fun clearCopyError() {
+        _uiState.value = _uiState.value.copy(copyError = null)
     }
     
     /**

@@ -29,6 +29,16 @@ class EditRecipeViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
+    // Photo management state
+    private val _photos = MutableStateFlow<List<PhotoDetail>>(emptyList())
+    val photos: StateFlow<List<PhotoDetail>> = _photos.asStateFlow()
+    
+    private val _isPhotoManagementVisible = MutableStateFlow(false)
+    val isPhotoManagementVisible: StateFlow<Boolean> = _isPhotoManagementVisible.asStateFlow()
+    
+    private val _isAddingPhoto = MutableStateFlow(false)
+    val isAddingPhoto: StateFlow<Boolean> = _isAddingPhoto.asStateFlow()
+
     private var _recipeId: String? = null
     private var _isEditMode: Boolean = false
 
@@ -72,6 +82,8 @@ class EditRecipeViewModel @Inject constructor(
                         sourceBookAuthors = "",
                         sourceBookPage = ""
                     )
+                    // Load photos
+                    _photos.value = recipeDetail.photos
                 }.onFailure { exception ->
                     _errorMessage.value = "Erreur lors du chargement de la recette: ${exception.message}"
                 }
@@ -276,7 +288,15 @@ class EditRecipeViewModel @Inject constructor(
                     repository.createRecipe(recipe)
                 }
                 
-                result.onSuccess {
+                result.onSuccess { response ->
+                    // If creating a new recipe and there are photos to add
+                    if (!_isEditMode && _photos.value.isNotEmpty()) {
+                        val newRecipeId = response.id
+                        // Save all temporary photos to the database
+                        _photos.value.forEach { photo ->
+                            repository.addPhoto(newRecipeId, photo.chemin, photo.categorie)
+                        }
+                    }
                     _saveSuccess.value = true
                 }.onFailure { exception ->
                     _formState.value = state.copy(
@@ -304,4 +324,145 @@ class EditRecipeViewModel @Inject constructor(
     
     fun isEditMode(): Boolean = _isEditMode
     fun getRecipeId(): String? = _recipeId
+    
+    /**
+     * Toggle photo management visibility.
+     */
+    fun togglePhotoManagement() {
+        _isPhotoManagementVisible.value = !_isPhotoManagementVisible.value
+    }
+    
+    /**
+     * Add a photo to the recipe.
+     */
+    fun addPhoto(photoPath: String, category: String?) {
+        viewModelScope.launch {
+            _isAddingPhoto.value = true
+            
+            if (_recipeId != null) {
+                // Edit mode - save directly to database
+                repository.addPhoto(_recipeId!!, photoPath, category)
+                    .onSuccess { _ ->
+                        // Reload recipe details to get updated photos
+                        repository.getRecipeDetails(_recipeId!!).onSuccess { recipeDetail ->
+                            _photos.value = recipeDetail.photos
+                        }
+                        _isAddingPhoto.value = false
+                    }
+                    .onFailure { error ->
+                        _isAddingPhoto.value = false
+                        _errorMessage.value = "Erreur lors de l'ajout de la photo: ${error.message}"
+                    }
+            } else {
+                // Create mode - store in memory temporarily
+                val nextOrder = (_photos.value.maxOfOrNull { it.ordre } ?: 0) + 1
+                val tempPhoto = PhotoDetail(
+                    id = "temp_${System.currentTimeMillis()}", // Temporary ID
+                    chemin = photoPath,
+                    categorie = category,
+                    ordre = nextOrder
+                )
+                _photos.value = _photos.value + tempPhoto
+                _isAddingPhoto.value = false
+            }
+        }
+    }
+    
+    /**
+     * Update photo category.
+     */
+    fun updatePhotoCategory(photoId: String, category: String?) {
+        viewModelScope.launch {
+            if (_recipeId != null) {
+                // Edit mode - update in database
+                repository.updatePhotoCategory(photoId, category)
+                    .onSuccess {
+                        _photos.value = _photos.value.map { photo ->
+                            if (photo.id == photoId) photo.copy(categorie = category) else photo
+                        }
+                    }
+                    .onFailure { error ->
+                        _errorMessage.value = "Erreur lors de la mise à jour: ${error.message}"
+                    }
+            } else {
+                // Create mode - update in memory
+                _photos.value = _photos.value.map { photo ->
+                    if (photo.id == photoId) photo.copy(categorie = category) else photo
+                }
+            }
+        }
+    }
+    
+    /**
+     * Delete a photo.
+     */
+    fun deletePhoto(photoId: String) {
+        viewModelScope.launch {
+            if (_recipeId != null) {
+                // Edit mode - delete from database
+                repository.deletePhoto(photoId)
+                    .onSuccess {
+                        _photos.value = _photos.value.filter { it.id != photoId }
+                    }
+                    .onFailure { error ->
+                        _errorMessage.value = "Erreur lors de la suppression: ${error.message}"
+                    }
+            } else {
+                // Create mode - remove from memory
+                _photos.value = _photos.value.filter { it.id != photoId }
+            }
+        }
+    }
+    
+    /**
+     * Move photo up in order.
+     */
+    fun movePhotoUp(photoId: String) {
+        val currentPhotos = _photos.value
+        val index = currentPhotos.indexOfFirst { it.id == photoId }
+        if (index > 0) {
+            val reordered = currentPhotos.toMutableList()
+            val temp = reordered[index]
+            reordered[index] = reordered[index - 1]
+            reordered[index - 1] = temp
+            reorderPhotos(reordered)
+        }
+    }
+    
+    /**
+     * Move photo down in order.
+     */
+    fun movePhotoDown(photoId: String) {
+        val currentPhotos = _photos.value
+        val index = currentPhotos.indexOfFirst { it.id == photoId }
+        if (index < currentPhotos.size - 1) {
+            val reordered = currentPhotos.toMutableList()
+            val temp = reordered[index]
+            reordered[index] = reordered[index + 1]
+            reordered[index + 1] = temp
+            reorderPhotos(reordered)
+        }
+    }
+    
+    /**
+     * Reorder photos and update in repository.
+     */
+    private fun reorderPhotos(reorderedPhotos: List<PhotoDetail>) {
+        viewModelScope.launch {
+            val updatedPhotos = reorderedPhotos.mapIndexed { index, photo ->
+                photo.copy(ordre = index + 1)
+            }
+            _photos.value = updatedPhotos
+            
+            // Only update in repository if in edit mode
+            if (_recipeId != null) {
+                // Create map of photoId to order
+                val photoOrders = updatedPhotos.associate { it.id to it.ordre }
+                
+                // Update in repository
+                repository.reorderPhotos(_recipeId!!, photoOrders)
+            }
+            // In create mode, just keep in memory
+        }
+    }
 }
