@@ -10,7 +10,6 @@ Migrer une application Python (Streamlit + SQLAlchemy) vers une application Andr
 - **Frontend actuel** : Streamlit
 - **Gestion des dépendances** : Passage à Poetry (`pyproject.toml`, `poetry.lock`)
 - **CI/CD** : GitHub Actions (tests, lint, bumpversion)
-- **Repo Git** : branch `feat/android-flutter-setup`
 - **Tests** : Pytest
 - **Versioning** : bump2version
 
@@ -19,10 +18,8 @@ Migrer une application Python (Streamlit + SQLAlchemy) vers une application Andr
 ## 3. Tâches de migration
 
 ### 3.1 Architecture cible
-- Décider du framework Android :
-  - Kotlin natif (Jetpack Compose)
-  - Ou Flutter (Dart) si plus adapté (à discuter avec l’agent)
-- Définir API backend → REST ou GraphQL
+- Framework Android : Kotlin natif (Jetpack Compose)
+- API backend → REST avec FastAPI
 - Gérer l’authentification (JWT, OAuth2, etc.)
 
 ### 3.2 Backend (Python)
