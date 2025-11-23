@@ -2,9 +2,17 @@
 
 LibraRecipes est une application de gestion de recettes de cuisine qui vous permet de créer, organiser et rechercher vos recettes préférées avec photos, ingrédients, étapes détaillées et métadonnées.
 
+## 🏗️ Architecture
+
+LibraRecipes est composé de trois éléments principaux :
+
+- **Backend FastAPI** : API REST qui sert de source de vérité canonique pour les données
+- **Interface Web Streamlit** : Application web moderne avec navigation intuitive
+- **Application Android Native** : Application mobile pour smartphones et tablettes (Kotlin + Jetpack Compose)
+
 ## 📱 Interfaces disponibles
 
-LibraRecipes propose deux interfaces :
+Vous pouvez accéder à vos recettes via :
 
 - **Interface Web** : Application Streamlit moderne avec navigation intuitive
 - **Application Android** : Application native pour smartphones et tablettes Android
