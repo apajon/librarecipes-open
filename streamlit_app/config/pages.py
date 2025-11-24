@@ -2,6 +2,7 @@
 
 import streamlit as st
 from pages_functions.add_recette import add_recette_page
+from pages_functions.android_theme_editor import android_theme_editor_page
 from pages_functions.card_recette import card_recette_page
 from pages_functions.home import home_page
 from pages_functions.index_ingredients import index_ingredients_page
@@ -46,6 +47,9 @@ def get_pages_config(page_objects):
             page_objects["card_recette"],
             page_objects["modify_recette"],
             page_objects["photos_recette"],
+        ],
+        "⚙️ Configuration": [
+            st.Page(android_theme_editor_page, title="Android Theme Editor", icon="🎨"),
         ],
     }
 
