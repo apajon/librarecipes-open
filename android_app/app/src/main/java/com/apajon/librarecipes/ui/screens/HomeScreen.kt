@@ -3,7 +3,6 @@ package com.apajon.librarecipes.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,6 +13,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.apajon.librarecipes.ui.components.ActionCard
+import com.apajon.librarecipes.ui.icon.AppIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,7 +41,7 @@ fun HomeScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = AppIcons.Add,
                     contentDescription = "Ajouter une recette",
                     modifier = Modifier.size(32.dp)
                 )
@@ -104,7 +104,7 @@ fun HomeScreen(
                 ActionCard(
                     title = "Voir mes recettes",
                     description = "Parcourir toutes vos recettes enregistrées",
-                    icon = Icons.AutoMirrored.Filled.List,
+                    icon = AppIcons.List,
                     onClick = { navController.navigate("recipes") }
                 )
             }
@@ -113,7 +113,7 @@ fun HomeScreen(
                 ActionCard(
                     title = "Ajouter une recette",
                     description = "Créer une nouvelle recette",
-                    icon = Icons.Default.Add,
+                    icon = AppIcons.Add,
                     onClick = { navController.navigate("create_recipe") }
                 )
             }
