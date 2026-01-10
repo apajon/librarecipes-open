@@ -379,7 +379,7 @@ def render_preview(theme_cfg: ThemeConfig):
             margin-top: {theme_cfg.spacing.mediumDp}px;
         }}
     </style>
-    
+
     <div class="preview-container">
         <div class="preview-appbar">
             LibraRecipes
@@ -391,7 +391,7 @@ def render_preview(theme_cfg: ThemeConfig):
             </div>
             <button class="preview-button">Primary Button</button>
             <button class="preview-button-secondary">Secondary Button</button>
-            
+
             <div class="preview-card">
                 <strong>Card Component</strong><br>
                 Background color with rounded corners
@@ -494,7 +494,7 @@ def android_theme_editor_page():
         st.markdown(
             """
         ### Getting Started
-        
+
         1. Select a theme file from the sidebar or upload your own
         2. Click "Load" to load the theme into the editor
         3. Edit colors, typography, and spacing

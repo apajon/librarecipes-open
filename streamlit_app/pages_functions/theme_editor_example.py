@@ -338,7 +338,7 @@ To integrate this into your Streamlit app:
 1. In config/pages.py, add:
    ```python
    from streamlit_app.pages_functions.theme_editor import theme_editor_page
-   
+
    # In get_pages_config():
    st.Page(
        theme_editor_page,
@@ -351,7 +351,7 @@ To integrate this into your Streamlit app:
    ```python
    # streamlit_app/pages/theme_editor.py
    from streamlit_app.pages_functions.theme_editor_example import theme_editor_page
-   
+
    theme_editor_page()
    ```
 """
