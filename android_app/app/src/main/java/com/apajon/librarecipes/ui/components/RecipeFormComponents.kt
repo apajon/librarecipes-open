@@ -3,8 +3,6 @@ package com.apajon.librarecipes.ui.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -15,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.MeasurementUnits
 import com.apajon.librarecipes.data.model.SourceType
+import com.apajon.librarecipes.ui.icon.AppIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -93,7 +92,7 @@ fun RecipeBasicInfoCard(
                         if (current > 1) onPortionsChange((current - 1).toString())
                     }
                 ) {
-                    Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Diminuer")
+                    Icon(AppIcons.ArrowDown, contentDescription = "Diminuer")
                 }
                 
                 OutlinedTextField(
@@ -110,7 +109,7 @@ fun RecipeBasicInfoCard(
                         if (current < 99) onPortionsChange((current + 1).toString())
                     }
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Augmenter")
+                    Icon(AppIcons.Add, contentDescription = "Augmenter")
                 }
             }
 
@@ -195,7 +194,7 @@ fun IngredientCard(
                     enabled = canMoveUp
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowUp,
+                        AppIcons.ArrowUp,
                         contentDescription = "Déplacer vers le haut",
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
@@ -206,7 +205,7 @@ fun IngredientCard(
                     enabled = canMoveDown
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowDown,
+                        AppIcons.ArrowDown,
                         contentDescription = "Déplacer vers le bas",
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
@@ -216,7 +215,7 @@ fun IngredientCard(
                     onClick = { onDelete(index) }
                 ) {
                     Icon(
-                        Icons.Default.Delete,
+                        AppIcons.Delete,
                         contentDescription = "Supprimer",
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -272,7 +271,7 @@ fun StepCard(
                     enabled = canMoveUp
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowUp,
+                        AppIcons.ArrowUp,
                         contentDescription = "Déplacer vers le haut",
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
@@ -283,7 +282,7 @@ fun StepCard(
                     enabled = canMoveDown
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowDown,
+                        AppIcons.ArrowDown,
                         contentDescription = "Déplacer vers le bas",
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
@@ -293,7 +292,7 @@ fun StepCard(
                     onClick = { onDelete(index) }
                 ) {
                     Icon(
-                        Icons.Default.Delete,
+                        AppIcons.Delete,
                         contentDescription = "Supprimer",
                         tint = MaterialTheme.colorScheme.error
                     )

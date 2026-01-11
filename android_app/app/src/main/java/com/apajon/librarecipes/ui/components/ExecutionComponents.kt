@@ -8,11 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.clickable
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.model.*
+import com.apajon.librarecipes.ui.icon.AppIcons
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -128,7 +124,7 @@ fun AddExecutionDialog(
                     IconButton(
                         onClick = { showAddConviveDialog = true }
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Ajouter un convive")
+                        Icon(AppIcons.Add, contentDescription = "Ajouter un convive")
                     }
                 }
                 
@@ -344,7 +340,7 @@ fun AddConviveToExecutionDialog(
                             onClick = { showNewConviveDialog = true },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
+                            Icon(AppIcons.Add, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Créer un nouveau convive")
                         }
@@ -433,7 +429,7 @@ fun ConviveSelectionItem(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Icon(
-                Icons.Default.Person,
+                AppIcons.Person,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -493,7 +489,7 @@ fun ConviveWithFeedbackItem(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Default.Person,
+                        AppIcons.Person,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -509,7 +505,7 @@ fun ConviveWithFeedbackItem(
                     onClick = onRemove
                 ) {
                     Icon(
-                        Icons.Default.Delete,
+                        AppIcons.Delete,
                         contentDescription = "Supprimer",
                         tint = MaterialTheme.colorScheme.error
                     )
@@ -705,7 +701,7 @@ fun ExecutionDetailDialog(
                                             verticalAlignment = Alignment.CenterVertically
                                         ) {
                                             Icon(
-                                                Icons.Default.Person,
+                                                AppIcons.Person,
                                                 contentDescription = null,
                                                 tint = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
@@ -738,7 +734,7 @@ fun ExecutionDetailDialog(
                 TextButton(
                     onClick = onEdit
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
+                    Icon(AppIcons.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Modifier")
                 }
@@ -748,7 +744,7 @@ fun ExecutionDetailDialog(
                         contentColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Icon(Icons.Default.Delete, contentDescription = null)
+                    Icon(AppIcons.Delete, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text("Supprimer")
                 }

@@ -12,14 +12,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -34,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.apajon.librarecipes.data.model.PhotoDetail
+import com.apajon.librarecipes.ui.icon.AppIcons
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -64,7 +57,7 @@ fun PhotoViewerCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    Icons.Default.Add,
+                    AppIcons.Add,
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -155,7 +148,7 @@ fun PhotoViewerCard(
                             )
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            AppIcons.ArrowBack,
                             contentDescription = "Photo précédente",
                             tint = Color.White
                         )
@@ -172,7 +165,7 @@ fun PhotoViewerCard(
                             )
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowForward,
+                            AppIcons.ArrowForward,
                             contentDescription = "Photo suivante",
                             tint = Color.White
                         )
@@ -210,11 +203,11 @@ fun CategoryBadge(
     modifier: Modifier = Modifier
 ) {
     val (backgroundColor, emoji) = when (category.lowercase()) {
-        "préparation", "preparation" -> Pair(Color(0xFFFFEB3B), "🟡") // Yellow
-        "ingrédient", "ingredient" -> Pair(Color(0xFF4CAF50), "🟢") // Green
-        "cuisson" -> Pair(Color(0xFFFF9800), "🟠") // Orange
-        "final" -> Pair(Color(0xFF2196F3), "🔵") // Blue
-        else -> Pair(Color(0xFF9E9E9E), "⚪") // Gray
+        "préparation", "preparation" -> Pair(com.apajon.librarecipes.ui.theme.CategoryPreparation, "🟡") // Yellow
+        "ingrédient", "ingredient" -> Pair(com.apajon.librarecipes.ui.theme.CategoryIngredient, "🟢") // Green
+        "cuisson" -> Pair(com.apajon.librarecipes.ui.theme.CategoryCuisson, "🟠") // Orange
+        "final" -> Pair(com.apajon.librarecipes.ui.theme.CategoryFinal, "🔵") // Blue
+        else -> Pair(com.apajon.librarecipes.ui.theme.CategoryDefault, "⚪") // Gray
     }
     
     Surface(
@@ -323,7 +316,7 @@ fun PhotoManagementCard(
                 )
                 
                 Icon(
-                    if (isVisible) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    if (isVisible) AppIcons.ArrowUp else AppIcons.ArrowDown,
                     contentDescription = if (isVisible) "Masquer" else "Afficher"
                 )
             }
@@ -438,7 +431,7 @@ fun PhotoUploadSection(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Ajout en cours...")
             } else {
-                Icon(Icons.Default.Add, contentDescription = null)
+                Icon(AppIcons.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Choisir une photo")
             }
@@ -546,7 +539,7 @@ fun PhotoManagementItem(
                     enabled = canMoveUp
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowUp,
+                        AppIcons.ArrowUp,
                         contentDescription = "Déplacer vers le haut",
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
@@ -558,7 +551,7 @@ fun PhotoManagementItem(
                     enabled = canMoveDown
                 ) {
                     Icon(
-                        Icons.Default.KeyboardArrowDown,
+                        AppIcons.ArrowDown,
                         contentDescription = "Déplacer vers le bas",
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
@@ -569,7 +562,7 @@ fun PhotoManagementItem(
                     onClick = { showDeleteDialog = true }
                 ) {
                     Icon(
-                        Icons.Default.Delete,
+                        AppIcons.Delete,
                         contentDescription = "Supprimer",
                         tint = MaterialTheme.colorScheme.error
                     )
