@@ -11,15 +11,9 @@ from pydantic import ValidationError
 
 # Import theme configuration modules
 from src.theme_config import load_theme, save_theme, ThemeConfig
-from src.theme_config.models import ColorPalette, Typography, Spacing
 
-# Try to import streamlit-extras for toasts
-try:
-    from streamlit_extras.stylable_container import stylable_container
-
-    HAS_EXTRAS = True
-except ImportError:
-    HAS_EXTRAS = False
+# Try to import streamlit-extras for toasts (currently not using stylable_container)
+HAS_EXTRAS = False
 
 # Configuration
 CONFIG_DIR = Path("config")
