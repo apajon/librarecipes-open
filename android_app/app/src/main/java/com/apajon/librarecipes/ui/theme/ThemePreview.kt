@@ -27,10 +27,23 @@ import androidx.compose.ui.unit.dp
 
 /**
  * ThemePreview - Comprehensive theme showcase for LibraRecipes
- * 
+ *
  * This file provides visual testing for the app's theming system without running the app.
  * It showcases all Material 3 theme tokens including colors, typography, and components.
- * 
+ *
+ * ## Static colors vs Dynamic colors
+ *
+ * **Static colors** (`dynamicColor = false`): the palette is fixed and defined entirely in
+ * [Color.kt]. LibraRecipes uses a green / orange / red scheme regardless of what the user's
+ * wallpaper looks like.
+ *
+ * **Dynamic colors** (`dynamicColor = true`): available on Android 12+ (Material You). The
+ * system extracts a tonal palette directly from the user's wallpaper and overrides the static
+ * palette at runtime. The app then automatically adapts to the user's personalization choices.
+ * On devices below Android 12 the app falls back to the static palette. In Android Studio
+ * previews there is no wallpaper, so both modes render identically; the difference only
+ * manifests on a real Android 12+ device.
+ *
  * Usage:
  * - Open this file in Android Studio
  * - Use the "Split" or "Design" view to see live previews
@@ -39,10 +52,17 @@ import androidx.compose.ui.unit.dp
  */
 
 /**
- * Main reusable composable that showcases all theme tokens
+ * Main reusable composable that showcases all theme tokens.
+ *
+ * @param dynamicColor pass `true` when the preview is configured with dynamic color so the
+ * info banner reflects the active mode. This parameter has no effect on actual colors —
+ * it only drives the explanatory label shown at the top of the preview.
  */
 @Composable
-fun ThemeShowcase(modifier: Modifier = Modifier) {
+fun ThemeShowcase(
+    modifier: Modifier = Modifier,
+    dynamicColor: Boolean = false
+) {
     Surface(
         modifier = modifier,
         color = MaterialTheme.colorScheme.background
@@ -59,7 +79,10 @@ fun ThemeShowcase(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            
+
+            // Color-mode info banner
+            ColorModeBanner(dynamicColor = dynamicColor)
+
             // Color Scheme Section
             ColorSchemeSection()
             
@@ -68,6 +91,59 @@ fun ThemeShowcase(modifier: Modifier = Modifier) {
             
             // Components Section
             ComponentsSection()
+        }
+    }
+}
+
+/**
+ * Informational banner that explains which color mode is active in this preview.
+ *
+ * **Static colors** – the palette is hard-coded in [Color.kt] (green / orange / red).
+ * It never changes regardless of user settings.
+ *
+ * **Dynamic colors (Material You)** – Android 12+ generates a personalized tonal palette
+ * from the user's wallpaper at runtime, replacing the static palette. Previews in Android
+ * Studio always fall back to the static palette because there is no wallpaper context, so
+ * both modes look identical here; the difference is only visible on a real device.
+ */
+@Composable
+private fun ColorModeBanner(dynamicColor: Boolean) {
+    val containerColor = if (dynamicColor)
+        MaterialTheme.colorScheme.secondaryContainer
+    else
+        MaterialTheme.colorScheme.primaryContainer
+    val contentColor = if (dynamicColor)
+        MaterialTheme.colorScheme.onSecondaryContainer
+    else
+        MaterialTheme.colorScheme.onPrimaryContainer
+    val title = if (dynamicColor)
+        "Dynamic Colors (Material You) — Android 12+"
+    else
+        "Static Colors — Fixed Palette"
+    val description = if (dynamicColor)
+        "Colors are generated from the user's wallpaper at runtime. " +
+            "This preview falls back to static colors because no wallpaper context is available."
+    else
+        "Colors are defined in Color.kt (green / orange / red theme). " +
+            "They are the same for every user on every device."
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = containerColor,
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelLarge,
+                color = contentColor
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodySmall,
+                color = contentColor
+            )
         }
     }
 }
@@ -452,7 +528,7 @@ private fun ThemePreview_Light_Static() {
         darkTheme = false,
         dynamicColor = false
     ) {
-        ThemeShowcase()
+        ThemeShowcase(dynamicColor = false)
     }
 }
 
@@ -471,14 +547,15 @@ private fun ThemePreview_Dark_Static() {
         darkTheme = true,
         dynamicColor = false
     ) {
-        ThemeShowcase()
+        ThemeShowcase(dynamicColor = false)
     }
 }
 
 /**
  * Preview: Light theme with dynamic color enabled
- * This shows how the theme adapts to Android 12+ dynamic colors in light mode
- * Note: Dynamic colors won't actually appear in preview, but this tests the theme setup
+ * Colors are generated from the user's wallpaper on Android 12+. In Android Studio previews
+ * there is no wallpaper context, so the static palette is used and the previews look the same
+ * as the static ones — the banner inside the preview explains this.
  */
 @Preview(
     name = "Light Theme (Dynamic Colors)",
@@ -491,14 +568,15 @@ private fun ThemePreview_Light_Dynamic() {
         darkTheme = false,
         dynamicColor = true
     ) {
-        ThemeShowcase()
+        ThemeShowcase(dynamicColor = true)
     }
 }
 
 /**
  * Preview: Dark theme with dynamic color enabled
- * This shows how the theme adapts to Android 12+ dynamic colors in dark mode
- * Note: Dynamic colors won't actually appear in preview, but this tests the theme setup
+ * Colors are generated from the user's wallpaper on Android 12+. In Android Studio previews
+ * there is no wallpaper context, so the static palette is used and the previews look the same
+ * as the static ones — the banner inside the preview explains this.
  */
 @Preview(
     name = "Dark Theme (Dynamic Colors)",
@@ -511,6 +589,6 @@ private fun ThemePreview_Dark_Dynamic() {
         darkTheme = true,
         dynamicColor = true
     ) {
-        ThemeShowcase()
+        ThemeShowcase(dynamicColor = true)
     }
 }
