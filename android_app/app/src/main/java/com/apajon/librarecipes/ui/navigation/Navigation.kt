@@ -15,14 +15,28 @@ import com.apajon.librarecipes.ui.screens.QueChoisirScreen
 
 @Composable
 fun LibraRecipesNavigation(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    useSystemDarkTheme: Boolean = true,
+    forceDarkTheme: Boolean = false,
+    dynamicColor: Boolean = true,
+    onUseSystemDarkThemeChange: (Boolean) -> Unit = {},
+    onForceDarkThemeChange: (Boolean) -> Unit = {},
+    onDynamicColorChange: (Boolean) -> Unit = {}
 ) {
     NavHost(
         navController = navController,
         startDestination = "home"
     ) {
         composable("home") {
-            HomeScreen(navController = navController)
+            HomeScreen(
+                navController = navController,
+                useSystemDarkTheme = useSystemDarkTheme,
+                forceDarkTheme = forceDarkTheme,
+                dynamicColor = dynamicColor,
+                onUseSystemDarkThemeChange = onUseSystemDarkThemeChange,
+                onForceDarkThemeChange = onForceDarkThemeChange,
+                onDynamicColorChange = onDynamicColorChange
+            )
         }
         composable("recipes") {
             RecipeListScreen(navController = navController)
