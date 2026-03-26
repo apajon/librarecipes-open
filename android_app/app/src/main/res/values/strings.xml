@@ -1,4 +1,279 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- ==================== Common / Shared ==================== -->
     <string name="app_name">LibraRecipes</string>
+    <string name="action_ok">OK</string>
+    <string name="action_close">Fermer</string>
+    <string name="action_back">Retour</string>
+    <string name="action_save">Sauvegarder</string>
+    <string name="action_add">Ajouter</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="action_edit">Modifier</string>
+    <string name="action_delete">Supprimer</string>
+    <string name="action_retry">Réessayer</string>
+    <string name="action_move_up_cd">Déplacer vers le haut</string>
+    <string name="action_move_down_cd">Déplacer vers le bas</string>
+    <string name="action_delete_cd">Supprimer</string>
+    <string name="action_edit_cd">Modifier</string>
+    <string name="error_title">Erreur</string>
+    <string name="sort_recent">Récent</string>
+    <string name="sort_old">Ancien</string>
+
+    <!-- ==================== HomeScreen ==================== -->
+    <string name="home_theme_settings_cd">Paramètres du thème</string>
+    <string name="home_fab_add_recipe_cd">Ajouter une recette</string>
+    <string name="home_hero_title">Votre carnet de cuisine</string>
+    <string name="home_hero_subtitle">Le carnet de cuisine que vous ne perdrez jamais.</string>
+    <string name="home_section_main_actions">Actions principales</string>
+    <string name="home_action_view_recipes_title">Voir mes recettes</string>
+    <string name="home_action_view_recipes_desc">Parcourir votre carnet de recettes</string>
+    <string name="home_action_add_recipe_title">Ajouter une recette</string>
+    <string name="home_action_add_recipe_desc">Créer une nouvelle fiche recette</string>
+    <string name="home_action_search_title">Rechercher</string>
+    <string name="home_action_search_desc">Retrouver une recette par nom, ingrédient ou tag</string>
+    <string name="home_action_suggestions_title">Besoin d\'une idée ?</string>
+    <string name="home_action_suggestions_desc">Trouver une recette selon vos envies ou ce que vous avez</string>
+
+    <!-- Theme dialog -->
+    <string name="theme_dialog_title">Thème</string>
+    <string name="theme_dark_mode">Mode sombre</string>
+    <string name="theme_follow_system">Suivre le système</string>
+    <string name="theme_colors">Couleurs</string>
+    <string name="theme_dynamic_colors">Couleurs dynamiques</string>
+    <string name="theme_dynamic_colors_desc">Adapter les couleurs au fond d\'écran</string>
+    <string name="theme_dynamic_colors_unavailable">Nécessite Android 12+</string>
+
+    <!-- ==================== EditRecipeScreen ==================== -->
+    <string name="edit_section_ingredients">Ingrédients</string>
+    <string name="edit_section_steps">Étapes</string>
+    <string name="edit_section_categories_tags">Catégories et tags</string>
+    <string name="edit_title_edit_recipe">Modifier Recette</string>
+    <string name="edit_title_edit_section">Modifier: %1$s</string>
+    <string name="edit_title_new_recipe">Nouvelle Recette</string>
+    <string name="edit_fab_add_photo_cd">Ajouter une photo à la recette</string>
+    <string name="edit_loading_recipe">Chargement de la recette…</string>
+    <string name="edit_section_ingredients_title">Ingrédients</string>
+    <string name="edit_empty_ingredients">Aucun ingrédient ajouté</string>
+    <string name="edit_section_steps_title">Étapes de préparation</string>
+    <string name="edit_empty_steps">Aucune étape ajoutée</string>
+    <string name="edit_save_update">💾 Mettre à jour la recette</string>
+    <string name="edit_save_create">💾 Sauvegarder la recette</string>
+    <string name="edit_saving_update">Mise à jour en cours…</string>
+    <string name="edit_saving_create">Sauvegarde en cours…</string>
+
+    <!-- ==================== RecipeFormComponents ==================== -->
+    <string name="form_basic_info_title">Informations de base</string>
+    <string name="form_recipe_name_label">Nom de la recette *</string>
+    <string name="form_preparation_label">Préparation (min)</string>
+    <string name="form_cooking_label">Cuisson (min)</string>
+    <string name="form_portions_label">Portions:</string>
+    <string name="form_portions_decrease_cd">Diminuer</string>
+    <string name="form_portions_increase_cd">Augmenter</string>
+    <string name="form_categories_label">Catégories (séparées par des virgules)</string>
+    <string name="form_categories_placeholder">Ex: plat principal, végétarien</string>
+    <string name="form_tags_label">Tags (séparés par des virgules)</string>
+    <string name="form_tags_placeholder">Ex: facile, rapide, économique</string>
+    <string name="ingredient_essential">Essentiel</string>
+    <string name="ingredient_optional">Optionnel</string>
+    <string name="ingredient_alt_prefix">Alt: %1$s</string>
+    <string name="form_step_number">Étape %1$d</string>
+    <string name="form_source_title">Source de la recette</string>
+
+    <!-- ==================== RecipeFormDialogs ==================== -->
+    <!-- Ingredient dialog -->
+    <string name="dialog_edit_ingredient_title">Modifier l\'ingrédient</string>
+    <string name="dialog_add_ingredient_title">Ajouter un ingrédient</string>
+    <string name="dialog_ingredient_name_label">Nom de l\'ingrédient *</string>
+    <string name="dialog_ingredient_name_placeholder">Ex: Farine</string>
+    <string name="dialog_quantity_label">Quantité</string>
+    <string name="dialog_quantity_placeholder">Ex: 250</string>
+    <string name="dialog_unit_label">Unité</string>
+    <string name="dialog_unit_placeholder">Sélectionner</string>
+    <string name="dialog_no_unit">Aucune unité</string>
+    <string name="dialog_essential_ingredient">Ingrédient essentiel</string>
+    <string name="dialog_alternatives_label">Alternatives (séparées par des points-virgules)</string>
+    <string name="dialog_alternatives_placeholder">Ex: sauce soja; tamari; sel de céleri</string>
+
+    <!-- Step dialog -->
+    <string name="dialog_edit_step_title">Modifier l\'étape</string>
+    <string name="dialog_add_step_title">Ajouter une étape</string>
+    <string name="dialog_step_description_label">Description de l\'étape *</string>
+    <string name="dialog_step_description_placeholder">Décrivez l\'étape de préparation…</string>
+
+    <!-- Source fields -->
+    <string name="source_url_label">URL de la recette</string>
+    <string name="source_url_placeholder">https://exemple.com/recette</string>
+    <string name="source_book_title_label">Titre du livre/magazine</string>
+    <string name="source_book_title_placeholder">Nom du livre ou magazine</string>
+    <string name="source_book_authors_label">Auteur(s)</string>
+    <string name="source_book_authors_placeholder">Nom des auteurs</string>
+    <string name="source_book_page_label">Page (optionnel)</string>
+    <string name="source_book_page_placeholder">Numéro de page</string>
+
+    <!-- ==================== RecipeDetailScreen ==================== -->
+    <string name="recipe_detail_default_title">Détail Recette</string>
+    <string name="recipe_detail_copy_cd">Copier la recette</string>
+    <string name="recipe_detail_delete_title">Supprimer la recette</string>
+    <string name="recipe_detail_delete_message">Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.</string>
+    <string name="recipe_detail_deleting">Suppression en cours…</string>
+
+    <!-- RecipeDetailContent -->
+    <string name="recipe_ingredients_count">Ingrédients (%1$d)</string>
+    <string name="recipe_ingredients_edit_cd">Modifier les ingrédients</string>
+    <string name="recipe_steps_count">Étapes de préparation (%1$d)</string>
+    <string name="recipe_steps_edit_cd">Modifier les étapes</string>
+    <string name="recipe_section_categories_tags">Catégories et tags</string>
+    <string name="recipe_categories_tags_edit_cd">Modifier les catégories et tags</string>
+    <string name="recipe_categories_title">Catégories</string>
+    <string name="recipe_tags_title">Tags</string>
+    <string name="recipe_source_title">Source</string>
+    <string name="recipe_source_web">Site web: %1$s</string>
+    <string name="recipe_source_web_unknown">URL non spécifiée</string>
+    <string name="recipe_source_book">Livre: %1$s</string>
+    <string name="recipe_source_book_unknown">Titre non spécifié</string>
+    <string name="recipe_source_authors">Auteur(s): %1$s</string>
+    <string name="recipe_source_page">Page: %1$s</string>
+    <string name="recipe_source_homemade">Recette maison</string>
+    <string name="recipe_info_title">Informations</string>
+    <string name="recipe_date_added">Ajoutée le: %1$s</string>
+    <string name="recipe_realizations_count">Réalisations (%1$d)</string>
+    <string name="recipe_add_realization_cd">Ajouter une réalisation</string>
+    <string name="recipe_no_realizations">Aucune réalisation enregistrée</string>
+    <string name="recipe_alternative">Alternative: %1$s</string>
+    <string name="ingredient_optional_label">optionnel</string>
+    <string name="recipe_info_preparation">Préparation</string>
+    <string name="recipe_info_cooking">Cuisson</string>
+    <string name="recipe_info_portions">Portions</string>
+
+    <!-- ==================== SearchScreen ==================== -->
+    <string name="search_title">Recherche</string>
+    <string name="search_clear_cd">Effacer recherche</string>
+    <string name="search_fab_add_recipe_cd">Ajouter une recette</string>
+    <string name="search_filters_title">Filtres de recherche</string>
+    <string name="search_recipe_name_label">Nom de la recette</string>
+    <string name="search_recipe_name_placeholder">Ex: Carbonara, Tiramisu…</string>
+    <string name="search_ingredients_label">Ingrédients</string>
+    <string name="search_ingredients_placeholder">Ex: tomate, basilic, mozzarella (séparés par des virgules)</string>
+    <string name="search_ingredients_supporting">Entrez les ingrédients séparés par des virgules</string>
+    <string name="search_categories_label">Catégories</string>
+    <string name="search_categories_placeholder">Ex: plat principal, dessert, entrée</string>
+    <string name="search_categories_supporting">Entrez les catégories séparées par des virgules</string>
+    <string name="search_tags_label">Tags</string>
+    <string name="search_tags_placeholder">Ex: rapide, végétarien, italien</string>
+    <string name="search_tags_supporting">Entrez les tags séparés par des virgules</string>
+    <string name="search_button">🔍 Rechercher</string>
+    <string name="search_all_recipes_button">📋 Toutes les recettes</string>
+    <string name="search_results_count">Résultats (%1$d)</string>
+    <string name="search_in_progress">Recherche en cours…</string>
+    <string name="search_error">Erreur de recherche</string>
+    <string name="search_no_results">Aucun résultat trouvé</string>
+    <string name="search_no_recipe_found">Aucune recette trouvée</string>
+    <string name="search_no_recipe_suggestion">Essayez de modifier vos critères de recherche ou cliquez sur \"Toutes les recettes\" pour voir toutes les recettes disponibles.</string>
+
+    <!-- ==================== QueChoisirScreen ==================== -->
+    <string name="que_choisir_title">Besoin d\'une idée ?</string>
+    <string name="que_choisir_subtitle">Trouvez une recette selon vos envies ou ce que vous avez.</string>
+    <string name="que_choisir_filter_suggestions">Suggestions</string>
+    <string name="que_choisir_filter_popular">Populaires</string>
+    <string name="que_choisir_filter_random">Au hasard</string>
+    <string name="que_choisir_renew">Renouveler</string>
+    <string name="que_choisir_search">Rechercher</string>
+    <string name="que_choisir_suggestions_title">Suggestions pour vous</string>
+    <string name="que_choisir_popular_title">Recettes populaires</string>
+    <string name="que_choisir_random_title">Recettes au hasard</string>
+    <string name="que_choisir_empty_title">Aucune recette disponible</string>
+    <string name="que_choisir_empty_message">Ajoutez quelques recettes pour recevoir des suggestions personnalisées !</string>
+    <string name="que_choisir_add_recipe">Ajouter une recette</string>
+    <string name="que_choisir_tip_title">Conseil culinaire</string>
+    <string name="que_choisir_tip_suggestions">Ces recettes sont sélectionnées en fonction de vos préférences et des recettes que vous avez récemment consultées.</string>
+    <string name="que_choisir_tip_popular">Les recettes populaires sont celles qui ont été les plus consultées et réalisées par les utilisateurs.</string>
+    <string name="que_choisir_tip_random">Laissez-vous surprendre ! Parfois les meilleures découvertes se font par hasard.</string>
+    <string name="que_choisir_tip_default">Explorez de nouvelles saveurs et techniques culinaires.</string>
+
+    <!-- ==================== RecipeListScreen ==================== -->
+    <string name="recipe_list_title">Mes Recettes</string>
+    <string name="recipe_list_refresh_cd">Actualiser</string>
+    <string name="recipe_list_tab_alphabetical">Alphabétique</string>
+    <string name="recipe_list_tab_ingredient">Par ingrédient</string>
+    <string name="recipe_list_tab_date">Par date</string>
+    <string name="recipe_list_tab_realization">Par réalisation</string>
+    <string name="recipe_list_tab_convives">Par convives</string>
+    <string name="recipe_list_filter_all">Tout</string>
+    <string name="recipe_list_back_convives">← Retour aux convives</string>
+    <string name="recipe_list_back_ingredients">← Retour aux ingrédients</string>
+    <string name="recipe_list_error_connection">Erreur de connexion</string>
+    <string name="recipe_list_no_recipe_for_letter">Aucune recette trouvée pour la lettre %1$s</string>
+    <string name="recipe_list_see_all">Voir toutes les recettes</string>
+    <string name="recipe_list_no_recipe">Aucune recette trouvée</string>
+    <string name="recipe_list_add_first">Ajoutez votre première recette !</string>
+    <string name="recipe_list_no_recipe_period">Aucune recette trouvée pour la période sélectionnée</string>
+    <string name="recipe_list_no_convive_for">Aucune recette trouvée pour le convive \"%1$s\"</string>
+    <string name="recipe_list_back_to_convives">Retour aux convives</string>
+    <string name="recipe_list_no_convive">Aucun convive trouvé</string>
+    <string name="recipe_list_no_realization_convives">Aucune réalisation enregistrée avec des convives !</string>
+    <string name="recipe_list_no_recipe_ingredient">Aucune recette trouvée pour l\'ingrédient \"%1$s\"</string>
+    <string name="recipe_list_back_to_ingredients">Retour aux ingrédients</string>
+    <string name="recipe_list_no_ingredient">Aucun ingrédient trouvé</string>
+    <string name="recipe_list_add_with_ingredients">Ajoutez des recettes avec des ingrédients !</string>
+
+    <!-- ==================== ExecutionComponents ==================== -->
+    <string name="execution_edit_title">Modifier la réalisation</string>
+    <string name="execution_add_title">Ajouter une réalisation</string>
+    <string name="execution_description">Enregistrer que vous avez préparé cette recette avec les convives.</string>
+    <string name="execution_date_time_title">Date et heure de la réalisation</string>
+    <string name="execution_convives_count">Convives (%1$d)</string>
+    <string name="execution_add_convive_cd">Ajouter un convive</string>
+    <string name="execution_no_convive">Aucun convive ajouté. Ajoutez au moins un convive pour continuer.</string>
+    <string name="execution_convive_count_display">%1$d convive%2$s</string>
+    <string name="execution_convives_label">Convives :</string>
+    <string name="execution_detail_title">Détails de la réalisation</string>
+    <string name="execution_detail_date_time">Date et heure</string>
+    <string name="execution_no_convive_registered">Aucun convive enregistré</string>
+    <string name="execution_select_time">Sélectionner l\'heure</string>
+    <string name="execution_add_convive_dialog_title">Ajouter un convive</string>
+    <string name="execution_mode_existing">Existant</string>
+    <string name="execution_mode_new">Nouveau</string>
+    <string name="execution_select_convive">Sélectionner un convive :</string>
+    <string name="execution_no_convive_available">Aucun convive disponible. Créez-en un nouveau.</string>
+    <string name="execution_create_new_convive">Créer un nouveau convive</string>
+    <string name="execution_feedback_question">Comment cette personne a-t-elle apprécié ?</string>
+
+    <!-- ==================== NewConviveDialog ==================== -->
+    <string name="new_convive_title">Nouveau convive</string>
+    <string name="new_convive_description">Créer un nouveau convive pour cette réalisation.</string>
+    <string name="new_convive_name_label">Nom *</string>
+    <string name="new_convive_name_placeholder">Ex: David</string>
+    <string name="new_convive_group_label">Groupe (optionnel)</string>
+    <string name="new_convive_group_placeholder">Ex: cousin, ami, famille</string>
+    <string name="new_convive_warning">⚠️ Convives existants avec le même nom :</string>
+    <string name="new_convive_suggestion">Suggestion : ajoutez un groupe pour différencier (ex: \"%1$s (cousin)\").</string>
+    <string name="new_convive_create">Créer</string>
+
+    <!-- ==================== PhotoComponents ==================== -->
+    <string name="photo_empty">Aucune photo ajoutée pour cette recette.</string>
+    <string name="photo_section_title">📷 Photos</string>
+    <string name="photo_content_description">Photo %1$d</string>
+    <string name="photo_previous_cd">Photo précédente</string>
+    <string name="photo_next_cd">Photo suivante</string>
+    <string name="photo_thumbnail_cd">Thumbnail %1$d</string>
+    <string name="photo_management_title">🔧 Gestion des photos</string>
+    <string name="photo_management_hide">Masquer</string>
+    <string name="photo_management_show">Afficher</string>
+    <string name="photo_add_title">➕ Ajouter une photo</string>
+    <string name="photo_category_label">Catégorie de la photo</string>
+    <string name="photo_uploading">Ajout en cours…</string>
+    <string name="photo_choose">Choisir une photo</string>
+    <string name="photo_order">Photo %1$d</string>
+    <string name="photo_category_dropdown_label">Catégorie</string>
+    <string name="photo_no_category">Aucune</string>
+    <string name="photo_delete_title">Supprimer la photo</string>
+    <string name="photo_delete_message">Êtes-vous sûr de vouloir supprimer cette photo ?</string>
+    <string name="photo_counter">%1$d/%2$d - %3$s</string>
+    <string name="photo_category_preparation">préparation</string>
+    <string name="photo_category_ingredient">ingrédient</string>
+    <string name="photo_category_cooking">cuisson</string>
+    <string name="photo_category_final">final</string>
+    <string name="photo_category_none">aucune catégorie</string>
+
 </resources>

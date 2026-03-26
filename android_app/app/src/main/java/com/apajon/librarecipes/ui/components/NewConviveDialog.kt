@@ -5,9 +5,11 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.model.ConviveForm
 import com.apajon.librarecipes.data.model.ConviveOption
@@ -34,18 +36,18 @@ fun NewConviveDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nouveau convive") },
+        title = { Text(stringResource(R.string.new_convive_title)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Créer un nouveau convive pour cette réalisation.")
+                Text(stringResource(R.string.new_convive_description))
                 
                 OutlinedTextField(
                     value = nom,
                     onValueChange = { nom = it },
-                    label = { Text("Nom *") },
-                    placeholder = { Text("Ex: David") },
+                    label = { Text(stringResource(R.string.new_convive_name_label)) },
+                    placeholder = { Text(stringResource(R.string.new_convive_name_placeholder)) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Next
@@ -58,8 +60,8 @@ fun NewConviveDialog(
                 OutlinedTextField(
                     value = groupe,
                     onValueChange = { groupe = it },
-                    label = { Text("Groupe (optionnel)") },
-                    placeholder = { Text("Ex: cousin, ami, famille") },
+                    label = { Text(stringResource(R.string.new_convive_group_label)) },
+                    placeholder = { Text(stringResource(R.string.new_convive_group_placeholder)) },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Done
@@ -80,7 +82,7 @@ fun NewConviveDialog(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "⚠️ Convives existants avec le même nom :",
+                                text = stringResource(R.string.new_convive_warning),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
@@ -95,7 +97,7 @@ fun NewConviveDialog(
                             }
                             
                             Text(
-                                text = "Suggestion : ajoutez un groupe pour différencier (ex: \"${nom.trim()} (cousin)\").",
+                                text = stringResource(R.string.new_convive_suggestion, nom.trim()),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onErrorContainer
                             )
@@ -112,12 +114,12 @@ fun NewConviveDialog(
                 },
                 enabled = nom.isNotBlank()
             ) {
-                Text("Créer")
+                Text(stringResource(R.string.new_convive_create))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annuler")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
