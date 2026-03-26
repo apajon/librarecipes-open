@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,12 +35,12 @@ fun HomeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("LibraRecipes") },
+                title = { Text(stringResource(R.string.app_name)) },
                 actions = {
                     IconButton(onClick = { showThemeDialog = true }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Paramètres du thème"
+                            contentDescription = stringResource(R.string.home_theme_settings_cd)
                         )
                     }
                 },
@@ -62,7 +63,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     imageVector = AppIcons.Add,
-                    contentDescription = "Ajouter une recette",
+                    contentDescription = stringResource(R.string.home_fab_add_recipe_cd),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -94,7 +95,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Votre carnet de cuisine",
+                            text = stringResource(R.string.home_hero_title),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Center,
@@ -102,7 +103,7 @@ fun HomeScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Le carnet de cuisine que vous ne perdrez jamais.",
+                            text = stringResource(R.string.home_hero_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Center
@@ -113,7 +114,7 @@ fun HomeScreen(
 
             item {
                 Text(
-                    text = "Actions principales",
+                    text = stringResource(R.string.home_section_main_actions),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(vertical = 8.dp)
@@ -122,8 +123,8 @@ fun HomeScreen(
 
             item {
                 ActionCard(
-                    title = "Voir mes recettes",
-                    description = "Parcourir votre carnet de recettes",
+                    title = stringResource(R.string.home_action_view_recipes_title),
+                    description = stringResource(R.string.home_action_view_recipes_desc),
                     icon = AppIcons.List,
                     onClick = { navController.navigate("recipes") }
                 )
@@ -131,8 +132,8 @@ fun HomeScreen(
 
             item {
                 ActionCard(
-                    title = "Ajouter une recette",
-                    description = "Créer une nouvelle fiche recette",
+                    title = stringResource(R.string.home_action_add_recipe_title),
+                    description = stringResource(R.string.home_action_add_recipe_desc),
                     icon = AppIcons.Add,
                     onClick = { navController.navigate("create_recipe") }
                 )
@@ -140,8 +141,8 @@ fun HomeScreen(
 
             item {
                 ActionCard(
-                    title = "Rechercher",
-                    description = "Retrouver une recette par nom, ingrédient ou tag",
+                    title = stringResource(R.string.home_action_search_title),
+                    description = stringResource(R.string.home_action_search_desc),
                     icon = Icons.Default.Search,
                     onClick = { navController.navigate("search") }
                 )
@@ -149,8 +150,8 @@ fun HomeScreen(
 
             item {
                 ActionCard(
-                    title = "Besoin d'une idée ?",
-                    description = "Trouver une recette selon vos envies ou ce que vous avez",
+                    title = stringResource(R.string.home_action_suggestions_title),
+                    description = stringResource(R.string.home_action_suggestions_desc),
                     icon = Icons.Default.Star,
                     onClick = { navController.navigate("que_choisir") }
                 )
@@ -190,13 +191,13 @@ private fun ThemeSettingsDialog(
             )
         },
         title = {
-            Text("Thème")
+            Text(stringResource(R.string.theme_dialog_title))
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 // Dark theme section
                 Text(
-                    text = "Mode sombre",
+                    text = stringResource(R.string.theme_dark_mode),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -206,7 +207,7 @@ private fun ThemeSettingsDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Suivre le système",
+                        text = stringResource(R.string.theme_follow_system),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.weight(1f)
                     )
@@ -222,7 +223,7 @@ private fun ThemeSettingsDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Mode sombre",
+                            text = stringResource(R.string.theme_dark_mode),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.weight(1f)
                         )
@@ -237,7 +238,7 @@ private fun ThemeSettingsDialog(
 
                 // Dynamic colors section
                 Text(
-                    text = "Couleurs",
+                    text = stringResource(R.string.theme_colors),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -248,14 +249,14 @@ private fun ThemeSettingsDialog(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Couleurs dynamiques",
+                            text = stringResource(R.string.theme_dynamic_colors),
                             style = MaterialTheme.typography.bodyMedium
                         )
                         Text(
                             text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
-                                "Adapter les couleurs au fond d'écran"
+                                stringResource(R.string.theme_dynamic_colors_desc)
                             else
-                                "Nécessite Android 12+",
+                                stringResource(R.string.theme_dynamic_colors_unavailable),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -270,7 +271,7 @@ private fun ThemeSettingsDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fermer")
+                Text(stringResource(R.string.action_close))
             }
         }
     )
