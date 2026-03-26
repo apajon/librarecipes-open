@@ -31,8 +31,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.ExecutionCreate
 import com.apajon.librarecipes.data.model.ExecutionWithDetails
@@ -93,14 +95,14 @@ fun RecipeDetailScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        text = uiState.recipe?.nom ?: "Détail Recette",
+                        text = uiState.recipe?.nom ?: stringResource(R.string.recipe_detail_default_title),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -113,7 +115,7 @@ fun RecipeDetailScreen(
                     ) {
                         Icon(
                             Icons.Default.Edit,
-                            contentDescription = "Modifier",
+                            contentDescription = stringResource(R.string.action_edit_cd),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -125,7 +127,7 @@ fun RecipeDetailScreen(
                     ) {
                         Icon(
                             Icons.Default.Delete,
-                            contentDescription = "Supprimer",
+                            contentDescription = stringResource(R.string.action_delete_cd),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
@@ -156,7 +158,7 @@ fun RecipeDetailScreen(
                 } else {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
-                        contentDescription = "Copier la recette"
+                        contentDescription = stringResource(R.string.recipe_detail_copy_cd)
                     )
                 }
             }
@@ -179,7 +181,7 @@ fun RecipeDetailScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Erreur",
+                            text = stringResource(R.string.error_title),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.error
@@ -193,7 +195,7 @@ fun RecipeDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.retry(recipeId) }) {
-                            Text("Réessayer")
+                            Text(stringResource(R.string.action_retry))
                         }
                     }
                 }
@@ -223,9 +225,9 @@ fun RecipeDetailScreen(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Supprimer la recette") },
+            title = { Text(stringResource(R.string.recipe_detail_delete_title)) },
             text = { 
-                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+                Text(stringResource(R.string.recipe_detail_delete_message))
             },
             confirmButton = {
                 Button(
@@ -237,12 +239,12 @@ fun RecipeDetailScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -325,7 +327,7 @@ fun RecipeDetailScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Suppression en cours...")
+                    Text(stringResource(R.string.recipe_detail_deleting))
                 }
             }
         }
@@ -365,10 +367,10 @@ fun CreateRecipeScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nouvelle Recette") },
+                title = { Text(stringResource(R.string.edit_title_new_recipe)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -376,7 +378,7 @@ fun CreateRecipeScreen(
                         onClick = { viewModel.validateAndSaveRecipe() },
                         enabled = !formState.isLoading
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = "Sauvegarder")
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.action_save))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -431,7 +433,7 @@ fun CreateRecipeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Ingrédients",
+                                text = stringResource(R.string.edit_section_ingredients_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
@@ -444,13 +446,13 @@ fun CreateRecipeScreen(
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Ajouter")
+                                Text(stringResource(R.string.action_add))
                             }
                         }
 
                         if (formState.ingredients.isEmpty()) {
                             Text(
-                                text = "Aucun ingrédient ajouté",
+                                text = stringResource(R.string.edit_empty_ingredients),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -494,7 +496,7 @@ fun CreateRecipeScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Étapes de préparation",
+                                text = stringResource(R.string.edit_section_steps_title),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
@@ -507,13 +509,13 @@ fun CreateRecipeScreen(
                             ) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Ajouter")
+                                Text(stringResource(R.string.action_add))
                             }
                         }
 
                         if (formState.steps.isEmpty()) {
                             Text(
-                                text = "Aucune étape ajoutée",
+                                text = stringResource(R.string.edit_empty_steps),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -577,7 +579,7 @@ fun CreateRecipeScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
-                    Text("💾 Sauvegarder la recette")
+                    Text(stringResource(R.string.edit_save_create))
                 }
             }
         }
@@ -638,7 +640,7 @@ fun CreateRecipeScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Sauvegarde en cours...")
+                    Text(stringResource(R.string.edit_saving_create))
                 }
             }
         }
@@ -667,10 +669,10 @@ fun SearchScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Recherche") },
+                title = { Text(stringResource(R.string.search_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -682,7 +684,7 @@ fun SearchScreen(
                             categoriesText = ""
                             tagsText = ""
                         }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Effacer recherche")
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.search_clear_cd))
                         }
                     }
                 },
@@ -706,7 +708,7 @@ fun SearchScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Ajouter une recette",
+                    contentDescription = stringResource(R.string.search_fab_add_recipe_cd),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -732,7 +734,7 @@ fun SearchScreen(
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         Text(
-                            text = "Filtres de recherche",
+                            text = stringResource(R.string.search_filters_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -741,8 +743,8 @@ fun SearchScreen(
                         OutlinedTextField(
                             value = uiState.searchQuery,
                             onValueChange = viewModel::updateSearchQuery,
-                            label = { Text("Nom de la recette") },
-                            placeholder = { Text("Ex: Carbonara, Tiramisu...") },
+                            label = { Text(stringResource(R.string.search_recipe_name_label)) },
+                            placeholder = { Text(stringResource(R.string.search_recipe_name_placeholder)) },
                             leadingIcon = {
                                 Icon(Icons.Default.Search, contentDescription = null)
                             },
@@ -757,14 +759,14 @@ fun SearchScreen(
                                 ingredientsText = newValue
                                 viewModel.updateIngredients(newValue)
                             },
-                            label = { Text("Ingrédients") },
-                            placeholder = { Text("Ex: tomate, basilic, mozzarella (séparés par des virgules)") },
+                            label = { Text(stringResource(R.string.search_ingredients_label)) },
+                            placeholder = { Text(stringResource(R.string.search_ingredients_placeholder)) },
                             leadingIcon = {
                                 Icon(Icons.Default.Info, contentDescription = null)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             supportingText = {
-                                Text("Entrez les ingrédients séparés par des virgules")
+                                Text(stringResource(R.string.search_ingredients_supporting))
                             }
                         )
 
@@ -775,14 +777,14 @@ fun SearchScreen(
                                 categoriesText = newValue
                                 viewModel.updateCategories(newValue)
                             },
-                            label = { Text("Catégories") },
-                            placeholder = { Text("Ex: plat principal, dessert, entrée") },
+                            label = { Text(stringResource(R.string.search_categories_label)) },
+                            placeholder = { Text(stringResource(R.string.search_categories_placeholder)) },
                             leadingIcon = {
                                 Icon(Icons.Default.Face, contentDescription = null)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             supportingText = {
-                                Text("Entrez les catégories séparées par des virgules")
+                                Text(stringResource(R.string.search_categories_supporting))
                             }
                         )
 
@@ -793,14 +795,14 @@ fun SearchScreen(
                                 tagsText = newValue
                                 viewModel.updateTags(newValue)
                             },
-                            label = { Text("Tags") },
-                            placeholder = { Text("Ex: rapide, végétarien, italien") },
+                            label = { Text(stringResource(R.string.search_tags_label)) },
+                            placeholder = { Text(stringResource(R.string.search_tags_placeholder)) },
                             leadingIcon = {
                                 Icon(Icons.Default.Star, contentDescription = null)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             supportingText = {
-                                Text("Entrez les tags séparés par des virgules")
+                                Text(stringResource(R.string.search_tags_supporting))
                             }
                         )
 
@@ -821,7 +823,7 @@ fun SearchScreen(
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                 }
-                                Text("🔍 Rechercher")
+                                Text(stringResource(R.string.search_button))
                             }
                             
                             OutlinedButton(
@@ -829,7 +831,7 @@ fun SearchScreen(
                                 modifier = Modifier.weight(1f),
                                 enabled = !uiState.isLoading
                             ) {
-                                Text("📋 Toutes les recettes")
+                                Text(stringResource(R.string.search_all_recipes_button))
                             }
                         }
                     }
@@ -841,13 +843,13 @@ fun SearchScreen(
                 item {
                     Text(
                         text = if (uiState.searchResults.isNotEmpty()) {
-                            "Résultats (${uiState.searchResults.size})"
+                            stringResource(R.string.search_results_count, uiState.searchResults.size)
                         } else if (uiState.isLoading) {
-                            "Recherche en cours..."
+                            stringResource(R.string.search_in_progress)
                         } else if (uiState.errorMessage != null) {
-                            "Erreur de recherche"
+                            stringResource(R.string.search_error)
                         } else {
-                            "Aucun résultat trouvé"
+                            stringResource(R.string.search_no_results)
                         },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
@@ -882,7 +884,7 @@ fun SearchScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Button(onClick = { viewModel.clearError() }) {
-                                    Text("OK")
+                                    Text(stringResource(R.string.action_ok))
                                 }
                             }
                         }
@@ -924,14 +926,14 @@ fun SearchScreen(
                                 )
                                 Spacer(modifier = Modifier.height(16.dp))
                                 Text(
-                                    text = "Aucune recette trouvée",
+                                    text = stringResource(R.string.search_no_recipe_found),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Essayez de modifier vos critères de recherche ou cliquez sur \"Toutes les recettes\" pour voir toutes les recettes disponibles.",
+                                    text = stringResource(R.string.search_no_recipe_suggestion),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     textAlign = TextAlign.Center
@@ -965,9 +967,9 @@ fun SearchScreen(
     recipeToDelete?.let { recipeId ->
         AlertDialog(
             onDismissRequest = { recipeToDelete = null },
-            title = { Text("Supprimer la recette") },
+            title = { Text(stringResource(R.string.recipe_detail_delete_title)) },
             text = { 
-                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+                Text(stringResource(R.string.recipe_detail_delete_message))
             },
             confirmButton = {
                 Button(
@@ -979,12 +981,12 @@ fun SearchScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { recipeToDelete = null }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -1049,13 +1051,13 @@ fun RecipeDetailContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Ingrédients (${recipe.ingredients.size})",
+                                text = stringResource(R.string.recipe_ingredients_count, recipe.ingredients.size),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Icon(
                                 Icons.Default.Edit,
-                                contentDescription = "Modifier les ingrédients",
+                                contentDescription = stringResource(R.string.recipe_ingredients_edit_cd),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -1088,13 +1090,13 @@ fun RecipeDetailContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Étapes de préparation (${recipe.etapes.size})",
+                                text = stringResource(R.string.recipe_steps_count, recipe.etapes.size),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Icon(
                                 Icons.Default.Edit,
-                                contentDescription = "Modifier les étapes",
+                                contentDescription = stringResource(R.string.recipe_steps_edit_cd),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -1127,20 +1129,20 @@ fun RecipeDetailContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                            text = "Catégories et tags",
+                            text = stringResource(R.string.recipe_section_categories_tags),
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Icon(
                                 Icons.Default.Edit,
-                                contentDescription = "Modifier les catégories et tags",
+                                contentDescription = stringResource(R.string.recipe_categories_tags_edit_cd),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
                         
                         if (recipe.categories.isNotEmpty()) {
                             Text(
-                                text = "Catégories",
+                                text = stringResource(R.string.recipe_categories_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1159,7 +1161,7 @@ fun RecipeDetailContent(
                         
                         if (recipe.tags.isNotEmpty()) {
                             Text(
-                                text = "Tags",
+                                text = stringResource(R.string.recipe_tags_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1193,7 +1195,7 @@ fun RecipeDetailContent(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Source",
+                            text = stringResource(R.string.recipe_source_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -1201,25 +1203,25 @@ fun RecipeDetailContent(
                         when (source.type) {
                             "url" -> {
                                 Text(
-                                    text = "Site web: ${source.url ?: "URL non spécifiée"}",
+                                    text = stringResource(R.string.recipe_source_web, source.url ?: stringResource(R.string.recipe_source_web_unknown)),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                             "book" -> {
                                 Text(
-                                    text = "Livre: ${source.bookTitle ?: "Titre non spécifié"}",
+                                    text = stringResource(R.string.recipe_source_book, source.bookTitle ?: stringResource(R.string.recipe_source_book_unknown)),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 source.bookAuthors?.let { authors ->
                                     Text(
-                                        text = "Auteur(s): $authors",
+                                        text = stringResource(R.string.recipe_source_authors, authors),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 source.bookPage?.let { page ->
                                     Text(
-                                        text = "Page: $page",
+                                        text = stringResource(R.string.recipe_source_page, page),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -1227,7 +1229,7 @@ fun RecipeDetailContent(
                             }
                             else -> {
                                 Text(
-                                    text = "Recette maison",
+                                    text = stringResource(R.string.recipe_source_homemade),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -1249,13 +1251,13 @@ fun RecipeDetailContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Informations",
+                        text = stringResource(R.string.recipe_info_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     
                     Text(
-                        text = "Ajoutée le: ${recipe.dateAjout}",
+                        text = stringResource(R.string.recipe_date_added, recipe.dateAjout),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1280,7 +1282,7 @@ fun RecipeDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Réalisations (${executions.size})",
+                            text = stringResource(R.string.recipe_realizations_count, executions.size),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -1289,7 +1291,7 @@ fun RecipeDetailContent(
                         ) {
                             Icon(
                                 Icons.Default.Add,
-                                contentDescription = "Ajouter une réalisation",
+                                contentDescription = stringResource(R.string.recipe_add_realization_cd),
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -1297,7 +1299,7 @@ fun RecipeDetailContent(
                     
                     if (executions.isEmpty()) {
                         Text(
-                            text = "Aucune réalisation enregistrée",
+                            text = stringResource(R.string.recipe_no_realizations),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1325,7 +1327,7 @@ fun RecipeDetailContent(
                 ) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Modifier")
+                    Text(stringResource(R.string.action_edit))
                 }
                 
                 Button(
@@ -1337,7 +1339,7 @@ fun RecipeDetailContent(
                 ) {
                     Icon(Icons.Default.Delete, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             }
         }
@@ -1367,21 +1369,21 @@ fun RecipeBasicInfoDisplay(recipe: RecipeDetail) {
             ) {
                 recipe.preparation?.let { prep ->
                     InfoChip(
-                        label = "Préparation",
+                        label = stringResource(R.string.recipe_info_preparation),
                         value = "${prep} min"
                     )
                 }
                 
                 recipe.cuisson?.let { cuisson ->
                     InfoChip(
-                        label = "Cuisson",
+                        label = stringResource(R.string.recipe_info_cooking),
                         value = "${cuisson} min"
                     )
                 }
                 
                 recipe.portions?.let { portions ->
                     InfoChip(
-                        label = "Portions",
+                        label = stringResource(R.string.recipe_info_portions),
                         value = "$portions"
                     )
                 }
@@ -1456,7 +1458,7 @@ fun IngredientDisplayItem(ingredient: com.apajon.librarecipes.data.model.Ingredi
             
             ingredient.alternatives?.takeIf { it.isNotBlank() }?.let { alternatives ->
                 Text(
-                    text = "Alternative: $alternatives",
+                    text = stringResource(R.string.recipe_alternative, alternatives),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -1465,7 +1467,7 @@ fun IngredientDisplayItem(ingredient: com.apajon.librarecipes.data.model.Ingredi
         
         if (!ingredient.indispensable) {
             Text(
-                text = "optionnel",
+                text = stringResource(R.string.ingredient_optional_label),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -1531,10 +1533,10 @@ fun QueChoisirScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Que choisir ?") },
+                title = { Text(stringResource(R.string.que_choisir_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -1556,7 +1558,7 @@ fun QueChoisirScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Ajouter une recette",
+                    contentDescription = stringResource(R.string.home_fab_add_recipe_cd),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -1590,7 +1592,7 @@ fun QueChoisirScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Besoin d'une idée ?",
+                            text = stringResource(R.string.que_choisir_title),
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold,
@@ -1598,7 +1600,7 @@ fun QueChoisirScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Trouvez une recette selon vos envies ou ce que vous avez.",
+                            text = stringResource(R.string.que_choisir_subtitle),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center
@@ -1615,9 +1617,9 @@ fun QueChoisirScreen(
                 ) {
                     items(
                         listOf(
-                            "suggestions" to "Suggestions",
-                            "popular" to "Populaires", 
-                            "random" to "Au hasard"
+                            "suggestions" to stringResource(R.string.que_choisir_filter_suggestions),
+                            "popular" to stringResource(R.string.que_choisir_filter_popular), 
+                            "random" to stringResource(R.string.que_choisir_filter_random)
                         )
                     ) { (key, label) ->
                         FilterChip(
@@ -1649,7 +1651,7 @@ fun QueChoisirScreen(
                     ) {
                         Icon(Icons.Default.Refresh, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Renouveler")
+                        Text(stringResource(R.string.que_choisir_renew))
                     }
                     
                     OutlinedButton(
@@ -1658,7 +1660,7 @@ fun QueChoisirScreen(
                     ) {
                         Icon(Icons.Default.Search, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Rechercher")
+                        Text(stringResource(R.string.que_choisir_search))
                     }
                 }
             }
@@ -1668,7 +1670,7 @@ fun QueChoisirScreen(
                 "suggestions" -> {
                     item {
                         Text(
-                            text = "Suggestions pour vous",
+                            text = stringResource(R.string.que_choisir_suggestions_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
@@ -1678,7 +1680,7 @@ fun QueChoisirScreen(
                 "popular" -> {
                     item {
                         Text(
-                            text = "Recettes populaires",
+                            text = stringResource(R.string.que_choisir_popular_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
@@ -1688,7 +1690,7 @@ fun QueChoisirScreen(
                 "random" -> {
                     item {
                         Text(
-                            text = "Recettes au hasard",
+                            text = stringResource(R.string.que_choisir_random_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(vertical = 8.dp)
@@ -1762,14 +1764,14 @@ fun QueChoisirScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "Aucune recette disponible",
+                                text = stringResource(R.string.que_choisir_empty_title),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Ajoutez quelques recettes pour recevoir des suggestions personnalisées !",
+                                text = stringResource(R.string.que_choisir_empty_message),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Center
@@ -1778,7 +1780,7 @@ fun QueChoisirScreen(
                             Button(onClick = { navController.navigate("create_recipe") }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Ajouter une recette")
+                                Text(stringResource(R.string.que_choisir_add_recipe))
                             }
                         }
                     }
@@ -1825,7 +1827,7 @@ fun QueChoisirScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Conseil culinaire",
+                                    text = stringResource(R.string.que_choisir_tip_title),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -1834,10 +1836,10 @@ fun QueChoisirScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = when (selectedFilter) {
-                                    "suggestions" -> "Ces recettes sont sélectionnées en fonction de vos préférences et des recettes que vous avez récemment consultées."
-                                    "popular" -> "Les recettes populaires sont celles qui ont été les plus consultées et exécutées par les utilisateurs."
-                                    "random" -> "Laissez-vous surprendre ! Parfois les meilleures découvertes se font par hasard."
-                                    else -> "Explorez de nouvelles saveurs et techniques culinaires."
+                                    "suggestions" -> stringResource(R.string.que_choisir_tip_suggestions)
+                                    "popular" -> stringResource(R.string.que_choisir_tip_popular)
+                                    "random" -> stringResource(R.string.que_choisir_tip_random)
+                                    else -> stringResource(R.string.que_choisir_tip_default)
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onTertiaryContainer
