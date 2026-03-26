@@ -162,35 +162,40 @@ object RecipeTextFormat {
                 }
                 else -> {
                     // Header key:value pairs
-                    parseKeyValue(line, KEY_TITRE)?.let { nom = it; continue }
-                    parseKeyValue(line, KEY_PREPARATION)?.let {
-                        preparation = extractMinutes(it); continue
-                    }
-                    parseKeyValue(line, KEY_CUISSON)?.let {
-                        cuisson = extractMinutes(it); continue
-                    }
-                    parseKeyValue(line, KEY_PORTIONS)?.let {
-                        portions = it.trim().toIntOrNull(); continue
-                    }
-                    parseKeyValue(line, KEY_CATEGORIES)?.let {
-                        categories = splitCsv(it); continue
-                    }
-                    parseKeyValue(line, KEY_TAGS)?.let {
-                        tags = splitCsv(it); continue
-                    }
-                    parseKeyValue(line, KEY_SOURCE)?.let {
-                        sourceText = it; continue
+                    val titreVal = parseKeyValue(line, KEY_TITRE)
+                    val prepVal = parseKeyValue(line, KEY_PREPARATION)
+                    val cuissonVal = parseKeyValue(line, KEY_CUISSON)
+                    val portionsVal = parseKeyValue(line, KEY_PORTIONS)
+                    val categoriesVal = parseKeyValue(line, KEY_CATEGORIES)
+                    val tagsVal = parseKeyValue(line, KEY_TAGS)
+                    val sourceVal = parseKeyValue(line, KEY_SOURCE)
+
+                    if (titreVal != null) {
+                        nom = titreVal
+                    } else if (prepVal != null) {
+                        preparation = extractMinutes(prepVal)
+                    } else if (cuissonVal != null) {
+                        cuisson = extractMinutes(cuissonVal)
+                    } else if (portionsVal != null) {
+                        portions = portionsVal.trim().toIntOrNull()
+                    } else if (categoriesVal != null) {
+                        categories = splitCsv(categoriesVal)
+                    } else if (tagsVal != null) {
+                        tags = splitCsv(tagsVal)
+                    } else if (sourceVal != null) {
+                        sourceText = sourceVal
                     }
                 }
             }
         }
 
-        if (nom.isNullOrBlank()) return null
+        val finalNom = nom?.trim()
+        if (finalNom.isNullOrBlank()) return null
 
         val source = sourceText?.let { parseSource(it) }
 
         return RecipeCreate(
-            nom = nom!!.trim(),
+            nom = finalNom,
             preparation = preparation,
             cuisson = cuisson,
             portions = portions,

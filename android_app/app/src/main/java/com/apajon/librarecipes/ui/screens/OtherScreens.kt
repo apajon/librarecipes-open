@@ -2133,4 +2133,3 @@ fun ImportRecipeScreen(
         }
     }
 }
-}
