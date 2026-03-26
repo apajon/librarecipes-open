@@ -20,11 +20,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.model.PhotoDetail
 import com.apajon.librarecipes.ui.icon.AppIcons
 import java.io.File
@@ -64,7 +66,7 @@ fun PhotoViewerCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Aucune photo ajoutée pour cette recette.",
+                    text = stringResource(R.string.photo_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -93,13 +95,13 @@ fun PhotoViewerCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "📷 Photos",
+                    text = stringResource(R.string.photo_section_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold
                 )
                 
                 Text(
-                    text = "${selectedPhotoIndex + 1}/${photos.size} - ${getCategoryDisplayName(currentPhoto.categorie)}",
+                    text = stringResource(R.string.photo_counter, selectedPhotoIndex + 1, photos.size, getCategoryDisplayName(currentPhoto.categorie)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -118,7 +120,7 @@ fun PhotoViewerCard(
                         .data(File(currentPhoto.chemin))
                         .crossfade(true)
                         .build(),
-                    contentDescription = "Photo ${selectedPhotoIndex + 1}",
+                    contentDescription = stringResource(R.string.photo_content_description, selectedPhotoIndex + 1),
                     modifier = Modifier
                         .fillMaxSize()
                         .clip(RoundedCornerShape(8.dp)),
@@ -149,7 +151,7 @@ fun PhotoViewerCard(
                     ) {
                         Icon(
                             AppIcons.ArrowBack,
-                            contentDescription = "Photo précédente",
+                            contentDescription = stringResource(R.string.photo_previous_cd),
                             tint = Color.White
                         )
                     }
@@ -166,7 +168,7 @@ fun PhotoViewerCard(
                     ) {
                         Icon(
                             AppIcons.ArrowForward,
-                            contentDescription = "Photo suivante",
+                            contentDescription = stringResource(R.string.photo_next_cd),
                             tint = Color.White
                         )
                     }
@@ -246,7 +248,7 @@ fun ThumbnailPhoto(
             .data(File(photo.chemin))
             .crossfade(true)
             .build(),
-        contentDescription = "Thumbnail ${photo.ordre}",
+        contentDescription = stringResource(R.string.photo_thumbnail_cd, photo.ordre),
         modifier = modifier
             .size(60.dp)
             .clip(RoundedCornerShape(8.dp))
@@ -310,14 +312,14 @@ fun PhotoManagementCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "🔧 Gestion des photos",
+                    text = stringResource(R.string.photo_management_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 
                 Icon(
                     if (isVisible) AppIcons.ArrowUp else AppIcons.ArrowDown,
-                    contentDescription = if (isVisible) "Masquer" else "Afficher"
+                    contentDescription = if (isVisible) stringResource(R.string.photo_management_hide) else stringResource(R.string.photo_management_show)
                 )
             }
             
@@ -378,7 +380,7 @@ fun PhotoUploadSection(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "➕ Ajouter une photo",
+            text = stringResource(R.string.photo_add_title),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold
         )
@@ -392,7 +394,7 @@ fun PhotoUploadSection(
                 value = selectedCategory,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Catégorie de la photo") },
+                label = { Text(stringResource(R.string.photo_category_label)) },
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
@@ -429,11 +431,11 @@ fun PhotoUploadSection(
                     color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Ajout en cours...")
+                Text(stringResource(R.string.photo_uploading))
             } else {
                 Icon(AppIcons.Add, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Choisir une photo")
+                Text(stringResource(R.string.photo_choose))
             }
         }
     }
@@ -476,7 +478,7 @@ fun PhotoManagementItem(
                     .data(File(photo.chemin))
                     .crossfade(true)
                     .build(),
-                contentDescription = "Photo ${photo.ordre}",
+                contentDescription = stringResource(R.string.photo_order, photo.ordre),
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(6.dp)),
@@ -490,7 +492,7 @@ fun PhotoManagementItem(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Photo ${photo.ordre}",
+                    text = stringResource(R.string.photo_order, photo.ordre),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -501,10 +503,10 @@ fun PhotoManagementItem(
                     onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
-                        value = photo.categorie ?: "Aucune",
+                        value = photo.categorie ?: stringResource(R.string.photo_no_category),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Catégorie") },
+                        label = { Text(stringResource(R.string.photo_category_dropdown_label)) },
                         trailingIcon = {
                             ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                         },
@@ -540,7 +542,7 @@ fun PhotoManagementItem(
                 ) {
                     Icon(
                         AppIcons.ArrowUp,
-                        contentDescription = "Déplacer vers le haut",
+                        contentDescription = stringResource(R.string.action_move_up_cd),
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                 }
@@ -552,7 +554,7 @@ fun PhotoManagementItem(
                 ) {
                     Icon(
                         AppIcons.ArrowDown,
-                        contentDescription = "Déplacer vers le bas",
+                        contentDescription = stringResource(R.string.action_move_down_cd),
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                 }
@@ -563,7 +565,7 @@ fun PhotoManagementItem(
                 ) {
                     Icon(
                         AppIcons.Delete,
-                        contentDescription = "Supprimer",
+                        contentDescription = stringResource(R.string.action_delete_cd),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -575,8 +577,8 @@ fun PhotoManagementItem(
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Supprimer la photo") },
-            text = { Text("Êtes-vous sûr de vouloir supprimer cette photo ?") },
+            title = { Text(stringResource(R.string.photo_delete_title)) },
+            text = { Text(stringResource(R.string.photo_delete_message)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -587,12 +589,12 @@ fun PhotoManagementItem(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
