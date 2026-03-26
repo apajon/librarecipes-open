@@ -7,9 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.MeasurementUnits
 import com.apajon.librarecipes.data.model.SourceType
@@ -42,7 +44,7 @@ fun RecipeBasicInfoCard(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Informations de base",
+                text = stringResource(R.string.form_basic_info_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
@@ -50,7 +52,7 @@ fun RecipeBasicInfoCard(
             OutlinedTextField(
                 value = nom,
                 onValueChange = onNomChange,
-                label = { Text("Nom de la recette *") },
+                label = { Text(stringResource(R.string.form_recipe_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -62,7 +64,7 @@ fun RecipeBasicInfoCard(
                 OutlinedTextField(
                     value = preparation,
                     onValueChange = onPreparationChange,
-                    label = { Text("Préparation (min)") },
+                    label = { Text(stringResource(R.string.form_preparation_label)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
@@ -71,7 +73,7 @@ fun RecipeBasicInfoCard(
                 OutlinedTextField(
                     value = cuisson,
                     onValueChange = onCuissonChange,
-                    label = { Text("Cuisson (min)") },
+                    label = { Text(stringResource(R.string.form_cooking_label)) },
                     modifier = Modifier.weight(1f),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true
@@ -84,7 +86,7 @@ fun RecipeBasicInfoCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("Portions:", style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.form_portions_label), style = MaterialTheme.typography.bodyLarge)
                 
                 IconButton(
                     onClick = {
@@ -92,7 +94,7 @@ fun RecipeBasicInfoCard(
                         if (current > 1) onPortionsChange((current - 1).toString())
                     }
                 ) {
-                    Icon(AppIcons.ArrowDown, contentDescription = "Diminuer")
+                    Icon(AppIcons.ArrowDown, contentDescription = stringResource(R.string.form_portions_decrease_cd))
                 }
                 
                 OutlinedTextField(
@@ -109,24 +111,24 @@ fun RecipeBasicInfoCard(
                         if (current < 99) onPortionsChange((current + 1).toString())
                     }
                 ) {
-                    Icon(AppIcons.Add, contentDescription = "Augmenter")
+                    Icon(AppIcons.Add, contentDescription = stringResource(R.string.form_portions_increase_cd))
                 }
             }
 
             OutlinedTextField(
                 value = categories,
                 onValueChange = onCategoriesChange,
-                label = { Text("Catégories (séparées par des virgules)") },
+                label = { Text(stringResource(R.string.form_categories_label)) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ex: plat principal, végétarien") }
+                placeholder = { Text(stringResource(R.string.form_categories_placeholder)) }
             )
 
             OutlinedTextField(
                 value = tags,
                 onValueChange = onTagsChange,
-                label = { Text("Tags (séparés par des virgules)") },
+                label = { Text(stringResource(R.string.form_tags_label)) },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Ex: facile, rapide, économique") }
+                placeholder = { Text(stringResource(R.string.form_tags_placeholder)) }
             )
         }
     }
@@ -174,7 +176,7 @@ fun IngredientCard(
                 }
                 
                 Text(
-                    text = if (ingredient.indispensable) "Essentiel" else "Optionnel",
+                    text = if (ingredient.indispensable) stringResource(R.string.ingredient_essential) else stringResource(R.string.ingredient_optional),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -195,7 +197,7 @@ fun IngredientCard(
                 ) {
                     Icon(
                         AppIcons.ArrowUp,
-                        contentDescription = "Déplacer vers le haut",
+                        contentDescription = stringResource(R.string.action_move_up_cd),
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
@@ -206,7 +208,7 @@ fun IngredientCard(
                 ) {
                     Icon(
                         AppIcons.ArrowDown,
-                        contentDescription = "Déplacer vers le bas",
+                        contentDescription = stringResource(R.string.action_move_down_cd),
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
@@ -216,7 +218,7 @@ fun IngredientCard(
                 ) {
                     Icon(
                         AppIcons.Delete,
-                        contentDescription = "Supprimer",
+                        contentDescription = stringResource(R.string.action_delete_cd),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -253,7 +255,7 @@ fun StepCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "Étape ${index + 1}",
+                    text = stringResource(R.string.form_step_number, index + 1),
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium
                 )
@@ -272,7 +274,7 @@ fun StepCard(
                 ) {
                     Icon(
                         AppIcons.ArrowUp,
-                        contentDescription = "Déplacer vers le haut",
+                        contentDescription = stringResource(R.string.action_move_up_cd),
                         tint = if (canMoveUp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
@@ -283,7 +285,7 @@ fun StepCard(
                 ) {
                     Icon(
                         AppIcons.ArrowDown,
-                        contentDescription = "Déplacer vers le bas",
+                        contentDescription = stringResource(R.string.action_move_down_cd),
                         tint = if (canMoveDown) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
                     )
                 }
@@ -293,7 +295,7 @@ fun StepCard(
                 ) {
                     Icon(
                         AppIcons.Delete,
-                        contentDescription = "Supprimer",
+                        contentDescription = stringResource(R.string.action_delete_cd),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -318,7 +320,7 @@ fun SourceTypeSelector(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Source de la recette",
+                text = stringResource(R.string.form_source_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
