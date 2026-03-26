@@ -2,8 +2,8 @@ package com.apajon.librarecipes.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apajon.librarecipes.data.repository.SettingsRepository
-import com.apajon.librarecipes.data.repository.ThemeMode
+import com.apajon.librarecipes.preferences.SettingsRepository
+import com.apajon.librarecipes.preferences.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow

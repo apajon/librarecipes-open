@@ -11,7 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import com.apajon.librarecipes.data.repository.ThemeMode
+import com.apajon.librarecipes.preferences.ThemeMode
 import com.apajon.librarecipes.ui.navigation.LibraRecipesNavigation
 import com.apajon.librarecipes.ui.theme.LibraRecipesTheme
 import com.apajon.librarecipes.viewmodel.SettingsViewModel
