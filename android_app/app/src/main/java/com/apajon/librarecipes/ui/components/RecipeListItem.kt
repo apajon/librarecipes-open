@@ -8,9 +8,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.model.RecipeListItem
 import com.apajon.librarecipes.ui.icon.AppIcons
 
@@ -60,7 +62,7 @@ fun RecipeListItem(
                             ) {
                                 Icon(
                                     AppIcons.Edit,
-                                    contentDescription = "Modifier",
+                                    contentDescription = stringResource(R.string.action_edit_cd),
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -74,7 +76,7 @@ fun RecipeListItem(
                             ) {
                                 Icon(
                                     AppIcons.Delete,
-                                    contentDescription = "Supprimer",
+                                    contentDescription = stringResource(R.string.action_delete_cd),
                                     tint = MaterialTheme.colorScheme.error,
                                     modifier = Modifier.size(20.dp)
                                 )
