@@ -12,11 +12,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.local.entities.ConviveEntity
 import com.apajon.librarecipes.data.model.*
 import com.apajon.librarecipes.ui.icon.AppIcons
@@ -56,7 +58,7 @@ fun AddExecutionDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existingExecution != null) "Modifier la réalisation" else "Ajouter une réalisation") },
+        title = { Text(if (existingExecution != null) stringResource(R.string.execution_edit_title) else stringResource(R.string.execution_add_title)) },
         text = {
             Column(
                 modifier = Modifier
@@ -65,7 +67,7 @@ fun AddExecutionDialog(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Enregistrer que vous avez préparé cette recette avec les convives.")
+                Text(stringResource(R.string.execution_description))
                 
                 // Date and Time selection
                 Card(
@@ -79,7 +81,7 @@ fun AddExecutionDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Date et heure de la réalisation",
+                            text = stringResource(R.string.execution_date_time_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -116,7 +118,7 @@ fun AddExecutionDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Convives (${selectedConvives.size})",
+                        text = stringResource(R.string.execution_convives_count, selectedConvives.size),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -124,13 +126,13 @@ fun AddExecutionDialog(
                     IconButton(
                         onClick = { showAddConviveDialog = true }
                     ) {
-                        Icon(AppIcons.Add, contentDescription = "Ajouter un convive")
+                        Icon(AppIcons.Add, contentDescription = stringResource(R.string.execution_add_convive_cd))
                     }
                 }
                 
                 if (selectedConvives.isEmpty()) {
                     Text(
-                        text = "Aucun convive ajouté. Ajoutez au moins un convive pour continuer.",
+                        text = stringResource(R.string.execution_no_convive),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -174,7 +176,7 @@ fun AddExecutionDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text(if (existingExecution != null) "Modifier" else "Ajouter")
+                Text(if (existingExecution != null) stringResource(R.string.action_edit) else stringResource(R.string.action_add))
             }
         },
         dismissButton = {
@@ -182,7 +184,7 @@ fun AddExecutionDialog(
                 onClick = onDismiss,
                 enabled = !isLoading
             ) {
-                Text("Annuler")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -222,12 +224,12 @@ fun AddExecutionDialog(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.action_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         ) {
@@ -243,7 +245,7 @@ fun AddExecutionDialog(
         )
         AlertDialog(
             onDismissRequest = { showTimePicker = false },
-            title = { Text("Sélectionner l'heure") },
+            title = { Text(stringResource(R.string.execution_select_time)) },
             text = {
                 TimePicker(state = timePickerState)
             },
@@ -258,12 +260,12 @@ fun AddExecutionDialog(
                         showTimePicker = false
                     }
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.action_ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -288,7 +290,7 @@ fun AddConviveToExecutionDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ajouter un convive") },
+        title = { Text(stringResource(R.string.execution_add_convive_dialog_title)) },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -301,19 +303,19 @@ fun AddConviveToExecutionDialog(
                     FilterChip(
                         selected = selectedMode == ConviveSelectionMode.EXISTING,
                         onClick = { selectedMode = ConviveSelectionMode.EXISTING },
-                        label = { Text("Existant") }
+                        label = { Text(stringResource(R.string.execution_mode_existing)) }
                     )
                     FilterChip(
                         selected = selectedMode == ConviveSelectionMode.NEW,
                         onClick = { selectedMode = ConviveSelectionMode.NEW },
-                        label = { Text("Nouveau") }
+                        label = { Text(stringResource(R.string.execution_mode_new)) }
                     )
                 }
                 
                 when (selectedMode) {
                     ConviveSelectionMode.EXISTING -> {
                         if (filteredConvives.isNotEmpty()) {
-                            Text("Sélectionner un convive :")
+                            Text(stringResource(R.string.execution_select_convive))
                             LazyColumn(
                                 modifier = Modifier.heightIn(max = 200.dp),
                                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -328,7 +330,7 @@ fun AddConviveToExecutionDialog(
                             }
                         } else {
                             Text(
-                                text = "Aucun convive disponible. Créez-en un nouveau.",
+                                text = stringResource(R.string.execution_no_convive_available),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -342,7 +344,7 @@ fun AddConviveToExecutionDialog(
                         ) {
                             Icon(AppIcons.Add, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Créer un nouveau convive")
+                            Text(stringResource(R.string.execution_create_new_convive))
                         }
                         
                         newConviveForm.takeIf { it.isValid() }?.let { form ->
@@ -353,7 +355,7 @@ fun AddConviveToExecutionDialog(
                 
                 // Feedback selection
                 if (selectedConvive != null || newConviveForm.isValid()) {
-                    Text("Comment cette personne a-t-elle apprécié ?")
+                    Text(stringResource(R.string.execution_feedback_question))
                     FeedbackStatusSelector(
                         selectedFeedback = selectedFeedback,
                         onFeedbackChange = { selectedFeedback = it }
@@ -372,12 +374,12 @@ fun AddConviveToExecutionDialog(
                 },
                 enabled = canAdd
             ) {
-                Text("Ajouter")
+                Text(stringResource(R.string.action_add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Annuler")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -506,7 +508,7 @@ fun ConviveWithFeedbackItem(
                 ) {
                     Icon(
                         AppIcons.Delete,
-                        contentDescription = "Supprimer",
+                        contentDescription = stringResource(R.string.action_delete_cd),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
@@ -549,7 +551,7 @@ fun ExecutionWithDetailsItem(
                 )
                 
                 Text(
-                    text = "${executionWithDetails.nombreConvives} convive${if (executionWithDetails.nombreConvives > 1) "s" else ""}",
+                    text = stringResource(R.string.execution_convive_count_display, executionWithDetails.nombreConvives, if (executionWithDetails.nombreConvives > 1) "s" else ""),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -557,7 +559,7 @@ fun ExecutionWithDetailsItem(
             
             if (executionWithDetails.convivesWithFeedback.isNotEmpty()) {
                 Text(
-                    text = "Convives :",
+                    text = stringResource(R.string.execution_convives_label),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -624,7 +626,7 @@ fun ExecutionDetailDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
-            Text("Détails de la réalisation")
+            Text(stringResource(R.string.execution_detail_title))
         },
         text = {
             Column(
@@ -646,7 +648,7 @@ fun ExecutionDetailDialog(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Date et heure",
+                            text = stringResource(R.string.execution_detail_date_time),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -669,14 +671,14 @@ fun ExecutionDetailDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Convives (${executionWithDetails.nombreConvives})",
+                            text = stringResource(R.string.execution_convives_count, executionWithDetails.nombreConvives),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
                         
                         if (executionWithDetails.convivesWithFeedback.isEmpty()) {
                             Text(
-                                text = "Aucun convive enregistré",
+                                text = stringResource(R.string.execution_no_convive_registered),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -736,7 +738,7 @@ fun ExecutionDetailDialog(
                 ) {
                     Icon(AppIcons.Edit, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Modifier")
+                    Text(stringResource(R.string.action_edit))
                 }
                 TextButton(
                     onClick = onDelete,
@@ -746,13 +748,13 @@ fun ExecutionDetailDialog(
                 ) {
                     Icon(AppIcons.Delete, contentDescription = null)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Fermer")
+                Text(stringResource(R.string.action_close))
             }
         }
     )
