@@ -124,7 +124,7 @@ fun RecipeListScreen(
                 Tab(
                     selected = uiState.filterMode == FilterMode.EXECUTION,
                     onClick = { viewModel.setFilterMode(FilterMode.EXECUTION) },
-                    text = { Text("Par exécution") }
+                    text = { Text("Par réalisation") }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.CONVIVES,
@@ -410,7 +410,7 @@ fun RecipeListScreen(
                                 FilterMode.EXECUTION -> {
                                     if (uiState.selectedExecutionPeriod != ExecutionPeriod.ALL) {
                                         Text(
-                                            text = "Aucune recette trouvée pour la période d'exécution sélectionnée",
+                                            text = "Aucune recette trouvée pour la période sélectionnée",
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -451,7 +451,7 @@ fun RecipeListScreen(
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Aucune exécution de recette avec des convives !",
+                                            text = "Aucune réalisation enregistrée avec des convives !",
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )

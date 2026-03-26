@@ -1127,7 +1127,7 @@ fun RecipeDetailContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Catégories & Tags",
+                            text = "Catégories et tags",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
@@ -1280,7 +1280,7 @@ fun RecipeDetailContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Exécutions (${executions.size})",
+                            text = "Réalisations (${executions.size})",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -1289,7 +1289,7 @@ fun RecipeDetailContent(
                         ) {
                             Icon(
                                 Icons.Default.Add,
-                                contentDescription = "Ajouter une exécution",
+                                contentDescription = "Ajouter une réalisation",
                                 tint = MaterialTheme.colorScheme.primary
                             )
                         }
@@ -1297,7 +1297,7 @@ fun RecipeDetailContent(
                     
                     if (executions.isEmpty()) {
                         Text(
-                            text = "Aucune exécution enregistrée",
+                            text = "Aucune réalisation enregistrée",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1590,7 +1590,7 @@ fun QueChoisirScreen(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "Inspiration culinaire",
+                            text = "Besoin d'une idée ?",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold,
@@ -1598,7 +1598,7 @@ fun QueChoisirScreen(
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                         Text(
-                            text = "Découvrez de nouvelles recettes ou trouvez l'inspiration pour votre prochain repas !",
+                            text = "Trouvez une recette selon vos envies ou ce que vous avez.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             textAlign = TextAlign.Center

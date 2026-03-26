@@ -39,7 +39,7 @@ fun NewConviveDialog(
             Column(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text("Créer un nouveau convive pour cette exécution.")
+                Text("Créer un nouveau convive pour cette réalisation.")
                 
                 OutlinedTextField(
                     value = nom,

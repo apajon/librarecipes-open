@@ -91,7 +91,7 @@ fun EditRecipeScreen(
                                 val sectionName = when (editSection) {
                                     "ingredients" -> "Ingrédients"
                                     "steps" -> "Étapes"
-                                    "categories" -> "Catégories & Tags"
+                                    "categories" -> "Catégories et tags"
                                     else -> "Modifier Recette"
                                 }
                                 "Modifier: $sectionName"
