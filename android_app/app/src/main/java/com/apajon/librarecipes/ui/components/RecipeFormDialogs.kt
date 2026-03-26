@@ -9,11 +9,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.MeasurementUnits
 import com.apajon.librarecipes.ui.icon.AppIcons
@@ -53,13 +55,13 @@ fun AddIngredientDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isEditing) "Modifier l'ingrédient" else "Ajouter un ingrédient",
+                        text = if (isEditing) stringResource(R.string.dialog_edit_ingredient_title) else stringResource(R.string.dialog_add_ingredient_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     
                     IconButton(onClick = onDismiss) {
-                        Icon(AppIcons.Close, contentDescription = "Fermer")
+                        Icon(AppIcons.Close, contentDescription = stringResource(R.string.action_close))
                     }
                 }
 
@@ -67,10 +69,10 @@ fun AddIngredientDialog(
                 OutlinedTextField(
                     value = nom,
                     onValueChange = { nom = it },
-                    label = { Text("Nom de l'ingrédient *") },
+                    label = { Text(stringResource(R.string.dialog_ingredient_name_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    placeholder = { Text("Ex: Farine") }
+                    placeholder = { Text(stringResource(R.string.dialog_ingredient_name_placeholder)) }
                 )
 
                 // Quantity and unit
@@ -81,11 +83,11 @@ fun AddIngredientDialog(
                     OutlinedTextField(
                         value = quantite,
                         onValueChange = { quantite = it },
-                        label = { Text("Quantité") },
+                        label = { Text(stringResource(R.string.dialog_quantity_label)) },
                         modifier = Modifier.weight(1f),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                         singleLine = true,
-                        placeholder = { Text("Ex: 250") }
+                        placeholder = { Text(stringResource(R.string.dialog_quantity_placeholder)) }
                     )
 
                     ExposedDropdownMenuBox(
@@ -97,12 +99,12 @@ fun AddIngredientDialog(
                             value = unite,
                             onValueChange = { },
                             readOnly = true,
-                            label = { Text("Unité") },
+                            label = { Text(stringResource(R.string.dialog_unit_label)) },
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = showUnitDropdown) },
                             modifier = Modifier
                                 .menuAnchor()
                                 .fillMaxWidth(),
-                            placeholder = { Text("Sélectionner") }
+                            placeholder = { Text(stringResource(R.string.dialog_unit_placeholder)) }
                         )
                         
                         ExposedDropdownMenu(
@@ -110,7 +112,7 @@ fun AddIngredientDialog(
                             onDismissRequest = { showUnitDropdown = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Aucune unité") },
+                                text = { Text(stringResource(R.string.dialog_no_unit)) },
                                 onClick = {
                                     unite = ""
                                     showUnitDropdown = false
@@ -146,7 +148,7 @@ fun AddIngredientDialog(
                         onCheckedChange = { indispensable = it }
                     )
                     Text(
-                        text = "Ingrédient essentiel",
+                        text = stringResource(R.string.dialog_essential_ingredient),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
@@ -156,9 +158,9 @@ fun AddIngredientDialog(
                     OutlinedTextField(
                         value = alternatives,
                         onValueChange = { alternatives = it },
-                        label = { Text("Alternatives (séparées par des points-virgules)") },
+                        label = { Text(stringResource(R.string.dialog_alternatives_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Ex: sauce soja; tamari; sel de céleri") },
+                        placeholder = { Text(stringResource(R.string.dialog_alternatives_placeholder)) },
                         minLines = 2
                     )
                 }
@@ -169,7 +171,7 @@ fun AddIngredientDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Annuler")
+                        Text(stringResource(R.string.action_cancel))
                     }
                     
                     Button(
@@ -189,7 +191,7 @@ fun AddIngredientDialog(
                         },
                         enabled = nom.isNotBlank()
                     ) {
-                        Text(if (isEditing) "Modifier" else "Ajouter")
+                        Text(if (isEditing) stringResource(R.string.action_edit) else stringResource(R.string.action_add))
                     }
                 }
             }
@@ -225,13 +227,13 @@ fun AddStepDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = if (isEditing) "Modifier l'étape" else "Ajouter une étape",
+                        text = if (isEditing) stringResource(R.string.dialog_edit_step_title) else stringResource(R.string.dialog_add_step_title),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
                     
                     IconButton(onClick = onDismiss) {
-                        Icon(AppIcons.Close, contentDescription = "Fermer")
+                        Icon(AppIcons.Close, contentDescription = stringResource(R.string.action_close))
                     }
                 }
 
@@ -239,9 +241,9 @@ fun AddStepDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description de l'étape *") },
+                    label = { Text(stringResource(R.string.dialog_step_description_label)) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Décrivez l'étape de préparation...") },
+                    placeholder = { Text(stringResource(R.string.dialog_step_description_placeholder)) },
                     minLines = 3,
                     maxLines = 6
                 )
@@ -252,7 +254,7 @@ fun AddStepDialog(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End)
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Annuler")
+                        Text(stringResource(R.string.action_cancel))
                     }
                     
                     Button(
@@ -264,7 +266,7 @@ fun AddStepDialog(
                         },
                         enabled = description.isNotBlank()
                     ) {
-                        Text(if (isEditing) "Modifier" else "Ajouter")
+                        Text(if (isEditing) stringResource(R.string.action_edit) else stringResource(R.string.action_add))
                     }
                 }
             }
@@ -299,9 +301,9 @@ fun SourceDetailsCard(
                     OutlinedTextField(
                         value = sourceUrl,
                         onValueChange = onSourceUrlChange,
-                        label = { Text("URL de la recette") },
+                        label = { Text(stringResource(R.string.source_url_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("https://exemple.com/recette") },
+                        placeholder = { Text(stringResource(R.string.source_url_placeholder)) },
                         singleLine = true
                     )
                 }
@@ -320,25 +322,25 @@ fun SourceDetailsCard(
                     OutlinedTextField(
                         value = sourceBookTitle,
                         onValueChange = onSourceBookTitleChange,
-                        label = { Text("Titre du livre/magazine") },
+                        label = { Text(stringResource(R.string.source_book_title_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Nom du livre ou magazine") }
+                        placeholder = { Text(stringResource(R.string.source_book_title_placeholder)) }
                     )
                     
                     OutlinedTextField(
                         value = sourceBookAuthors,
                         onValueChange = onSourceBookAuthorsChange,
-                        label = { Text("Auteur(s)") },
+                        label = { Text(stringResource(R.string.source_book_authors_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Nom des auteurs") }
+                        placeholder = { Text(stringResource(R.string.source_book_authors_placeholder)) }
                     )
                     
                     OutlinedTextField(
                         value = sourceBookPage,
                         onValueChange = onSourceBookPageChange,
-                        label = { Text("Page (optionnel)") },
+                        label = { Text(stringResource(R.string.source_book_page_label)) },
                         modifier = Modifier.fillMaxWidth(),
-                        placeholder = { Text("Numéro de page") },
+                        placeholder = { Text(stringResource(R.string.source_book_page_placeholder)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true
                     )
