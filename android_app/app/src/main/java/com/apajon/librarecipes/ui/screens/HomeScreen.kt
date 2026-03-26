@@ -9,10 +9,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.ui.components.ActionCard
 import com.apajon.librarecipes.ui.icon.AppIcons
 
@@ -85,14 +87,14 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(
-                            Icons.Default.Star,
+                            painter = painterResource(id = R.drawable.ic_menu_book),
                             contentDescription = null,
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Bienvenue dans LibraRecipes",
+                            text = "Votre carnet de cuisine",
                             style = MaterialTheme.typography.headlineSmall,
                             color = MaterialTheme.colorScheme.onPrimary,
                             textAlign = TextAlign.Center,
@@ -121,7 +123,7 @@ fun HomeScreen(
             item {
                 ActionCard(
                     title = "Voir mes recettes",
-                    description = "Parcourir toutes vos recettes enregistrées",
+                    description = "Parcourir votre carnet de recettes",
                     icon = AppIcons.List,
                     onClick = { navController.navigate("recipes") }
                 )
@@ -130,7 +132,7 @@ fun HomeScreen(
             item {
                 ActionCard(
                     title = "Ajouter une recette",
-                    description = "Créer une nouvelle recette",
+                    description = "Créer une nouvelle fiche recette",
                     icon = AppIcons.Add,
                     onClick = { navController.navigate("create_recipe") }
                 )
@@ -139,7 +141,7 @@ fun HomeScreen(
             item {
                 ActionCard(
                     title = "Rechercher",
-                    description = "Rechercher des recettes par nom, ingrédients ou tags",
+                    description = "Retrouver une recette par nom, ingrédient ou tag",
                     icon = Icons.Default.Search,
                     onClick = { navController.navigate("search") }
                 )
@@ -147,8 +149,8 @@ fun HomeScreen(
 
             item {
                 ActionCard(
-                    title = "Que choisir ?",
-                    description = "Suggestions de recettes et inspiration culinaire",
+                    title = "Besoin d'une idée ?",
+                    description = "Trouver une recette selon vos envies ou ce que vous avez",
                     icon = Icons.Default.Star,
                     onClick = { navController.navigate("que_choisir") }
                 )

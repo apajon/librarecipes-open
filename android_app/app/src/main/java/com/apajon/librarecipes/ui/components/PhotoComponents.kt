@@ -64,7 +64,7 @@ fun PhotoViewerCard(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "📷 Aucune photo enregistrée pour cette recette.",
+                    text = "Aucune photo ajoutée pour cette recette.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center

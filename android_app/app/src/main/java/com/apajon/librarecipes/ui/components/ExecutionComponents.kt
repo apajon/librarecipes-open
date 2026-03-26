@@ -56,7 +56,7 @@ fun AddExecutionDialog(
     
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (existingExecution != null) "Modifier l'exécution" else "Ajouter une exécution") },
+        title = { Text(if (existingExecution != null) "Modifier la réalisation" else "Ajouter une réalisation") },
         text = {
             Column(
                 modifier = Modifier
@@ -79,7 +79,7 @@ fun AddExecutionDialog(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Text(
-                            text = "Date et heure de l'exécution",
+                            text = "Date et heure de la réalisation",
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -624,7 +624,7 @@ fun ExecutionDetailDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { 
-            Text("Détails de l'exécution")
+            Text("Détails de la réalisation")
         },
         text = {
             Column(
