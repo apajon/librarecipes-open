@@ -1611,16 +1611,17 @@ fun QueChoisirScreen(
 
             // Filter tabs
             item {
+                val filterLabels = listOf(
+                    "suggestions" to stringResource(R.string.que_choisir_filter_suggestions),
+                    "popular" to stringResource(R.string.que_choisir_filter_popular), 
+                    "random" to stringResource(R.string.que_choisir_filter_random)
+                )
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(horizontal = 4.dp)
                 ) {
                     items(
-                        listOf(
-                            "suggestions" to stringResource(R.string.que_choisir_filter_suggestions),
-                            "popular" to stringResource(R.string.que_choisir_filter_popular), 
-                            "random" to stringResource(R.string.que_choisir_filter_random)
-                        )
+                        filterLabels
                     ) { (key, label) ->
                         FilterChip(
                             onClick = { 

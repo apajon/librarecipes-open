@@ -56,7 +56,7 @@ fun RecipeListScreen(
                     ) {
                         val sortText = when (uiState.filterMode) {
                             FilterMode.ALPHABETICAL -> if (uiState.sortAscending) "A-Z" else "Z-A"
-                            FilterMode.DATE, FilterMode.EXECUTION -> if (uiState.sortAscending) "Récent" else "Ancien"
+                            FilterMode.DATE, FilterMode.EXECUTION -> if (uiState.sortAscending) stringResource(R.string.sort_recent) else stringResource(R.string.sort_old)
                             FilterMode.CONVIVES -> if (uiState.sortAscending) "1-N" else "N-1"
                             FilterMode.INGREDIENT -> if (uiState.sortAscending) "A-Z" else "Z-A"
                         }

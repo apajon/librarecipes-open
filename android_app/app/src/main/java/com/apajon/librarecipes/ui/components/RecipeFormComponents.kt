@@ -183,7 +183,7 @@ fun IngredientCard(
                 
                 if (!ingredient.indispensable && ingredient.alternatives.isNotBlank()) {
                     Text(
-                        text = "Alt: ${ingredient.alternatives}",
+                        text = stringResource(R.string.ingredient_alt_prefix, ingredient.alternatives),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

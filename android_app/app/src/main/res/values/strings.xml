@@ -76,6 +76,7 @@
     <string name="form_tags_placeholder">Ex: facile, rapide, économique</string>
     <string name="ingredient_essential">Essentiel</string>
     <string name="ingredient_optional">Optionnel</string>
+    <string name="ingredient_alt_prefix">Alt: %1$s</string>
     <string name="form_step_number">Étape %1$d</string>
     <string name="form_source_title">Source de la recette</string>
 
