@@ -299,6 +299,7 @@
     <string name="import_success">Recette importée avec succès !</string>
     <string name="import_empty_clipboard">Le presse-papiers est vide</string>
     <string name="import_parse_error">Impossible de lire la recette. Vérifiez que le texte suit le bon format.</string>
+    <string name="import_error_save">Erreur lors de l\'importation de la recette.</string>
     <string name="import_hint">Copiez une recette au format texte, puis collez-la ici.</string>
 
 </resources>

@@ -85,7 +85,8 @@ class ImportRecipeViewModel @Inject constructor(
                 .onFailure { error ->
                     _uiState.value = _uiState.value.copy(
                         isSaving = false,
-                        saveError = error.message ?: "Erreur lors de l'importation"
+                        saveError = error.message
+                            ?: context.getString(com.apajon.librarecipes.R.string.import_error_save)
                     )
                 }
         }
