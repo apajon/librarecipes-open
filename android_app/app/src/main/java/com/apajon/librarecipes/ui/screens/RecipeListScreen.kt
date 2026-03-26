@@ -15,10 +15,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.ui.components.RecipeListItem
 import com.apajon.librarecipes.viewmodel.RecipeListViewModel
 import com.apajon.librarecipes.viewmodel.FilterMode
@@ -38,10 +40,10 @@ fun RecipeListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Mes Recettes") },
+                title = { Text(stringResource(R.string.recipe_list_title)) },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -61,7 +63,7 @@ fun RecipeListScreen(
                         Text(sortText)
                     }
                     IconButton(onClick = { viewModel.refreshRecipes() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Actualiser")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.recipe_list_refresh_cd))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -84,7 +86,7 @@ fun RecipeListScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Ajouter une recette",
+                    contentDescription = stringResource(R.string.home_fab_add_recipe_cd),
                     modifier = Modifier.size(32.dp)
                 )
             }
@@ -109,27 +111,27 @@ fun RecipeListScreen(
                 Tab(
                     selected = uiState.filterMode == FilterMode.ALPHABETICAL,
                     onClick = { viewModel.setFilterMode(FilterMode.ALPHABETICAL) },
-                    text = { Text("Alphabétique") }
+                    text = { Text(stringResource(R.string.recipe_list_tab_alphabetical)) }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.INGREDIENT,
                     onClick = { viewModel.setFilterMode(FilterMode.INGREDIENT) },
-                    text = { Text("Par ingrédient") }
+                    text = { Text(stringResource(R.string.recipe_list_tab_ingredient)) }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.DATE,
                     onClick = { viewModel.setFilterMode(FilterMode.DATE) },
-                    text = { Text("Par date") }
+                    text = { Text(stringResource(R.string.recipe_list_tab_date)) }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.EXECUTION,
                     onClick = { viewModel.setFilterMode(FilterMode.EXECUTION) },
-                    text = { Text("Par réalisation") }
+                    text = { Text(stringResource(R.string.recipe_list_tab_realization)) }
                 )
                 Tab(
                     selected = uiState.filterMode == FilterMode.CONVIVES,
                     onClick = { viewModel.setFilterMode(FilterMode.CONVIVES) },
-                    text = { Text("Par convives") }
+                    text = { Text(stringResource(R.string.recipe_list_tab_convives)) }
                 )
             }
             
@@ -148,7 +150,7 @@ fun RecipeListScreen(
                             item {
                                 FilterChip(
                                     onClick = { viewModel.filterByLetter(null) },
-                                    label = { Text("Tout") },
+                                    label = { Text(stringResource(R.string.recipe_list_filter_all)) },
                                     selected = uiState.selectedLetter == null,
                                     modifier = Modifier.height(40.dp)
                                 )
@@ -222,7 +224,7 @@ fun RecipeListScreen(
                                 item {
                                     FilterChip(
                                         onClick = { viewModel.filterByConviveLetter(null) },
-                                        label = { Text("Tout") },
+                                        label = { Text(stringResource(R.string.recipe_list_filter_all)) },
                                         selected = uiState.selectedConviveLetter == null,
                                         modifier = Modifier.height(40.dp)
                                     )
@@ -250,7 +252,7 @@ fun RecipeListScreen(
                             item {
                                 FilterChip(
                                     onClick = { viewModel.filterByConvive(null) },
-                                    label = { Text("← Retour aux convives") },
+                                    label = { Text(stringResource(R.string.recipe_list_back_convives)) },
                                     selected = false,
                                     modifier = Modifier.height(40.dp)
                                 )
@@ -278,7 +280,7 @@ fun RecipeListScreen(
                                 item {
                                     FilterChip(
                                         onClick = { viewModel.filterByIngredientLetter(null) },
-                                        label = { Text("Tout") },
+                                        label = { Text(stringResource(R.string.recipe_list_filter_all)) },
                                         selected = uiState.selectedIngredientLetter == null,
                                         modifier = Modifier.height(40.dp)
                                     )
@@ -306,7 +308,7 @@ fun RecipeListScreen(
                             item {
                                 FilterChip(
                                     onClick = { viewModel.filterByIngredient(null) },
-                                    label = { Text("← Retour aux ingrédients") },
+                                    label = { Text(stringResource(R.string.recipe_list_back_ingredients)) },
                                     selected = false,
                                     modifier = Modifier.height(40.dp)
                                 )
@@ -334,7 +336,7 @@ fun RecipeListScreen(
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
-                                text = "Erreur de connexion",
+                                text = stringResource(R.string.recipe_list_error_connection),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.error
@@ -347,7 +349,7 @@ fun RecipeListScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { viewModel.refreshRecipes() }) {
-                                Text("Réessayer")
+                                Text(stringResource(R.string.action_retry))
                             }
                         }
                     }
@@ -360,23 +362,23 @@ fun RecipeListScreen(
                                 FilterMode.ALPHABETICAL -> {
                                     if (uiState.selectedLetter != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour la lettre ${uiState.selectedLetter}",
+                                            text = stringResource(R.string.recipe_list_no_recipe_for_letter, uiState.selectedLetter ?: ""),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.filterByLetter(null) }) {
-                                            Text("Voir toutes les recettes")
+                                            Text(stringResource(R.string.recipe_list_see_all))
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucune recette trouvée",
+                                            text = stringResource(R.string.recipe_list_no_recipe),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez votre première recette !",
+                                            text = stringResource(R.string.recipe_list_add_first),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -385,23 +387,23 @@ fun RecipeListScreen(
                                 FilterMode.DATE -> {
                                     if (uiState.selectedDatePeriod != DatePeriod.ALL) {
                                         Text(
-                                            text = "Aucune recette trouvée pour la période sélectionnée",
+                                            text = stringResource(R.string.recipe_list_no_recipe_period),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.setDatePeriod(DatePeriod.ALL) }) {
-                                            Text("Voir toutes les recettes")
+                                            Text(stringResource(R.string.recipe_list_see_all))
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucune recette trouvée",
+                                            text = stringResource(R.string.recipe_list_no_recipe),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez votre première recette !",
+                                            text = stringResource(R.string.recipe_list_add_first),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -410,23 +412,23 @@ fun RecipeListScreen(
                                 FilterMode.EXECUTION -> {
                                     if (uiState.selectedExecutionPeriod != ExecutionPeriod.ALL) {
                                         Text(
-                                            text = "Aucune recette trouvée pour la période sélectionnée",
+                                            text = stringResource(R.string.recipe_list_no_recipe_period),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.setExecutionPeriod(ExecutionPeriod.ALL) }) {
-                                            Text("Voir toutes les recettes")
+                                            Text(stringResource(R.string.recipe_list_see_all))
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucune recette trouvée",
+                                            text = stringResource(R.string.recipe_list_no_recipe),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez votre première recette !",
+                                            text = stringResource(R.string.recipe_list_add_first),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -435,23 +437,23 @@ fun RecipeListScreen(
                                 FilterMode.CONVIVES -> {
                                     if (uiState.selectedConvive != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour le convive \"${uiState.selectedConvive}\"",
+                                            text = stringResource(R.string.recipe_list_no_convive_for, uiState.selectedConvive ?: ""),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.filterByConvive(null) }) {
-                                            Text("Retour aux convives")
+                                            Text(stringResource(R.string.recipe_list_back_to_convives))
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucun convive trouvé",
+                                            text = stringResource(R.string.recipe_list_no_convive),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Aucune réalisation enregistrée avec des convives !",
+                                            text = stringResource(R.string.recipe_list_no_realization_convives),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -460,23 +462,23 @@ fun RecipeListScreen(
                                 FilterMode.INGREDIENT -> {
                                     if (uiState.selectedIngredient != null) {
                                         Text(
-                                            text = "Aucune recette trouvée pour l'ingrédient \"${uiState.selectedIngredient}\"",
+                                            text = stringResource(R.string.recipe_list_no_recipe_ingredient, uiState.selectedIngredient ?: ""),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Button(onClick = { viewModel.filterByIngredient(null) }) {
-                                            Text("Retour aux ingrédients")
+                                            Text(stringResource(R.string.recipe_list_back_to_ingredients))
                                         }
                                     } else {
                                         Text(
-                                            text = "Aucun ingrédient trouvé",
+                                            text = stringResource(R.string.recipe_list_no_ingredient),
                                             style = MaterialTheme.typography.bodyLarge,
                                             fontWeight = FontWeight.Bold
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = "Ajoutez des recettes avec des ingrédients !",
+                                            text = stringResource(R.string.recipe_list_add_with_ingredients),
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
@@ -627,9 +629,9 @@ fun RecipeListScreen(
     recipeToDelete?.let { recipeId ->
         AlertDialog(
             onDismissRequest = { recipeToDelete = null },
-            title = { Text("Supprimer la recette") },
+            title = { Text(stringResource(R.string.recipe_detail_delete_title)) },
             text = { 
-                Text("Êtes-vous sûr de vouloir supprimer cette recette ? Cette action est irréversible.")
+                Text(stringResource(R.string.recipe_detail_delete_message))
             },
             confirmButton = {
                 Button(
@@ -641,12 +643,12 @@ fun RecipeListScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Supprimer")
+                    Text(stringResource(R.string.action_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { recipeToDelete = null }) {
-                    Text("Annuler")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
