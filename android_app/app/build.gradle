@@ -112,6 +112,9 @@ dependencies {
     // Image loading
     implementation "io.coil-kt:coil-compose:2.5.0"
     
+    // DataStore Preferences for persisting user settings
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
     // Activity Result Contracts for photo picking
     implementation "androidx.activity:activity-ktx:1.8.2"
     
