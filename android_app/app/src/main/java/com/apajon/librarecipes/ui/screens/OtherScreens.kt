@@ -1,5 +1,9 @@
 package com.apajon.librarecipes.ui.screens
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -11,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
@@ -22,10 +27,12 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -34,14 +41,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.launch
 import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.local.entities.ExecutionEntity
 import com.apajon.librarecipes.data.model.ExecutionCreate
 import com.apajon.librarecipes.data.model.ExecutionWithDetails
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.data.model.RecipeDetail
+import com.apajon.librarecipes.data.model.RecipeTextFormat
 import com.apajon.librarecipes.ui.components.*
 import com.apajon.librarecipes.viewmodel.CreateRecipeViewModel
+import com.apajon.librarecipes.viewmodel.ImportRecipeViewModel
 import com.apajon.librarecipes.viewmodel.RecipeDetailViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -59,6 +69,11 @@ fun RecipeDetailScreen(
     var showAddExecutionDialog by remember { mutableStateOf(false) }
     var selectedExecution by remember { mutableStateOf<ExecutionWithDetails?>(null) }
     var executionToEdit by remember { mutableStateOf<ExecutionWithDetails?>(null) }
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val copySuccessMessage = stringResource(R.string.recipe_copy_text_success)
+    val shareChooserTitle = stringResource(R.string.recipe_share_chooser_title)
+    val coroutineScope = rememberCoroutineScope()
     
     // Load recipe details when the screen is first displayed
     LaunchedEffect(recipeId) {
@@ -91,6 +106,7 @@ fun RecipeDetailScreen(
     }
     
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { 
@@ -106,6 +122,51 @@ fun RecipeDetailScreen(
                     }
                 },
                 actions = {
+                    // Copy as text button
+                    IconButton(
+                        onClick = {
+                            uiState.recipe?.let { recipe ->
+                                val text = RecipeTextFormat.formatRecipe(recipe)
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                clipboard.setPrimaryClip(ClipData.newPlainText(recipe.nom, text))
+                                coroutineScope.launch {
+                                    snackbarHostState.showSnackbar(copySuccessMessage)
+                                }
+                            }
+                        },
+                        enabled = uiState.recipe != null
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = stringResource(R.string.recipe_copy_text_cd),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    
+                    // Share button
+                    IconButton(
+                        onClick = {
+                            uiState.recipe?.let { recipe ->
+                                val text = RecipeTextFormat.formatRecipe(recipe)
+                                val sendIntent = Intent().apply {
+                                    action = Intent.ACTION_SEND
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                    putExtra(Intent.EXTRA_SUBJECT, recipe.nom)
+                                    type = "text/plain"
+                                }
+                                val chooser = Intent.createChooser(sendIntent, shareChooserTitle)
+                                context.startActivity(chooser)
+                            }
+                        },
+                        enabled = uiState.recipe != null
+                    ) {
+                        Icon(
+                            Icons.Default.Share,
+                            contentDescription = stringResource(R.string.recipe_share_cd),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                    
                     // Edit button
                     IconButton(
                         onClick = { 
@@ -1851,4 +1912,225 @@ fun QueChoisirScreen(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ImportRecipeScreen(
+    navController: NavHostController,
+    viewModel: ImportRecipeViewModel = hiltViewModel()
+) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Navigate to new recipe on import success
+    LaunchedEffect(uiState.savedRecipeId) {
+        uiState.savedRecipeId?.let { recipeId ->
+            navController.navigate("recipe/$recipeId") {
+                popUpTo("import_recipe") { inclusive = true }
+            }
+        }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.import_title),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.action_back)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(vertical = 16.dp)
+        ) {
+            // Hint text
+            item {
+                Text(
+                    text = stringResource(R.string.import_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            // Paste button
+            item {
+                Button(
+                    onClick = { viewModel.pasteFromClipboard() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.import_paste_button))
+                }
+            }
+
+            // Error: empty clipboard
+            if (uiState.emptyClipboard) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.import_empty_clipboard),
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+
+            // Error: parse failed
+            if (uiState.parseError) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = stringResource(R.string.import_parse_error),
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+
+            // Recipe preview
+            uiState.parsedRecipe?.let { recipe ->
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.medium,
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.import_preview_title),
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Text(
+                                text = stringResource(R.string.import_recipe_name, recipe.nom),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            recipe.preparation?.let {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_preparation, it),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            recipe.cuisson?.let {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_cooking, it),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            recipe.portions?.let {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_portions, it),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+
+                            if (recipe.ingredients.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_ingredients, recipe.ingredients.size),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            if (recipe.etapes.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_steps, recipe.etapes.size),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            if (recipe.categories.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_categories, recipe.categories.joinToString(", ")),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            if (recipe.tags.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(R.string.import_recipe_tags, recipe.tags.joinToString(", ")),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Import button
+                item {
+                    Button(
+                        onClick = { viewModel.importRecipe() },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !uiState.isSaving
+                    ) {
+                        if (uiState.isSaving) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(stringResource(R.string.import_saving))
+                        } else {
+                            Text(stringResource(R.string.import_save_button))
+                        }
+                    }
+                }
+            }
+
+            // Save error
+            uiState.saveError?.let { error ->
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = error,
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 }

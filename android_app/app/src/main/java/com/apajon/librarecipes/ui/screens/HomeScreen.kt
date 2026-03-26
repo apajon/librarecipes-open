@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -154,6 +155,15 @@ fun HomeScreen(
                     description = stringResource(R.string.home_action_suggestions_desc),
                     icon = Icons.Default.Star,
                     onClick = { navController.navigate("que_choisir") }
+                )
+            }
+
+            item {
+                ActionCard(
+                    title = stringResource(R.string.home_action_import_title),
+                    description = stringResource(R.string.home_action_import_desc),
+                    icon = Icons.Default.ContentPaste,
+                    onClick = { navController.navigate("import_recipe") }
                 )
             }
         }

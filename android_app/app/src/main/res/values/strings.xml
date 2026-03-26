@@ -276,4 +276,29 @@
     <string name="photo_category_final">final</string>
     <string name="photo_category_none">aucune catégorie</string>
 
+    <!-- ==================== Clipboard / Share / Import ==================== -->
+    <string name="recipe_copy_text_cd">Copier en texte</string>
+    <string name="recipe_copy_text_success">Recette copiée dans le presse-papiers</string>
+    <string name="recipe_share_cd">Partager la recette</string>
+    <string name="recipe_share_chooser_title">Partager la recette</string>
+    <string name="home_action_import_title">Importer une recette</string>
+    <string name="home_action_import_desc">Importer depuis le presse-papiers</string>
+    <string name="import_title">Importer une recette</string>
+    <string name="import_paste_button">📋 Coller depuis le presse-papiers</string>
+    <string name="import_preview_title">Aperçu de la recette</string>
+    <string name="import_recipe_name">Nom : %1$s</string>
+    <string name="import_recipe_preparation">Préparation : %1$d min</string>
+    <string name="import_recipe_cooking">Cuisson : %1$d min</string>
+    <string name="import_recipe_portions">Portions : %1$d</string>
+    <string name="import_recipe_ingredients">Ingrédients : %1$d</string>
+    <string name="import_recipe_steps">Étapes : %1$d</string>
+    <string name="import_recipe_categories">Catégories : %1$s</string>
+    <string name="import_recipe_tags">Tags : %1$s</string>
+    <string name="import_save_button">💾 Importer la recette</string>
+    <string name="import_saving">Importation en cours…</string>
+    <string name="import_success">Recette importée avec succès !</string>
+    <string name="import_empty_clipboard">Le presse-papiers est vide</string>
+    <string name="import_parse_error">Impossible de lire la recette. Vérifiez que le texte suit le bon format.</string>
+    <string name="import_hint">Copiez une recette au format texte, puis collez-la ici.</string>
+
 </resources>
