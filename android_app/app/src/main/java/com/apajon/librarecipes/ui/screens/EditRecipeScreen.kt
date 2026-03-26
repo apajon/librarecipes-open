@@ -13,10 +13,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.apajon.librarecipes.R
 import com.apajon.librarecipes.data.model.IngredientFormItem
 import com.apajon.librarecipes.ui.components.*
 import com.apajon.librarecipes.viewmodel.EditRecipeViewModel
@@ -89,21 +91,21 @@ fun EditRecipeScreen(
                         when {
                             editSection != null -> {
                                 val sectionName = when (editSection) {
-                                    "ingredients" -> "Ingrédients"
-                                    "steps" -> "Étapes"
-                                    "categories" -> "Catégories et tags"
-                                    else -> "Modifier Recette"
+                                    "ingredients" -> stringResource(R.string.edit_section_ingredients)
+                                    "steps" -> stringResource(R.string.edit_section_steps)
+                                    "categories" -> stringResource(R.string.edit_section_categories_tags)
+                                    else -> stringResource(R.string.edit_title_edit_recipe)
                                 }
-                                "Modifier: $sectionName"
+                                stringResource(R.string.edit_title_edit_section, sectionName)
                             }
-                            viewModel.isEditMode() -> "Modifier Recette"
-                            else -> "Nouvelle Recette"
+                            viewModel.isEditMode() -> stringResource(R.string.edit_title_edit_recipe)
+                            else -> stringResource(R.string.edit_title_new_recipe)
                         }
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Retour")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
                 actions = {
@@ -111,7 +113,7 @@ fun EditRecipeScreen(
                         onClick = { viewModel.validateAndSaveRecipe() },
                         enabled = !formState.isLoading && !isLoading
                     ) {
-                        Icon(Icons.Default.Check, contentDescription = "Sauvegarder")
+                        Icon(Icons.Default.Check, contentDescription = stringResource(R.string.action_save))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -134,7 +136,7 @@ fun EditRecipeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Ajouter une photo à la recette"
+                    contentDescription = stringResource(R.string.edit_fab_add_photo_cd)
                 )
             }
         }
@@ -151,7 +153,7 @@ fun EditRecipeScreen(
                 ) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Chargement de la recette...")
+                    Text(stringResource(R.string.edit_loading_recipe))
                 }
             }
         } else {
@@ -199,7 +201,7 @@ fun EditRecipeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Ingrédients",
+                                    text = stringResource(R.string.edit_section_ingredients_title),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -212,13 +214,13 @@ fun EditRecipeScreen(
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null)
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Ajouter")
+                                    Text(stringResource(R.string.action_add))
                                 }
                             }
 
                             if (formState.ingredients.isEmpty()) {
                                 Text(
-                                    text = "Aucun ingrédient ajouté",
+                                    text = stringResource(R.string.edit_empty_ingredients),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 8.dp)
@@ -262,7 +264,7 @@ fun EditRecipeScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = "Étapes de préparation",
+                                    text = stringResource(R.string.edit_section_steps_title),
                                     style = MaterialTheme.typography.titleLarge,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -275,13 +277,13 @@ fun EditRecipeScreen(
                                 ) {
                                     Icon(Icons.Default.Add, contentDescription = null)
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Ajouter")
+                                    Text(stringResource(R.string.action_add))
                                 }
                             }
 
                             if (formState.steps.isEmpty()) {
                                 Text(
-                                    text = "Aucune étape ajoutée",
+                                    text = stringResource(R.string.edit_empty_steps),
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 8.dp)
@@ -361,7 +363,7 @@ fun EditRecipeScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                         }
                         Text(
-                            if (viewModel.isEditMode()) "💾 Mettre à jour la recette" else "💾 Sauvegarder la recette"
+                            if (viewModel.isEditMode()) stringResource(R.string.edit_save_update) else stringResource(R.string.edit_save_create)
                         )
                     }
                 }
@@ -425,7 +427,7 @@ fun EditRecipeScreen(
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        if (viewModel.isEditMode()) "Mise à jour en cours..." else "Sauvegarde en cours..."
+                        if (viewModel.isEditMode()) stringResource(R.string.edit_saving_update) else stringResource(R.string.edit_saving_create)
                     )
                 }
             }
