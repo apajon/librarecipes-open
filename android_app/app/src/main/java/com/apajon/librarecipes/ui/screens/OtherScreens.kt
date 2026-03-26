@@ -139,43 +139,24 @@ fun RecipeDetailScreen(
             )
         },
         floatingActionButton = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+            // Copy recipe FAB
+            FloatingActionButton(
+                onClick = { 
+                    viewModel.copyRecipe(recipeId)
+                },
+                modifier = Modifier.size(56.dp),
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
             ) {
-                // Tertiary FAB - Copy recipe
-                FloatingActionButton(
-                    onClick = { 
-                        viewModel.copyRecipe(recipeId)
-                    },
-                    modifier = Modifier.size(56.dp),
-                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                ) {
-                    if (uiState.isCopying) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.AddCircle,
-                            contentDescription = "Copier la recette"
-                        )
-                    }
-                }
-                
-                // Secondary FAB - Edit recipe
-                FloatingActionButton(
-                    onClick = { 
-                        navController.navigate("edit_recipe/$recipeId")
-                    },
-                    modifier = Modifier.size(56.dp),
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                ) {
+                if (uiState.isCopying) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                } else {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Modifier la recette"
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Copier la recette"
                     )
                 }
             }

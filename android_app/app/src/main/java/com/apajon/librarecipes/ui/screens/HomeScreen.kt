@@ -1,5 +1,6 @@
 package com.apajon.librarecipes.ui.screens
 
+import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
@@ -18,15 +19,32 @@ import com.apajon.librarecipes.ui.icon.AppIcons
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    navController: NavHostController
+    navController: NavHostController,
+    useSystemDarkTheme: Boolean = true,
+    forceDarkTheme: Boolean = false,
+    dynamicColor: Boolean = true,
+    onUseSystemDarkThemeChange: (Boolean) -> Unit = {},
+    onForceDarkThemeChange: (Boolean) -> Unit = {},
+    onDynamicColorChange: (Boolean) -> Unit = {}
 ) {
+    var showThemeDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("LibraRecipes") },
+                actions = {
+                    IconButton(onClick = { showThemeDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Paramètres du thème"
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -137,4 +155,121 @@ fun HomeScreen(
             }
         }
     }
+
+    if (showThemeDialog) {
+        ThemeSettingsDialog(
+            useSystemDarkTheme = useSystemDarkTheme,
+            forceDarkTheme = forceDarkTheme,
+            dynamicColor = dynamicColor,
+            onUseSystemDarkThemeChange = onUseSystemDarkThemeChange,
+            onForceDarkThemeChange = onForceDarkThemeChange,
+            onDynamicColorChange = onDynamicColorChange,
+            onDismiss = { showThemeDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ThemeSettingsDialog(
+    useSystemDarkTheme: Boolean,
+    forceDarkTheme: Boolean,
+    dynamicColor: Boolean,
+    onUseSystemDarkThemeChange: (Boolean) -> Unit,
+    onForceDarkThemeChange: (Boolean) -> Unit,
+    onDynamicColorChange: (Boolean) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = null
+            )
+        },
+        title = {
+            Text("Thème")
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                // Dark theme section
+                Text(
+                    text = "Mode sombre",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Suivre le système",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Switch(
+                        checked = useSystemDarkTheme,
+                        onCheckedChange = onUseSystemDarkThemeChange
+                    )
+                }
+                if (!useSystemDarkTheme) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Mode sombre",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = forceDarkTheme,
+                            onCheckedChange = onForceDarkThemeChange
+                        )
+                    }
+                }
+
+                HorizontalDivider()
+
+                // Dynamic colors section
+                Text(
+                    text = "Couleurs",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Couleurs dynamiques",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
+                            text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+                                "Adapter les couleurs au fond d'écran"
+                            else
+                                "Nécessite Android 12+",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = dynamicColor,
+                        onCheckedChange = onDynamicColorChange,
+                        enabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Fermer")
+            }
+        }
+    )
 }
